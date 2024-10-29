@@ -1,5 +1,4 @@
-import { test } from 'uvu'
-import * as assert from 'uvu/assert'
+import { test, expect } from 'vitest'
 
 import {} from './'
 
@@ -31,5 +30,3 @@ import {} from './'
 test(`base API`, async () => {
   // TODO
 })
-
-test.run()

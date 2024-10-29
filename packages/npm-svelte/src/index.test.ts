@@ -1,10 +1,5 @@
-import { test } from 'uvu'
-import * as assert from 'uvu/assert'
+import { test, expect } from 'vitest'
 
-import {} from './'
-
-test.skip(`base API`, async () => {
-  assert.ok(false, `You forgot test you code`)
+test.skip('base API', async () => {
+  expect(false).toBeTruthy()
 })
-
-test.run()

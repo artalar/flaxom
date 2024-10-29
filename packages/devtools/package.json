@@ -18,8 +18,8 @@
   "scripts": {
     "prepublishOnly": "npm run build && npm run test",
     "build": "rm -rf build && tsc && bun build src/index.tsx --outdir ./build --sourcemap=external  --loader .css:text --target browser",
-    "test": "tsx src/index.test.ts",
-    "test:watch": "tsx watch src/index.test.ts"
+    "test": "vitest",
+    "test:watch": "vitest --watch"
   },
   "dependencies": {},
   "author": {

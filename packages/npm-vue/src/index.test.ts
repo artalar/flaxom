@@ -1,11 +1,9 @@
-import { test } from 'uvu'
-import * as assert from 'uvu/assert'
+import { test, expect } from 'vitest'
 import { createTestCtx, mockFn } from '@reatom/testing'
 import { effectScope } from 'vue'
 import { reatomRef, useAction } from './'
 import { action, atom } from '@reatom/core'
 import { onConnect, onDisconnect } from '@reatom/hooks'
-import { noop } from '@reatom/utils'
 
 test('reatomRef', async () => {
   const ctx = createTestCtx()
@@ -15,24 +13,24 @@ test('reatomRef', async () => {
   onConnect(state, () => (connected = true))
   onDisconnect(state, () => (connected = false))
 
-  assert.is(connected, false)
+  expect(connected).toBe(false)
 
   const scope = effectScope()
   scope.run(() => {
     const stateRef = reatomRef(state, ctx)
-    assert.is(connected, true)
-    assert.is(stateRef.value, 0)
-    assert.is(connected, true)
-    assert.is((stateRef.value = 1), 1)
-    assert.is(stateRef.value, 1)
-    assert.is(ctx.get(state), 1)
+    expect(connected).toBe(true)
+    expect(stateRef.value).toBe(0)
+    expect(connected).toBe(true)
+    expect((stateRef.value = 1)).toBe(1)
+    expect(stateRef.value).toBe(1)
+    expect(ctx.get(state)).toBe(1)
     state(ctx, 2)
-    assert.is(stateRef.value, 2)
+    expect(stateRef.value).toBe(2)
   })
 
-  assert.is(connected, true)
+  expect(connected).toBe(true)
   scope.stop()
-  assert.is(connected, false)
+  expect(connected).toBe(false)
 })
 
 test('useAction', async () => {
@@ -47,8 +45,6 @@ test('useAction', async () => {
   })
   globalActionBound()
 
-  assert.equal(globalActionFn.calls.length, 1)
-  assert.equal(globalActionFn.calls[0]!.i.length, 1)
+  expect(globalActionFn.calls.length).toBe(1)
+  expect(globalActionFn.calls[0]!.i.length).toBe(1)
 })
-
-test.run()

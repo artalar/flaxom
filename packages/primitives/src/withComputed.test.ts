@@ -1,21 +1,18 @@
 import { atom, createCtx } from '@reatom/core'
-import { suite } from 'uvu'
-import * as assert from 'uvu/assert'
+import { describe, it, expect } from 'vitest'
 
 import { withComputed } from './withComputed'
 
-const test = suite('withComputed')
+describe('withComputed', () => {
+  it('should compute value based on dependencies', () => {
+    const a = atom(0)
+    const b = atom(0).pipe(withComputed((ctx) => ctx.spy(a)))
+    const ctx = createCtx()
 
-test('withComputed', () => {
-  const a = atom(0)
-  const b = atom(0).pipe(withComputed((ctx) => ctx.spy(a)))
-  const ctx = createCtx()
-
-  assert.is(ctx.get(b), 0)
-  b(ctx, 1)
-  assert.is(ctx.get(b), 1)
-  a(ctx, 2)
-  assert.is(ctx.get(b), 2)
+    expect(ctx.get(b)).toBe(0) // Initial value of b should be 0
+    b(ctx, 1) // Set b to 1
+    expect(ctx.get(b)).toBe(1) // b should now be 1
+    a(ctx, 2) // Update a to 2
+    expect(ctx.get(b)).toBe(2) // b should now reflect the updated value of a
+  })
 })
-
-test.run()

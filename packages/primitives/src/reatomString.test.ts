@@ -1,23 +1,19 @@
 import { createCtx } from '@reatom/core'
-import { suite } from 'uvu'
-import * as assert from 'uvu/assert'
+import { describe, it, expect } from 'vitest'
 
 import { reatomString } from './reatomString'
 
-const test = suite('reatomString')
+describe('reatomString', () => {
+  it('should reset to initial value', () => {
+    const ctx = createCtx()
+    const a = reatomString(`string`)
 
-test('reatomString.reset', () => {
-  const ctx = createCtx()
-  const a = reatomString(`string`)
+    expect(ctx.get(a)).toBe(`string`)
 
-  assert.is(ctx.get(a), `string`)
+    a(ctx, (s) => `s`)
 
-  a(ctx, (s) => `s`)
-
-  assert.is(ctx.get(a), `s`)
-  a.reset(ctx)
-  assert.is(ctx.get(a), `string`)
-  ;`👍` //?
+    expect(ctx.get(a)).toBe(`s`)
+    a.reset(ctx)
+    expect(ctx.get(a)).toBe(`string`)
+  })
 })
-
-test.run()

@@ -1,5 +1,4 @@
-import { test } from 'uvu'
-import * as assert from 'uvu/assert'
+import { describe, it, expect } from 'vitest'
 import { createTestCtx } from '@reatom/testing'
 import { atom } from '@reatom/core'
 import { onConnect } from '@reatom/hooks'
@@ -16,6 +15,7 @@ describe('optimistic update', () => {
     Also, we use `onConnect` to fetch the list from the server every 5 seconds
     and we don't want to call subscriptions extra times so we use `isDeepEqual`
     in `withDataAtom` to prevent new reference stream if nothing really changed.
+
   */
 
   //#region BACKEND IMITATION
@@ -36,19 +36,13 @@ describe('optimistic update', () => {
   const getData = reatomAsync.from(api.getData).pipe(
     // add `dataAtom` and map the effect payload into it
     // try to prevent new reference stream if nothing really changed
-    withDataAtom([], (ctx, payload, state) =>
-      isDeepEqual(payload, state) ? state : payload,
-    ),
+    withDataAtom([], (ctx, payload, state) => (isDeepEqual(payload, state) ? state : payload)),
   )
   const putData = reatomAsync.from(api.putData)
   putData.onCall((ctx, promise, params) => {
     const [id, value] = params
     const oldList = ctx.get(getData.dataAtom)
-    // optimistic update
-    const newList = getData.dataAtom(ctx, (state) =>
-      state.map((item) => (item.id === id ? { ...item, value } : item)),
-    )
-    // rollback on error
+    const newList = getData.dataAtom(ctx, (state) => state.map((item) => (item.id === id ? { ...item, value } : item)))
     promise.catch((error) => {
       if (ctx.get(getData.dataAtom) === newList) {
         getData.dataAtom(ctx, oldList)
@@ -67,36 +61,29 @@ describe('optimistic update', () => {
     }
   })
 
-  test('optimistic update', async () => {
+  it('optimistic update', async () => {
     const ctx = createTestCtx()
     const effectTrack = ctx.subscribeTrack(getData.onFulfill)
     const dataTrack = ctx.subscribeTrack(getData.dataAtom)
 
-    // every subscription calls passed callback immediately
-    assert.is(effectTrack.calls.length, 1)
-    assert.is(dataTrack.calls.length, 1)
-    assert.equal(dataTrack.lastInput(), [])
+    expect(effectTrack.calls.length).toBe(1)
+    expect(dataTrack.calls.length).toBe(1)
+    expect(dataTrack.lastInput()).toEqual([])
 
-    // `onConnect` calls `fetchData`, wait it and check changes
     await sleep()
-    assert.is(dataTrack.calls.length, 2)
-    assert.equal(dataTrack.lastInput(), [{ id: 1, value: 1 }])
+    expect(dataTrack.calls.length).toBe(2)
+    expect(dataTrack.lastInput()).toEqual([{ id: 1, value: 1 }])
 
-    // call `updateData` and check changes
     putData(ctx, 1, 2)
-    assert.is(dataTrack.calls.length, 3)
-    assert.equal(dataTrack.lastInput(), [{ id: 1, value: 2 }])
+    expect(dataTrack.calls.length).toBe(3)
+    expect(dataTrack.lastInput()).toEqual([{ id: 1, value: 2 }])
 
-    // wait for `fetchData` and check changes
-    assert.is(effectTrack.calls.length, 2)
+    expect(effectTrack.calls.length).toBe(2)
     await sleep(INTERVAL)
-    // the effect is called again, but dataAtom is not updated
-    assert.is(effectTrack.calls.length, 3)
-    assert.is(dataTrack.calls.length, 3)
+    expect(effectTrack.calls.length).toBe(3)
+    expect(dataTrack.calls.length).toBe(3)
 
-    // cleanup test
     dataTrack.unsubscribe()
-    ;`👍` //?
   })
 })
 
@@ -106,7 +93,7 @@ describe('concurrent pooling', () => {
     every 5 seconds. We want to abort the previous pooling if the new one
     was started. The problem with the most tooling for async management is that no causes tracking
     and we can't abort some step of the previous pooling if the new one was started.
-    Reatom handle it perfectly, because `ctx` is immutable and could be traced when needed.
+    Reatom handle it perfectly, because ctx is immutable and could be traced when needed.
   */
 
   //#region BACKEND IMITATION
@@ -119,7 +106,6 @@ describe('concurrent pooling', () => {
       await sleep(5)
       const progress = (tasks.get(taskId) ?? -10) + 10
       tasks.set(taskId, progress)
-
       return progress
     },
   }
@@ -141,7 +127,7 @@ describe('concurrent pooling', () => {
     }
   }).pipe(withAbort({ strategy: 'last-in-win' }))
 
-  test('concurrent pooling', async () => {
+  it('concurrent pooling', async () => {
     const ctx = createTestCtx()
     const track = ctx.subscribeTrack(progressAtom)
 
@@ -151,20 +137,10 @@ describe('concurrent pooling', () => {
 
     await Promise.allSettled([promise1, promise2])
 
-    assert.is(ctx.get(progressAtom), 100)
+    expect(ctx.get(progressAtom)).toBe(100)
 
-    const expectedProgress = [
-      0, 10, /* start again */ 0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100,
-    ]
+    const expectedProgress = [0, 10, /* start again */ 0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
 
-    // assert.equal(track.inputs(), expectedProgress)
-    ;`👍` //?
+    // expect(track.inputs()).toEqual(expectedProgress)
   })
 })
-
-test.run()
-
-// uvu have no own describe
-function describe(name: string, fn: () => any) {
-  fn()
-}

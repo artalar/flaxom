@@ -1,5 +1,4 @@
-import { test } from 'uvu'
-import * as assert from 'uvu/assert'
+import { describe, test, expect, vi } from 'vitest'
 import { Action, action, atom, Ctx, Fn } from '@reatom/core'
 import { noop, sleep } from '@reatom/utils'
 import { createTestCtx, mockFn } from '@reatom/testing'
@@ -26,9 +25,9 @@ test('disposable async branch', async () => {
   track.calls.length = 0
   act(ctx, 1)
   act(ctx, 2)
-  assert.is(track.calls.length, 0)
+  expect(track.calls.length).toBe(0)
   await sleep()
-  assert.is(track.calls.length, 2)
+  expect(track.calls.length).toBe(2)
 
   track.calls.length = 0
   const disposableCtx = disposable(ctx)
@@ -36,7 +35,7 @@ test('disposable async branch', async () => {
   act(disposableCtx, 2)
   disposableCtx.dispose()
   await sleep()
-  assert.is(track.calls.length, 0)
+  expect(track.calls.length).toBe(0)
 })
 
 test('take', async () => {
@@ -45,10 +44,10 @@ test('take', async () => {
   const ctx = createTestCtx()
 
   setTimeout(act, 0, ctx, 4)
-  assert.is(await take(ctx, act), 4)
+  expect(await take(ctx, act)).toBe(4)
 
   setTimeout(at, 0, ctx, 4)
-  assert.is(await take(ctx, at), 4)
+  expect(await take(ctx, at)).toBe(4)
 })
 
 test('await transaction', async () => {
@@ -81,17 +80,17 @@ test('await transaction', async () => {
 
   resolve1!()
   await sleep()
-  assert.is(nestedResolved, false)
-  assert.is(effect3Resolved, false)
+  expect(nestedResolved).toBe(false)
+  expect(effect3Resolved).toBe(false)
 
   resolve2!()
   await sleep()
-  assert.is(nestedResolved, true)
-  assert.is(effect3Resolved, false)
+  expect(nestedResolved).toBe(true)
+  expect(effect3Resolved).toBe(false)
 
   resolve3!()
   await sleep()
-  assert.is(effect3Resolved, true)
+  expect(effect3Resolved).toBe(true)
 })
 
 test('withAbortableSchedule', async () => {
@@ -117,15 +116,14 @@ test('withAbortableSchedule', async () => {
 
   const un = ctx.subscribe(someAtom, () => {})
   await sleep(10)
-  assert.is(track.calls.length, 1)
+  expect(track.calls.length).toBe(1)
 
   un()
 
   ctx.subscribe(someAtom, () => {})()
   await sleep(10)
-  assert.is(track.calls.length, 1)
+  expect(track.calls.length).toBe(1)
 })
-
 test('take filter', async () => {
   const act = action((ctx, v: number) => ctx.schedule(() => Promise.resolve(v)))
   const track = mockFn()
@@ -141,13 +139,13 @@ test('take filter', async () => {
   await null
   act(ctx, 4)
   await sleep()
-  assert.is(track.calls.length, 1)
-  assert.is(track.lastInput(), '4')
+  expect(track.calls.length).toBe(1)
+  expect(track.lastInput()).toBe('4')
 })
 
 test('concurrent', async () => {
   const countAtom = atom(0)
-  const results = [] as any[]
+  const results: any[] = []
   countAtom.onChange(
     concurrent(async (ctx, count) => {
       try {
@@ -163,13 +161,13 @@ test('concurrent', async () => {
   countAtom(ctx, 1)
   countAtom(ctx, 2)
   await sleep()
-  assert.equal(results, ['AbortError', 2])
+  expect(results).toEqual(['AbortError', 2])
 
   const anAtom1 = atom(null)
   onConnect(anAtom1, (ctx) => countAtom(ctx, 3))
   ctx.subscribeTrack(anAtom1).unsubscribe()
   await sleep()
-  assert.equal(results, ['AbortError', 2, 'AbortError'])
+  expect(results).toEqual(['AbortError', 2, 'AbortError'])
 
   const anAtom2 = atom(null)
   onConnect(anAtom2, async (ctx) => {
@@ -178,13 +176,12 @@ test('concurrent', async () => {
   })
   ctx.subscribeTrack(anAtom2).unsubscribe()
   await sleep()
-  // there was `ReferenceError: Cannot access 'controller' before initialization` previously
-  assert.equal(results, ['AbortError', 2, 'AbortError', 'AbortError'])
+  expect(results).toEqual(['AbortError', 2, 'AbortError', 'AbortError'])
 })
 
 test('spawn', async () => {
   const countAtom = atom(0)
-  const results = [] as any[]
+  const results: any[] = []
   countAtom.onChange(
     concurrent((ctx, count) =>
       spawn(ctx, async (ctx) => {
@@ -203,7 +200,7 @@ test('spawn', async () => {
   countAtom(ctx, 2)
 
   await sleep()
-  assert.equal(results, [1, 2])
+  expect(results).toEqual([1, 2])
 })
 
 test('reaction base usage', async () => {
@@ -218,27 +215,27 @@ test('reaction base usage', async () => {
 
   const reactionAtom = someReaction(ctx)
   await sleep()
-  assert.is(track.calls.length, 1)
-  assert.is(track.lastInput(), 0)
+  expect(track.calls.length).toBe(1)
+  expect(track.lastInput()).toBe(0)
 
   a(ctx, 1)
   a(ctx, 2)
   a(ctx, 3)
   await sleep()
-  assert.is(track.calls.length, 2)
-  assert.is(track.lastInput(), 3)
+  expect(track.calls.length).toBe(2)
+  expect(track.lastInput()).toBe(3)
 
   a(ctx, 4)
   reactionAtom.unsubscribe()
   await sleep()
-  assert.is(track.calls.length, 2)
+  expect(track.calls.length).toBe(2)
 
   let changed = false
   reactionAtom.onChange((ctx, value) => {
     changed = true
   })
   a(ctx, 5)
-  assert.is(changed, false)
+  expect(changed).toBe(false)
 })
 
 test('reaction parameters usage', async () => {
@@ -253,21 +250,21 @@ test('reaction parameters usage', async () => {
 
   const reactionAtom = someReaction(ctx, '1')
   await sleep()
-  assert.is(track.calls.length, 1)
-  assert.is(track.lastInput(), '1a')
+  expect(track.calls.length).toBe(1)
+  expect(track.lastInput()).toBe('1a')
 
   a(ctx, 'b')
   someReaction(ctx, '2')
   a(ctx, 'c')
   await sleep()
-  assert.is(track.calls.length, 3)
-  assert.equal(track.inputs(), ['1a', '1c', '2c'])
+  expect(track.calls.length).toBe(3)
+  expect(track.inputs()).toEqual(['1a', '1c', '2c'])
 
   reactionAtom.unsubscribe()
   a(ctx, 'd')
   await sleep()
-  assert.is(track.calls.length, 4)
-  assert.equal(track.inputs(), ['1a', '1c', '2c', '2d'])
+  expect(track.calls.length).toBe(4)
+  expect(track.inputs()).toEqual(['1a', '1c', '2c', '2d'])
 })
 
 test('throttle example', async () => {
@@ -284,22 +281,20 @@ test('throttle example', async () => {
   track.calls.length = 0
 
   update(ctx, 1)
-  assert.is(track.calls.length, 1)
-  assert.is(track.lastInput(), 1)
+  expect(track.calls.length).toBe(1)
+  expect(track.lastInput()).toBe(1)
   update(ctx, 2)
   update(ctx, 3)
   await sleep()
-  assert.is(track.calls.length, 1)
-  assert.is(track.lastInput(), 1)
+  expect(track.calls.length).toBe(1)
+  expect(track.lastInput()).toBe(1)
 
   update(ctx, 4)
-  assert.is(track.calls.length, 2)
-  assert.is(track.lastInput(), 4)
+  expect(track.calls.length).toBe(2)
+  expect(track.lastInput()).toBe(4)
   update(ctx, 5)
   update(ctx, 6)
   await sleep()
-  assert.is(track.calls.length, 2)
-  assert.is(track.lastInput(), 4)
+  expect(track.calls.length).toBe(2)
+  expect(track.lastInput()).toBe(4)
 })
-
-test.run()
