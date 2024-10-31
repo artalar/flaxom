@@ -1,16 +1,16 @@
 {
   "packages/all-settled": "3.1.4",
-  "packages/async": "3.16.2",
+  "packages/async": "3.16.3",
   "packages/core": "3.9.0",
   "packages/core-v1": "3.1.9",
   "packages/core-v2": "3.1.4",
-  "packages/effects": "3.10.0",
+  "packages/effects": "3.10.1",
   "packages/eslint-plugin": "3.7.0",
   "packages/form": "3.3.2",
   "packages/form-web": "3.2.2",
   "packages/framework": "3.4.0",
-  "packages/hooks": "3.5.5",
-  "packages/jsx": "3.14.0",
+  "packages/hooks": "3.6.0",
+  "packages/jsx": "3.15.0",
   "packages/lens": "3.11.4",
   "packages/logger": "3.8.4",
   "packages/npm-cookie-baker": "3.1.5",
@@ -32,5 +32,5 @@
   "packages/url": "3.7.5",
   "packages/utils": "3.11.0",
   "packages/web": "3.6.0",
-  "packages/devtools": "0.6.2"
+  "packages/devtools": "0.7.0"
 }

@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.15.0](https://github.com/artalar/reatom/compare/jsx-v3.14.0...jsx-v3.15.0) (2024-10-31)
+
+
+### Features
+
+* **jsx:** class name normalization helper ([#942](https://github.com/artalar/reatom/issues/942)) ([2803165](https://github.com/artalar/reatom/commit/2803165ccf21100c3bd37b371d680481474874f1))
+
 ## [3.14.0](https://github.com/artalar/reatom/compare/jsx-v3.13.1...jsx-v3.14.0) (2024-10-08)
 
 

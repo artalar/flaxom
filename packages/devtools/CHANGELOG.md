@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.7.0](https://github.com/artalar/reatom/compare/devtools-v0.6.2...devtools-v0.7.0) (2024-10-31)
+
+
+### Features
+
+* **devtools:** add size limit ([d4045a5](https://github.com/artalar/reatom/commit/d4045a5bcda25b17ec00f2e298d6534af973419e))
+* **devtools:** search box ([6d0fc98](https://github.com/artalar/reatom/commit/6d0fc98b8c34c3d1b07f647d7a81b9ebb3fc367a))
+
+
+### Bug Fixes
+
+* **devtools:** defaults ([280beb3](https://github.com/artalar/reatom/commit/280beb398cb7e0a778a14eea195ce81dc4be9b3d))
+
 ## [0.6.2](https://github.com/artalar/reatom/compare/devtools-v0.6.1...devtools-v0.6.2) (2024-10-14)
 
 

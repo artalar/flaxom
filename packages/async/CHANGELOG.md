@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.16.3](https://github.com/artalar/reatom/compare/async-v3.16.2...async-v3.16.3) (2024-10-31)
+
+
+### Bug Fixes
+
+* **async:** invalidation for resource cache ([8de89a3](https://github.com/artalar/reatom/commit/8de89a382ec47de005b74a0ca211877befce9250))
+* **async:** retry concurrency ([6a43188](https://github.com/artalar/reatom/commit/6a4318899354267d7b37b378fcf8a912cf6c7292))
+
 ## [3.16.2](https://github.com/artalar/reatom/compare/async-v3.16.1...async-v3.16.2) (2024-10-08)
 
 

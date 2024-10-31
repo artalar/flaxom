@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.10.1](https://github.com/artalar/reatom/compare/effects-v3.10.0...effects-v3.10.1) (2024-10-31)
+
+
+### Bug Fixes
+
+* **effects:** small refactoring ([0bc0f0b](https://github.com/artalar/reatom/commit/0bc0f0b2cf2a1b6593019a2f8ef175f15bc81284))
+
 ## [3.10.0](https://github.com/artalar/reatom/compare/effects-v3.9.0...effects-v3.10.0) (2024-10-08)
 
 

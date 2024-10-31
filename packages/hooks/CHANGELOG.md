@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.6.0](https://github.com/artalar/reatom/compare/hooks-v3.5.5...hooks-v3.6.0) (2024-10-31)
+
+
+### Features
+
+* **hooks:** onConnect abortable schedule ([bffd735](https://github.com/artalar/reatom/commit/bffd7351eaa9d4025a4edc7f31fcfd5510811d9a))
+
 ## [3.5.5](https://github.com/artalar/reatom/compare/hooks-v3.5.4...hooks-v3.5.5) (2024-06-22)
 
 
