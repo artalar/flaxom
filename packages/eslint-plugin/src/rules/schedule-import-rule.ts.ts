@@ -21,7 +21,7 @@ const getMessage = (n?: estree.Expression | estree.SpreadElement) => {
   return "Use 'wrap(ctx, cb)' instead of deprecated 'ctx.schedule(cb)'."
 }
 
-export const wrapScheduleInsteadOfCtxScheduleRule: Rule.RuleModule = {
+export const scheduleImportRule: Rule.RuleModule = {
   meta: {
     type: 'suggestion',
     docs: {

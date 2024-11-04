@@ -1,4 +1,4 @@
-import { wrapScheduleInsteadOfCtxScheduleRule } from './wrap-schedule-instead-of-ctx-schedule-rule'
+import { scheduleImportRule } from './schedule-import-rule.ts'
 import { RuleTester } from 'eslint'
 
 const tester = new RuleTester({
@@ -8,7 +8,7 @@ const tester = new RuleTester({
   },
 })
 
-tester.run('wrap-schedule-instead-ctx-schedule', wrapScheduleInsteadOfCtxScheduleRule, {
+tester.run('schedule-import-rule', scheduleImportRule, {
   valid: [
     {
       code: `import { wrap } from "@reatom/framework";\nwrap(ctx, () => {})`,

@@ -1,12 +1,12 @@
 import { ESLint } from 'eslint'
 import { asyncRule } from './rules/async-rule'
 import { unitNamingRule } from './rules/unit-naming-rule'
-import { wrapScheduleInsteadOfCtxScheduleRule } from './rules/wrap-schedule-instead-of-ctx-schedule-rule'
+import { scheduleImportRule } from './rules/schedule-import-rule.ts'
 
 const rules = {
   'unit-naming-rule': unitNamingRule,
   'async-rule': asyncRule,
-  'wrap-schedule-instead-of-ctx-schedule-rule': wrapScheduleInsteadOfCtxScheduleRule,
+  'schedule-import-rule': scheduleImportRule,
 }
 
 export default {
