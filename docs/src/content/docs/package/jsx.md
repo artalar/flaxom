@@ -157,6 +157,44 @@ Correct:
 ></div>
 ```
 
+### Class name utility
+
+The `cn` function is designed for creating a string of CSS classes. It allows the use of multiple data types: strings, objects, arrays, functions, and atoms, which are converted into a class string.
+
+```ts
+cn('my-class') // Atom<'my-class'>
+
+cn(['first', atom('second')]) // Atom<'first second'>
+
+/** The `active` class will be determined by the truthiness of the data property `isActiveAtom`. */
+cn({ active: isActiveAtom }) // Atom<'active' | ''>
+
+cn((ctx) => ctx.spy(isActiveAtom) ? 'active' : undefined) // Atom<'active' | ''>
+```
+
+The `cn` function supports various complex data combinations, making it easier to declaratively describe classes for complex UI components.
+
+```ts
+const Button = (props) => {
+  /** @example Atom<'button button--size-medium button--theme-primary button--is-active'> */
+  const classNameAtom = cn((ctx) => [
+    'button',
+    `button--size-${props.size}`,
+    `button--theme-${props.theme}`,
+    {
+      'button--is-disabled': props.isDisabled,
+      'button--is-active': ctx.spy(props.isActive) && !ctx.spy(props.isDisabled),
+    },
+  ])
+
+  return (
+    <button class={classNameAtom}>
+      {props.children}
+    </button>
+  )
+}
+```
+
 ### CSS-in-JS
 
 We have a minimal, intuitive, and efficient styling engine tightly integrated with components. You can set a styles in `css` prop and all relative css-variables to `css:variable-name` prop.
@@ -333,7 +371,12 @@ To type your custom component props accepting general HTML attributes, for examp
 ```tsx
 import { type JSX } from '@reatom/jsx'
 
+// allow only plain data types
 export interface InputProps extends JSX.InputHTMLAttributes {
+  defaultValue?: string
+}
+// allow plain data types and atoms
+export type InputProps = JSX.IntrinsicElements['input'] & {
   defaultValue?: string
 }
 

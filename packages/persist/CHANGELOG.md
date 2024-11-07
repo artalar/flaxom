@@ -1,5 +1,14 @@
 # Changelog
 
+## [3.4.1](https://github.com/artalar/reatom/compare/persist-v3.4.0...persist-v3.4.1) (2024-10-08)
+
+
+### Bug Fixes
+
+* **persist:** computed handling ([6d747cb](https://github.com/artalar/reatom/commit/6d747cb07a3f857876abdb39afa91e8d9a36f4f0))
+* **persist:** do not accept an action ([f6b3028](https://github.com/artalar/reatom/commit/f6b3028982bec514158ce85474f116627ada3ab2))
+* **persist:** prevent extra computed calls ([65de325](https://github.com/artalar/reatom/commit/65de32501fa22841747069f6056f0d37c43b4ec4))
+
 ## [3.4.0](https://github.com/artalar/reatom/compare/persist-v3.3.4...persist-v3.4.0) (2024-09-18)
 
 

@@ -1,8 +1,9 @@
 import { test } from 'uvu'
 import * as assert from 'uvu/assert'
-import { atom } from '@reatom/core'
+import { action, atom } from '@reatom/core'
 import { createTestCtx } from '@reatom/testing'
-import { noop } from '@reatom/utils'
+import { noop, random } from '@reatom/utils'
+import { withComputed } from '@reatom/primitives'
 
 import { createMemStorage, reatomPersist } from './'
 
@@ -100,6 +101,53 @@ test('should not skip double update', async () => {
   assert.is(ctx.get(a1), 11)
   assert.is(ctx.get(a2), 2)
   ;('👍') //?
+})
+
+test('should memoize a computer', () => {
+  const ctx = createTestCtx()
+  const storage = withSomePersist.storageAtom(
+    ctx,
+    createMemStorage({
+      name: 'test',
+      snapshot: {
+        a: 1,
+      },
+    }),
+  )
+
+  const noop = atom({})
+  const a = atom(0).pipe(
+    withComputed((ctx, state) => {
+      ctx.spy(noop)
+      computedCalls++
+      return state
+    }),
+    withSomePersist('a'),
+  )
+  let computedCalls = 0
+
+  assert.is(ctx.get(a), 1)
+  assert.is(computedCalls, 1)
+
+  // const rec = storage.get(ctx, 'a')!
+  storage.set(ctx, 'a', {
+    data: 2,
+    fromState: false,
+    id: random(),
+    timestamp: Date.now(),
+    to: Date.now() + 5 * 1000,
+    version: 0,
+  })
+  assert.is(ctx.get(a), 2)
+  assert.is(computedCalls, 1)
+
+  noop(ctx, {})
+  ctx.get(a)
+  assert.is(computedCalls, 2)
+})
+
+test('should not accept an action', () => {
+  assert.throws(() => action().pipe(withSomePersist('test')))
 })
 
 test.run()

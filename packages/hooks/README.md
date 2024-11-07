@@ -12,7 +12,7 @@ A lot of cool examples you could find in [async package docs](https://www.reatom
 
 All connection (and disconnection) callbacks calling during effects queue - outside batching. The returned value is a dispose function used to deactivate the hook.
 
-"Connection" refers to the presence of any number of subscribers in the atom. The first subscriber activates the connection status, while the second subscriber does not interact with it. Unsubscribing the first subscriber has no effect since there is still one subscriber (the second one). However, after unsubscribing the second subscriber, the connection status will be deactivated, and if a cleanup callback is provided, it will be triggered. You can read more in the [lifecycle guide](https://www.reatom.dev/handbook#lifecycle).
+"Connection" refers to the presence of any number of subscribers in the atom. The first subscriber activates the connection status, while the second subscriber does not interact with it. Unsubscribing the first subscriber has no effect since there is still one subscriber (the second one). However, after unsubscribing the second subscriber, the connection status will be deactivated, all related `ctx.schedule` will throws `AbortError` and if a cleanup callback is provided, it will be triggered. You can read more in the [lifecycle guide](https://www.reatom.dev/handbook#lifecycle).
 
 ```ts
 import { atom } from '@reatom/core'
@@ -30,7 +30,19 @@ const dispose = onConnect(messagesAtom, (ctx) => {
 })
 ```
 
-The passed `ctx` has an `isConnected` method to check the current status of the passed atom. You can refer to the [async example](https://www.reatom.dev/package/async#periodic-refresh-for-used-data) for more information. Additionally, the `ctx` includes a `controller` property, which is an AbortController. You can conveniently reuse it with `reatomAsync`. For further details, you can refer to [another async example](https://www.reatom.dev/package/async#abortable-process).
+Since connection context follow Reatom concurrent abort strategy, you can use any infinity effects with a leaks safety. In the example above the loop will not stack forever, if the atom will disconnected, as the schedule method will throw an abort error in this case.
+
+```ts
+// lazy retry logic
+onConnect(fetchSome.dataAtom, async (ctx) => {
+  while (true) {
+    await ctx.schedule(() => sleep(5_000))
+    await fetchSome(ctx)
+  }
+})
+```
+
+> **Deprecated!** The passed `ctx` has an `isConnected` method to check the current status of the passed atom. You can refer to the [async example](https://www.reatom.dev/package/async#periodic-refresh-for-used-data) for more information. Additionally, the `ctx` includes a `controller` property, which is an AbortController. You can conveniently reuse it with `reatomAsync`. For further details, you can refer to [another async example](https://www.reatom.dev/package/async#abortable-process).
 
 ### Comparison with React
 

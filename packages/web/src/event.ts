@@ -31,12 +31,14 @@ export const onEvent: {
     target: Target,
     type: Type,
     cb: (value: EventOfTarget<Target, Type>) => any,
+    options?: AddEventListenerOptions
   ): Unsubscribe
   <Event>(
     ctx: Ctx,
     target: EventTarget,
     type: string,
     cb: (value: Event) => any,
+    options?: AddEventListenerOptions
   ): Unsubscribe
 } = (ctx: Ctx, target: EventTarget, type: string, listener: Fn) => {
   let un

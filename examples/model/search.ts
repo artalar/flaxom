@@ -8,12 +8,21 @@ import {
   withRetry,
   withAssign,
   action,
+  withComputed,
+  isInit,
 } from '@reatom/framework'
 import { withSearchParamsPersist } from '@reatom/url'
+import { withLocalStorage } from '@reatom/persist-web-storage'
 
-export const searchAtom = atom('', 'searchAtom')
+export const searchAtom = atom('', 'searchAtom').pipe(withSearchParamsPersist('search'))
 
 export const pageAtom = atom(1, 'pageAtom').pipe(
+  withComputed((ctx, state) => {
+    // reset the state on other filters change
+    ctx.spy(searchAtom)
+    // check the init to do not drop the persist state
+    return isInit(ctx) ? state : 1
+  }),
   withSearchParamsPersist('page', (page) => Number(page || 1)),
   withAssign((target, name) => ({
     next: action((ctx) => target(ctx, (page) => page + 1), `${name}.next`),
@@ -22,6 +31,7 @@ export const pageAtom = atom(1, 'pageAtom').pipe(
 )
 
 export const issuesResource = reatomResource(async (ctx) => {
+  const { signal } = ctx.controller
   const query = ctx.spy(searchAtom)
   const page = ctx.spy(pageAtom)
 
@@ -30,12 +40,12 @@ export const issuesResource = reatomResource(async (ctx) => {
   // debounce
   await ctx.schedule(() => sleep(350))
 
-  const { items } = await api.searchIssues({ query, page, signal: ctx.controller.signal })
+  const { items } = await api.searchIssues({ query, page, signal })
   return items
 }, 'issues').pipe(
   withDataAtom([]),
   withErrorAtom(),
-  withCache({ length: Infinity, swr: false, staleTime: 3 * 60 * 1000 }),
+  withCache({ length: Infinity, swr: false, staleTime: 3 * 60 * 1000, withPersist: withLocalStorage }),
   withRetry({
     onReject(ctx, error, retries) {
       if (error instanceof Error && error?.message.includes('rate limit')) {
@@ -90,10 +100,8 @@ export const api = {
     perPage?: number
     signal: AbortSignal
   }): Promise<IssuesResponse> {
-    const response = await fetch(
-      `https://api.github.com/search/issues?q=${query}&page=${page}&per_page=${perPage}`,
-      { signal },
-    )
+    const url = `https://api.github.com/search/issues?q=${query}&page=${page}&per_page=${perPage}`
+    const response = await fetch(url, { signal })
 
     if (response.status !== 200) {
       const error = new Error(`HTTP Error: ${response.statusText}`)

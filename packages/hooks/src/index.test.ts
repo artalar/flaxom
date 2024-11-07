@@ -1,6 +1,6 @@
 import { action, atom, CtxSpy } from '@reatom/core'
 import { createTestCtx, mockFn } from '@reatom/testing'
-import { sleep } from '@reatom/utils'
+import { noop, sleep } from '@reatom/utils'
 import { test } from 'uvu'
 import * as assert from 'uvu/assert'
 
@@ -63,25 +63,35 @@ test('onConnect ctx.isConnect', async () => {
 test('onConnect ctx.controller', async () => {
   const a = atom(0)
   const ctx = createTestCtx()
-  let delay = 0
-  let aborted: boolean
-  let connected: boolean
+  let aborted: null | boolean = null
+  let connected: null | boolean = null
+  let throwed: null | boolean = null
 
   onConnect(a, async (ctx) => {
-    await sleep(delay)
+    await sleep()
     aborted = ctx.controller.signal.aborted
     connected = ctx.isConnected()
+    ctx
+      .schedule(() => {
+        throwed = false
+      })
+      .catch(() => {
+        throwed = true
+      })
   })
 
   const track = ctx.subscribeTrack(a)
-  track.unsubscribe()
-  delay = 5
-  ctx.subscribeTrack(a)
   await sleep()
+  assert.is(aborted, false)
+  assert.is(connected, true)
+  assert.is(throwed, false)
 
-  assert.is(aborted!, true)
-  assert.is(connected!, true)
-  ;`👍` //?
+  track.unsubscribe()
+  ctx.subscribeTrack(a).unsubscribe()
+  await sleep()
+  assert.is(aborted, true)
+  assert.is(connected, false)
+  assert.is(throwed, true)
 })
 
 test('isInit', () => {
@@ -97,7 +107,6 @@ test('isInit', () => {
   ctx.get(computation)
   assert.equal(logs, [true, true])
   ctx.get(computation)
-  console.log(logs)
   assert.equal(logs, [true, true, false, false])
 
   assert.is(work(ctx), true)

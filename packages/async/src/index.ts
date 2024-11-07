@@ -42,7 +42,7 @@ export type {
   AsyncStatuses,
   AsyncStatusesAtom,
 } from './withStatusesAtom'
-export { reatomAsyncReaction, AsyncReaction, ResourceAtom, reatomResource } from './reatomResource'
+export { reatomAsyncReaction, type AsyncReaction, type ResourceAtom, reatomResource } from './reatomResource'
 
 export interface AsyncAction<Params extends any[] = any[], Resp = any> extends Action<Params, ControlledPromise<Resp>> {
   onFulfill: Action<[Resp], Resp>
@@ -78,11 +78,6 @@ export interface ControlledPromise<T = any> extends Promise<T> {
 }
 
 export const isAbortError = isAbort
-
-const getCache = (ctx: Ctx, anAtom: Atom): AtomCache => {
-  ctx.get(anAtom)
-  return anAtom.__reatom.patch ?? ctx.get((read) => read(anAtom.__reatom))!
-}
 
 export const reatomAsync = <Params extends [AsyncCtx, ...any[]] = [AsyncCtx, ...any[]], Resp = any>(
   effect: Fn<Params, Promise<Resp>>,
@@ -406,28 +401,45 @@ export const withRetry =
       const paramsAtom = (anAsync.paramsAtom = atom(fallbackParams as Params, `${anAsync.__reatom.name}._paramsAtom`))
       anAsync.onCall((ctx, payload, params) => paramsAtom(ctx, params as Params))
 
-      anAsync.retry = action((ctx, after = 0): ActionPayload<T> => {
-        throwReatomError(after < 0, 'wrong timeout')
-
-        let params = ctx.get(anAsync.paramsAtom!)
+      anAsync.retry = action(
         // @ts-expect-error
-        if (anAsync.promiseAtom) params ??= []
-        throwReatomError(!params, 'no cached params')
+        async (ctx, after = 0): ActionPayload<T> => {
+          throwReatomError(after < 0, 'wrong timeout')
 
-        const asyncSnapshot = getCache(ctx, anAsync)
-        const hasOtherCall = () => asyncSnapshot !== getCache(ctx, anAsync)
+          const topController = getTopController(ctx.cause)
+          const controller = new AbortController()
 
-        retriesAtom(ctx, (s) => s + 1)
+          abortCauseContext.set(ctx.cause, controller)
 
-        if (after > 0) {
-          return sleep(after).then(() => {
-            if (hasOtherCall()) throw toAbortError('outdated retry')
-            return anAsync(ctx, ...params!)
-          }) as ActionPayload<T>
-        }
+          let params = ctx.get(anAsync.paramsAtom!)
+          // @ts-expect-error
+          if (anAsync.promiseAtom) params ??= []
+          throwReatomError(!params, 'no cached params')
 
-        return anAsync(ctx, ...params!) as ActionPayload<T>
-      }, `${anAsync.__reatom.name}.retry`)
+          retriesAtom(ctx, (s) => s + 1)
+
+          if (after > 0) {
+            const asyncStateInstance = ctx.get(anAsync)
+            await sleep(after)
+            const abortReason =
+              (topController?.signal.aborted && topController.signal.reason) ||
+              (asyncStateInstance !== ctx.get(anAsync) && 'outdated retry')
+            if (abortReason) {
+              retriesAtom(ctx, 0)
+              throw toAbortError(abortReason)
+            }
+          }
+
+          const result = anAsync(ctx, ...params!) as ActionPayload<T>
+
+          topController?.signal.addEventListener('abort', () => {
+            controller.abort(topController.signal.reason)
+          })
+
+          return result
+        },
+        `${anAsync.__reatom.name}.retry`,
+      )
 
       const retriesAtom = (anAsync.retriesAtom = atom(0, `${anAsync.__reatom.name}.retriesAtom`))
 
@@ -438,29 +450,13 @@ export const withRetry =
             payload,
             () => retriesAtom(ctx, 0),
             (error) => {
-              // do not `retriesAtom(ctx, 0)`, as it handles with `signal?.addEventListener` below
-              if (isAbort(error)) return
-
-              const timeout = onReject(ctx, error, ctx.get(retriesAtom)) ?? -1
+              const timeout = isAbort(error) ? -1 : onReject(ctx, error, ctx.get(retriesAtom)) ?? -1
 
               if (timeout < 0) {
                 retriesAtom(ctx, 0)
-                return
+              } else {
+                anAsync.retry!(ctx, timeout).catch(noop)
               }
-
-              const controller = new AbortController()
-
-              spawn(ctx, anAsync.retry!, [timeout], controller).catch(noop)
-              const state = ctx.get(anAsync)
-
-              const signal = getTopController(ctx.cause.cause!)?.signal
-              // it is important to add the listener only after the `spawn`
-              signal?.addEventListener('abort', () => {
-                controller.abort(signal.reason)
-                if (state === ctx.get(anAsync)) {
-                  retriesAtom(ctx, 0)
-                }
-              })
             },
           )
         })

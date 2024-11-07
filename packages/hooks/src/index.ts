@@ -12,30 +12,22 @@ import {
   throwReatomError,
   Unsubscribe,
 } from '@reatom/core'
-import { noop, toAbortError, merge } from '@reatom/utils'
-import { abortCauseContext } from '@reatom/effects'
+import { noop, toAbortError } from '@reatom/utils'
+import { abortCauseContext, onCtxAbort, withAbortableSchedule } from '@reatom/effects'
 
-export const getRootCause = (cause: AtomCache): AtomCache =>
-  cause.cause === null ? cause : getRootCause(cause.cause)
+export const getRootCause = (cause: AtomCache): AtomCache => (cause.cause === null ? cause : getRootCause(cause.cause))
 
-export const isSameCtx = (ctx1: Ctx, ctx2: Ctx) =>
-  getRootCause(ctx1.cause) === getRootCause(ctx2.cause)
+export const isSameCtx = (ctx1: Ctx, ctx2: Ctx) => getRootCause(ctx1.cause) === getRootCause(ctx2.cause)
 
-export const addOnConnect = (anAtom: Atom, cb: Fn<[Ctx]>) =>
-  (anAtom.__reatom.connectHooks ??= new Set()).add(cb)
+export const addOnConnect = (anAtom: Atom, cb: Fn<[Ctx]>) => (anAtom.__reatom.connectHooks ??= new Set()).add(cb)
 
-export const addOnDisconnect = (anAtom: Atom, cb: Fn<[Ctx]>) =>
-  (anAtom.__reatom.disconnectHooks ??= new Set()).add(cb)
+export const addOnDisconnect = (anAtom: Atom, cb: Fn<[Ctx]>) => (anAtom.__reatom.disconnectHooks ??= new Set()).add(cb)
 
-export const addOnUpdate = <T extends Atom>(
-  anAtom: T,
-  cb: Fn<[Ctx, AtomCache<AtomState<T>>]>,
-) => (anAtom.__reatom.updateHooks ??= new Set()).add(cb)
+export const addOnUpdate = <T extends Atom>(anAtom: T, cb: Fn<[Ctx, AtomCache<AtomState<T>>]>) =>
+  (anAtom.__reatom.updateHooks ??= new Set()).add(cb)
 
 export const withInit =
-  <T extends Atom>(
-    createState: Fn<[Ctx, T['__reatom']['initState']], AtomState<T>>,
-  ): Fn<[T], T> =>
+  <T extends Atom>(createState: Fn<[Ctx, T['__reatom']['initState']], AtomState<T>>): Fn<[T], T> =>
   (anAtom) => {
     const { initState, isAction } = anAtom.__reatom
 
@@ -46,42 +38,29 @@ export const withInit =
     return anAtom
   }
 
+export const _onConnect = action((ctx, anAtom: Atom, fn: Fn, controller: AbortController) => {
+  ctx.cause.cause = getRootCause(ctx.cause)
+  abortCauseContext.set(ctx.cause, controller)
+  const result = fn(withAbortableSchedule({ ...ctx, controller, isConnected: () => isConnected(ctx, anAtom) }))
+  if (result instanceof Promise) {
+    controller.signal.addEventListener('abort', () => result.catch(noop))
+  }
+  return result
+}, '_onConnect')
+
 export const onConnect = (
   anAtom: Atom,
-  cb: Fn<
-    [Ctx & { controller: AbortController; isConnected(): boolean }],
-    (() => void) | unknown
-  >,
+  cb: Fn<[Ctx & { controller: AbortController; isConnected(): boolean }], (() => void) | unknown>,
 ): Unsubscribe => {
   const connectHook = (ctx: Ctx) => {
-    const cause = merge(
-      ctx.get((read) => read(anAtom.__reatom)!),
-      {
-        // drop the previous history for connect hooks
-        cause: getRootCause(ctx.cause),
-      },
-    )
-
     const controller = new AbortController()
-    abortCauseContext.set(cause, controller)
-
-    const cleanup = cb(
-      merge(ctx, {
-        cause,
-        controller,
-        isConnected: () => isConnected(ctx, anAtom),
-      }),
-    )
+    const cleanup = _onConnect(ctx, anAtom, cb, controller)
 
     if (cleanup instanceof Promise) cleanup.catch(noop)
 
     // TODO: abort on `connectHooks.delete`?
     const cleanupHook = (_ctx: Ctx) => {
-      if (
-        isSameCtx(ctx, _ctx) &&
-        disconnectHooks.delete(cleanupHook) &&
-        connectHooks.has(connectHook)
-      ) {
+      if (isSameCtx(ctx, _ctx) && disconnectHooks.delete(cleanupHook) && connectHooks.has(connectHook)) {
         controller.abort(toAbortError(`${anAtom.__reatom.name} disconnect`))
         typeof cleanup === 'function' && cleanup()
       }
@@ -95,29 +74,16 @@ export const onConnect = (
   return () => connectHooks.delete(connectHook)
 }
 
-export const onDisconnect = (anAtom: Atom, cb: Fn<[Ctx]>): Unsubscribe =>
-  onConnect(anAtom, (ctx) => () => cb(ctx))
+export const onDisconnect = (anAtom: Atom, cb: Fn<[Ctx]>): Unsubscribe => onConnect(anAtom, (ctx) => () => cb(ctx))
 
 // @ts-expect-error
 const _onUpdate: {
   <Params extends any[], Payload>(
     anAction: Action<Params, Payload> & { deps?: Array<Atom> },
-    cb?: Fn<
-      [
-        Ctx,
-        Payload,
-        AtomCache<AtomState<Action<Params, Payload>>> & { params: Params },
-      ]
-    >,
+    cb?: Fn<[Ctx, Payload, AtomCache<AtomState<Action<Params, Payload>>> & { params: Params }]>,
   ): Unsubscribe
-  <T>(
-    anAtom: Atom<T> & { deps?: Array<Atom> },
-    cb?: Fn<[Ctx, T, AtomCache<T>]>,
-  ): Unsubscribe
-} = <T>(
-  anAtom: Action<any[], T> | Atom<T>,
-  cb: Fn<[Ctx, T, AtomCache<T>]> = noop,
-) => {
+  <T>(anAtom: Atom<T> & { deps?: Array<Atom> }, cb?: Fn<[Ctx, T, AtomCache<T>]>): Unsubscribe
+} = <T>(anAtom: Action<any[], T> | Atom<T>, cb: Fn<[Ctx, T, AtomCache<T>]> = noop) => {
   const hook = (ctx: Ctx, patch: AtomCache & { params?: unknown[] }) => {
     let { state } = patch
     if (anAtom.__reatom.isAction) {
@@ -165,13 +131,7 @@ export const spyChange: {
 }
 
 export const controlConnection =
-  <T>(
-    initState = true,
-    name?: string,
-  ): Fn<
-    [Atom<T>],
-    Atom<T> & { toggleConnection: Action<[boolean?], boolean> }
-  > =>
+  <T>(initState = true, name?: string): Fn<[Atom<T>], Atom<T> & { toggleConnection: Action<[boolean?], boolean> }> =>
   (anAtom) => {
     name ??= `${anAtom.__reatom.name}.controlConnection`
 
@@ -184,10 +144,7 @@ export const controlConnection =
           `${name}.toggleConnection`,
         ),
       },
-      atom(
-        (ctx, state?: any) => (ctx.spy(isActiveAtom) ? ctx.spy(anAtom) : state),
-        name,
-      ),
+      atom((ctx, state?: any) => (ctx.spy(isActiveAtom) ? ctx.spy(anAtom) : state), name),
     )
   }
 
@@ -197,10 +154,7 @@ export const isConnected = (ctx: Ctx, { __reatom: proto }: Atom) =>
     return !!cache && cache.subs.size + cache.listeners.size > 0
   })
 
-const initializations = atom(
-  null! as WeakMap<AtomProto, AtomCache>,
-  'initializations',
-)
+const initializations = atom(null! as WeakMap<AtomProto, AtomCache>, 'initializations')
 initializations.__reatom.initState = () => new WeakMap()
 export const isInit = (ctx: Ctx) => {
   const inits = ctx.get(initializations)

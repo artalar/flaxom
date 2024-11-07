@@ -1,6 +1,6 @@
 {
   "name": "@reatom/web",
-  "version": "3.5.3",
+  "version": "3.6.0",
   "private": false,
   "sideEffects": false,
   "description": "Reatom for web",
@@ -27,7 +27,9 @@
     "test:watch": "tsx watch src/index.test.ts"
   },
   "dependencies": {
-    "@reatom/core": ">=3.5.0"
+    "@reatom/core": ">=3.5.0",
+    "@reatom/hooks": "^3.2.0",
+    "@reatom/primitives": "^3.5.0"
   },
   "author": "artalar",
   "maintainers": [

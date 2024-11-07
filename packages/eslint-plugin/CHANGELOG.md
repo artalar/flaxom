@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.7.1](https://github.com/artalar/reatom/compare/eslint-plugin-v3.7.0...eslint-plugin-v3.7.1) (2024-11-07)
+
+
+### Bug Fixes
+
+* **eslint-plugin:** typeError in reatom/unit-naming-rule ([#968](https://github.com/artalar/reatom/issues/968)) ([8392593](https://github.com/artalar/reatom/commit/8392593d6caab3136acbe1e77cb28129630d41e4))
+
 ## [3.7.0](https://github.com/artalar/reatom/compare/eslint-plugin-v3.6.2...eslint-plugin-v3.7.0) (2024-09-12)
 
 

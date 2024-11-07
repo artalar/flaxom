@@ -1,20 +1,11 @@
-import {
-  Action,
-  Atom,
-  AtomMut,
-  AtomState,
-  Ctx,
-  Fn,
-  Rec,
-  action,
-  atom,
-} from '@reatom/core'
+import { __count } from '@reatom/core'
+import { Action, Atom, AtomMut, AtomState, Ctx, Fn, Rec, action, atom } from '@reatom/core'
 import { abortCauseContext } from '@reatom/effects'
 import { getRootCause, withInit } from '@reatom/hooks'
-import { noop } from '@reatom/utils'
+import { noop, toAbortError } from '@reatom/utils'
 
 export interface AtomUrlSettings {
-  init: (ctx: Ctx) => URL
+  init: (ctx: Ctx, options?: { signal?: AbortSignal }) => URL
   sync: (ctx: Ctx, url: URL, replace?: boolean) => void
 }
 
@@ -32,11 +23,7 @@ export interface SearchParamsAtom extends Atom<Rec<string>> {
   set: Action<[key: string, value: string, replace?: boolean], void>
   del: Action<[key: string, replace?: boolean], void>
   /** create AtomMut which will synced with the specified query parameter */
-  lens<T = string>(
-    key: string,
-    parse?: (value?: string) => T,
-    serialize?: (value: T) => undefined | string,
-  ): AtomMut<T>
+  lens<T = string>(key: string, parse?: (value?: string) => T, serialize?: (value: T) => undefined | string): AtomMut<T>
   /** create AtomMut which will synced with the specified query parameter */
   lens<T = string>(
     key: string,
@@ -44,6 +31,7 @@ export interface SearchParamsAtom extends Atom<Rec<string>> {
       parse?: (value?: string) => T
       serialize?: (value: T) => undefined | string
       replace?: boolean
+      path?: string
     },
   ): AtomMut<T>
 }
@@ -59,10 +47,8 @@ const browserSync = (url: URL, replace?: boolean) => {
   else history.pushState({}, '', url.href)
 }
 /**Browser settings allow handling of the "popstate" event and a link click. */
-const createBrowserUrlAtomSettings = (
-  shouldCatchLinkClick = true,
-): AtomUrlSettings => ({
-  init: (ctx: Ctx) => {
+const createBrowserUrlAtomSettings = (shouldCatchLinkClick = true): AtomUrlSettings => ({
+  init: (ctx: Ctx, { signal } = {}) => {
     // do not store causes for IO events
     ctx = { ...ctx, cause: getRootCause(ctx.cause) }
     // copied from https://github.com/nanostores/router
@@ -108,10 +94,8 @@ const createBrowserUrlAtomSettings = (
         }
       })
 
-    globalThis.addEventListener('popstate', (event) =>
-      updateFromSource(ctx, new URL(location.href)),
-    )
-    if (shouldCatchLinkClick) document.body.addEventListener('click', click)
+    globalThis.addEventListener('popstate', (event) => updateFromSource(ctx, new URL(location.href)), { signal })
+    if (shouldCatchLinkClick) document.body.addEventListener('click', click, { signal })
 
     return new URL(location.href)
   },
@@ -120,28 +104,18 @@ const createBrowserUrlAtomSettings = (
   },
 })
 
-const settingsAtom = atom<AtomUrlSettings>(
-  createBrowserUrlAtomSettings(),
-  'urlAtom.settingAtom',
-)
+const settingsAtom = atom<AtomUrlSettings>(createBrowserUrlAtomSettings(), 'urlAtom.settingAtom')
 
 export const setupUrlAtomSettings = action(
-  (
-    ctx,
-    init: (ctx: Ctx) => URL,
-    sync: (ctx: Ctx, url: URL, replace?: boolean) => void = noop,
-  ) => {
+  (ctx, init: (ctx: Ctx) => URL, sync: (ctx: Ctx, url: URL, replace?: boolean) => void = noop) => {
     settingsAtom(ctx, { init, sync })
   },
   'urlAtom.setupUrlAtomSettings',
 )
 
-export const setupUrlAtomBrowserSettings = action(
-  (ctx, shouldCatchLinkClick: boolean) => {
-    settingsAtom(ctx, createBrowserUrlAtomSettings(shouldCatchLinkClick))
-  },
-  'urlAtom.setupUrlAtomBrowserSettings',
-)
+export const setupUrlAtomBrowserSettings = action((ctx, shouldCatchLinkClick: boolean) => {
+  settingsAtom(ctx, createBrowserUrlAtomSettings(shouldCatchLinkClick))
+}, 'urlAtom.setupUrlAtomBrowserSettings')
 
 const _urlAtom = atom(null as any as URL, 'urlAtom')
 export const urlAtom: UrlAtom = Object.assign(
@@ -159,24 +133,23 @@ export const urlAtom: UrlAtom = Object.assign(
   _urlAtom,
   {
     settingsAtom,
-    go: action(
-      (ctx, path, replace?: boolean) =>
-        urlAtom(ctx, (url) => new URL(path, url), replace),
-      'urlAtom.go',
-    ),
-    match: (path: string) =>
-      atom(
-        (ctx) => ctx.spy(urlAtom).pathname.startsWith(path),
-        `urlAtom.match#${path}`,
-      ),
+    go: action((ctx, path, replace?: boolean) => urlAtom(ctx, (url) => new URL(path, url), replace), 'urlAtom.go'),
+    match: (path: string) => atom((ctx) => ctx.spy(urlAtom).pathname.startsWith(path), `urlAtom.match#${path}`),
   },
-).pipe(withInit((ctx) => ctx.get(settingsAtom).init(ctx)))
+).pipe(
+  withInit((ctx) => {
+    const controller = new AbortController()
+    const url = ctx.get(settingsAtom).init(ctx, { signal: controller.signal })
+    const un = settingsAtom.onChange(() => {
+      un()
+      controller.abort(toAbortError('urlAtom settings change'))
+    })
+    return url
+  }),
+)
 
 export const searchParamsAtom: SearchParamsAtom = Object.assign(
-  atom(
-    (ctx) => Object.fromEntries(ctx.spy(urlAtom).searchParams),
-    'searchParamsAtom',
-  ),
+  atom((ctx) => Object.fromEntries(ctx.spy(urlAtom).searchParams), 'searchParamsAtom'),
   {
     set: action((ctx, key, value, replace) => {
       const url = ctx.get(urlAtom)
@@ -191,10 +164,7 @@ export const searchParamsAtom: SearchParamsAtom = Object.assign(
       urlAtom(ctx, newUrl, replace)
     }, 'searchParamsAtom._del') satisfies SearchParamsAtom['del'],
     lens: ((key, ...a: Parameters<typeof getSearchParamsOptions>) =>
-      atom(
-        getSearchParamsOptions(...a).parse(),
-        `searchParamsAtom#${a[0]}`,
-      ).pipe(
+      atom(getSearchParamsOptions(...a).parse(), __count('searchParamsAtom')).pipe(
         // TODO
         // @ts-expect-error
         withSearchParamsPersist(key, ...a),
@@ -204,15 +174,13 @@ export const searchParamsAtom: SearchParamsAtom = Object.assign(
 
 const getSearchParamsOptions = (
   ...a:
-    | [
-        parse?: (value?: string) => unknown,
-        serialize?: (value: unknown) => undefined | string,
-      ]
+    | [parse?: (value?: string) => unknown, serialize?: (value: unknown) => undefined | string]
     | [
         options: {
           parse?: (value?: string) => unknown
           serialize?: (value: unknown) => undefined | string
           replace?: boolean
+          path?: string
         },
       ]
 ) => {
@@ -220,20 +188,29 @@ const getSearchParamsOptions = (
     parse = (value = '') => String(value),
     serialize = (value: any) => (value === init ? undefined : String(value)),
     replace,
+    path,
   } = typeof a[0] === 'object'
     ? a[0]
     : {
         parse: a[0],
         serialize: a[1],
         replace: undefined,
+        path: undefined,
       }
   const init = parse()
   return {
     parse,
     serialize,
     replace,
+    path,
   }
 }
+
+const isSubpath = (currentPath: string, targetPath: string) =>
+  !targetPath ||
+  (targetPath[targetPath.length - 1] === '*'
+    ? `${currentPath}/`.startsWith(targetPath.slice(0, -1))
+    : `${currentPath}/` === targetPath)
 
 export function withSearchParamsPersist<T = string>(
   key: string,
@@ -246,34 +223,43 @@ export function withSearchParamsPersist<T = string>(
     parse?: (value?: string) => T
     serialize?: (value: T) => undefined | string
     replace?: boolean
+    path?: string
   },
 ): <A extends Atom<T>>(theAtom: A) => A
 export function withSearchParamsPersist(
   key: string,
   ...a:
-    | [
-        parse?: (value?: string) => unknown,
-        serialize?: (value: unknown) => undefined | string,
-      ]
+    | [parse?: (value?: string) => unknown, serialize?: (value: unknown) => undefined | string]
     | [
         options: {
           parse?: (value?: string) => unknown
-          serialize?: (value: unknown) => undefined | string
+          serialize?: (value?: unknown) => undefined | string
           replace?: boolean
+          path?: string
         },
       ]
 ) {
-  const { parse, serialize, replace } = getSearchParamsOptions(...a)
+  let { parse, serialize, replace, path = '' } = getSearchParamsOptions(...a)
+
+  const pathEnd = path[path.length - 1]
+  if (path && pathEnd !== '/' && pathEnd !== '*') {
+    path += '/'
+  }
 
   return (theAtom: Atom) => {
     const { computer, initState } = theAtom.__reatom
+
     theAtom.pipe(
       withInit((ctx, init) => {
         const sp = ctx.get(searchParamsAtom)
-        return key in sp ? parse(sp[key]) : init(ctx)
+        const currentPath = ctx.get(urlAtom).pathname
+
+        return key in sp && isSubpath(currentPath, path) ? parse(sp[key]) : init(ctx)
       }),
     )
+
     theAtom.__reatom.computer = (ctx, state) => {
+      const currentPath = ctx.get(urlAtom).pathname
       ctx.spy(searchParamsAtom, (next, prev) => {
         if (key in next) {
           if (!prev || prev[key] !== next[key]) {
@@ -281,18 +267,56 @@ export function withSearchParamsPersist(
           }
         } else {
           if (prev && key in prev) {
+            if (isSubpath(currentPath, path)) {
+              const prevState = state as string
+              ctx.schedule(() => {
+                searchParamsAtom.set(ctx, key, prevState, true)
+              }, 0)
+            }
             state = initState(ctx)
           }
         }
       })
-      return computer ? computer(ctx, state) : state
+
+      if (computer) {
+        const { pubs } = ctx.cause
+
+        const isInit = pubs.length === 0
+        const hasOtherDeps = pubs.length > 1
+
+        if (
+          isInit ||
+          (hasOtherDeps &&
+            pubs.some(
+              (pub, i) =>
+                i !== 0 &&
+                !Object.is(
+                  pub.state,
+                  // @ts-expect-error
+                  ctx.get({ __reatom: pub.proto }),
+                ),
+            ))
+        ) {
+          state = computer(ctx, state) as typeof state
+        } else {
+          for (let index = 1; index < pubs.length; index++) {
+            // @ts-expect-error
+            ctx.spy({ __reatom: pubs[index]!.proto })
+          }
+        }
+      }
+
+      return state
     }
+
     theAtom.onChange((ctx, state) => {
-      const value = serialize(state)
-      if (value === undefined) {
-        searchParamsAtom.del(ctx, key, replace)
-      } else {
-        searchParamsAtom.set(ctx, key, value, replace)
+      if (ctx.cause === theAtom.__reatom.patch) {
+        const value = serialize(state)
+        if (value === undefined) {
+          searchParamsAtom.del(ctx, key, replace)
+        } else if (isSubpath(ctx.get(urlAtom).pathname, path)) {
+          searchParamsAtom.set(ctx, key, value, replace)
+        }
       }
       ctx.get(theAtom)
     })

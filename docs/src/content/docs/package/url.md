@@ -28,18 +28,19 @@ There is also `searchParamsAtom` which derives from `urlAtom` and allow you to h
 ```ts
 import { searchParamsAtom } from '@reatom/url'
 
-export const filterAtom = searchParamsAtom.lens('filters')
+export const filtersAtom = searchParamsAtom.lens('filters')
 ```
 
-In the code below `filterAtom` is a mutable atom which changes will be synced with the passed search parameter. If you want to setup the sync for some other atom, you could use `withSearchParamsPersist` decorator.
+In the code below `filtersAtom` is a mutable atom which changes will be synced with the passed search parameter. If you want to setup the sync for some other atom, you could use `withSearchParamsPersist` decorator.
 
 ```ts
 import { reatomNumber } from '@reatom/primitives'
 import { withSearchParamsPersist } from '@reatom/url'
 
-export const pageAtom = reatomNumber(0, 'pageAtom').pipe(
-  withSearchParamsPersist('page', (page = '1') => Number(page)),
-)
+export const pageAtom = reatomNumber(0, 'pageAtom').pipe(withSearchParamsPersist('page', (page = '0') => Number(page)))
+//...
+pageAtom.increment(ctx)
+ctx.get(urlAtom).href // http://example.com/?page=1
 ```
 
 Now you have handy `increment` and `decrement` actions in `pageAtom` and synchronization with "page" search parameter.
@@ -60,6 +61,34 @@ export const filtersAtom = atom<Filters>({}, 'filtersAtom').pipe(
 )
 ```
 
+Another useful option is `path` which put a border to the search parameter application. By default search parameters reads from every url at any path and it changes applied to every url patch. You can change it by providing `path` option.
+
+```ts
+import { searchParamsAtom } from '@reatom/url'
+
+export const filtersAtom = searchParamsAtom.lens('filters', { path: '/list' })
+```
+
+In the code below and filters changes will sync to the url only to the `/list` path.
+
+```ts
+import { searchParamsAtom } from '@reatom/url'
+
+export const filtersAtom = searchParamsAtom.lens('filters', { path: '/list/*' })
+//...
+urlAtom.go('/list')
+filtersAtom(ctx, 'some')
+ctx.get(urlAtom).href // http://example.com/list?filters=some
+
+
+urlAtom.go('/list/123')
+ctx.get(urlAtom).href // http://example.com/list/123?filters=some
+urlAtom.go('/list')
+ctx.get(urlAtom).href // http://example.com/list?filters=some
+```
+
+Now, the filters will persists across the `/list` and `/list/id` paths, which is useful if you have programmable "back" button in your list element interface.
+
 ### Types
 
 Here are the types of the key features.
@@ -79,11 +108,7 @@ export interface SearchParamsAtom extends Atom<Rec<string>> {
   set: Action<[key: string, value: string, replace?: boolean], void>
   del: Action<[key: string, replace?: boolean], void>
   /** create AtomMut which will synced with the specified query parameter */
-  lens<T = string>(
-    key: string,
-    parse?: (value?: string) => T,
-    serialize?: (value: T) => undefined | string,
-  ): AtomMut<T>
+  lens<T = string>(key: string, parse?: (value?: string) => T, serialize?: (value: T) => undefined | string): AtomMut<T>
   /** create AtomMut which will synced with the specified query parameter */
   lens<T = string>(
     key: string,
@@ -91,6 +116,7 @@ export interface SearchParamsAtom extends Atom<Rec<string>> {
       parse?: (value?: string) => T
       serialize?: (value: T) => undefined | string
       replace?: boolean
+      path?: string
     },
   ): AtomMut<T>
 }
@@ -144,8 +170,7 @@ export const RouterSync = () => {
     setupRef.current = true
     urlAtom.settingsAtom(ctx, {
       init: () => new URL(location.href),
-      sync: (_ctx, url, replace) =>
-        navigate(url.pathname + url.search, { replace }),
+      sync: (_ctx, url, replace) => navigate(url.pathname + url.search, { replace }),
     })
     // trigger `onChange` hooks.
     urlAtom(ctx, new URL(location.href))

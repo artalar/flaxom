@@ -209,25 +209,27 @@ type RenderState = JSX.Element & { REATOM_DEPS_CHANGE?: true }
 const isSuspense = (thing: unknown) =>
   thing instanceof Promise || (thing instanceof Error && thing.message.startsWith('Suspense Exception'))
 
-export const reatomComponent = <T>(
-  Component: (props: T & { ctx: CtxRender }) => React.ReactNode,
+export type PropsWithCtx<T = unknown> = T & { ctx: CtxRender }
+
+export const reatomComponent = <T extends object>(
+  Component: (props: PropsWithCtx<T>) => React.ReactNode,
   name?: string,
-): ((props: T) => JSX.Element) => {
+): ((props: T extends PropsWithCtx<infer P> ? P : T) => JSX.Element) => {
   if (name) name = `Component.${name}`
   else name = __count('Component')
 
   let rendering = false
 
   return Object.defineProperty(
-    (props: T) => {
+    (props: T extends PropsWithCtx<infer P> ? P : T) => {
       const { controller, propsAtom, renderAtom } = React.useMemo(() => {
         const controller = new AbortController()
 
-        const propsAtom = atom<T & { ctx: CtxRender }>({} as T & { ctx: CtxRender }, `${name}._propsAtom`)
+        const propsAtom = atom<PropsWithCtx<T>>({} as PropsWithCtx<T>, `${name}._propsAtom`)
 
         const renderAtom = atom((ctx: CtxRender, state?: RenderState): RenderState => {
           const { pubs } = ctx.cause
-          const props = ctx.spy(propsAtom) as T & { ctx: CtxRender }
+          const props = ctx.spy(propsAtom) as PropsWithCtx<T>
 
           if (rendering) {
             const initCtxRef = React.useRef<CtxRender>()
@@ -301,7 +303,7 @@ export const reatomComponent = <T>(
       }, [ctx, renderAtom])
 
       const result = ctx.get(() => {
-        propsAtom(ctx, { ...props } as T & { ctx: CtxRender })
+        propsAtom(ctx, { ...props } as PropsWithCtx<T>)
         try {
           rendering = true
           return ctx.get(renderAtom)

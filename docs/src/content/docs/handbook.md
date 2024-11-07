@@ -106,7 +106,7 @@ In the code above, the update logic for the greeting is in the name update handl
 While this might seem trivial in a small example, it can lead to confusion in real applications with complex code organization and business requirements.
 You might lose track of why one part of the code changes another.
 
-Once again, we are investigating a super simple example because it's short and obvious. In this particular example there is no much sense to refactor anything, but it needed to illustrate the problems in general. That problems becomes fall your code base to a pit of failure during a time and have a huge влияние in general, so it is important to find a pattern to reduce those problems as much as possible. So, it is **the main reason for reactivity: solve state SSoT and a code coupling**.
+Once again, we are investigating a super simple example because it's short and obvious. In this particular example there is no much sense to refactor anything, but it needed to illustrate the problems in general. That problems becomes fall your code base to a pit of failure during a time and have a huge impact in general, so it is important to find a pattern to reduce those problems as much as possible. So, it is **the main reason for reactivity: solve state SSoT and a code coupling**.
 
 Reactive programming can address these issues by accurately describing dependent computations within each domain.
 

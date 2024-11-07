@@ -1,6 +1,6 @@
 {
   "name": "@reatom/persist",
-  "version": "3.4.0",
+  "version": "3.4.1",
   "sideEffects": false,
   "description": "Reatom for persist",
   "source": "src/index.ts",

@@ -1,5 +1,4 @@
-import { test } from 'uvu'
-import * as assert from 'uvu/assert'
+import { test, expect } from 'vitest'
 import { action, atom } from '@reatom/core'
 import { mapPayloadAwaited } from '@reatom/lens'
 import { take } from '@reatom/effects'
@@ -7,19 +6,7 @@ import { onConnect } from '@reatom/hooks'
 import { createTestCtx, mockFn } from '@reatom/testing'
 import { noop, random, sleep } from '@reatom/utils'
 
-import {
-  reatomAsync,
-  withAbort,
-  withDataAtom,
-  withRetry,
-  withErrorAtom,
-} from './'
-
-import './index.story.test'
-import './withCache.test'
-import './withStatusesAtom.test'
-import './mapToAsync.test'
-import './reatomResource.test'
+import { reatomAsync, withAbort, withDataAtom, withRetry, withErrorAtom } from './'
 
 test(`base API`, async () => {
   const fetchData = reatomAsync(async (ctx, v: number) => {
@@ -27,12 +14,11 @@ test(`base API`, async () => {
   }).pipe(withDataAtom(0, (ctx, v) => v))
   const ctx = createTestCtx()
 
-  assert.is(ctx.get(fetchData.dataAtom), 0)
+  expect(ctx.get(fetchData.dataAtom)).toBe(0)
 
   setTimeout(fetchData, 0, ctx, 123)
-  assert.is(await take(ctx, fetchData), 123)
-  assert.is(ctx.get(fetchData.dataAtom), 123)
-  ;`👍` //?
+  expect(await take(ctx, fetchData)).toBe(123)
+  expect(ctx.get(fetchData.dataAtom)).toBe(123)
 })
 
 test('withRetry', async () => {
@@ -50,39 +36,39 @@ test('withRetry', async () => {
 
   const track = ctx.subscribeTrack(fetchData)
 
-  assert.is(track.calls.length, 1)
+  expect(track.calls.length).toBe(1)
 
   fetchData(ctx, 123).catch(noop)
 
-  assert.is(track.calls.length, 2)
+  expect(track.calls.length).toBe(2)
 
   await sleep()
 
-  assert.is(track.calls.length, 4)
-  ;`👍` //?
+  expect(track.calls.length).toBe(4)
 })
 
 test('withRetry fallbackParams', async () => {
   const ctx = createTestCtx()
 
-  assert.throws(() =>
-    reatomAsync(async () => {})
-      .pipe(withRetry())
-      .retry(ctx),
-  )
+  const result = await reatomAsync(async () => {})
+    .pipe(withRetry())
+    .retry(ctx)
+    .catch((error) => error)
 
-  assert.not.throws(() =>
+  expect(result).toBeInstanceOf(Error)
+  expect(result.message).toBe('Reatom error: no cached params')
+
+  expect(() =>
     reatomAsync(async () => {})
       .pipe(withRetry({ fallbackParams: [] }))
       .retry(ctx),
-  )
+  ).not.throws()
 
   const fallback = await reatomAsync(async (ctx, v: number) => v)
     .pipe(withRetry({ fallbackParams: [123] }))
     .retry(ctx)
 
-  assert.is(fallback, 123)
-  ;`👍` //?
+  expect(fallback).toBe(123)
 })
 
 test('withRetry delay', async () => {
@@ -105,14 +91,13 @@ test('withRetry delay', async () => {
   effectTrack.calls.length = 0
 
   fetchData(ctx).catch(noop)
-  assert.is(effectTrack.calls.length, 1)
+  expect(effectTrack.calls.length).toBe(1)
 
   await sleep(30)
 
-  assert.is(onRejectTrack.calls.length, 2)
-  assert.is(effectTrack.calls.length, 2)
-  assert.is(ctx.get(fetchData.retriesAtom), 0)
-  ;`👍` //?
+  expect(onRejectTrack.calls.length).toBe(2)
+  expect(effectTrack.calls.length).toBe(2)
+  expect(ctx.get(fetchData.retriesAtom)).toBe(0)
 })
 
 test('withAbort', async () => {
@@ -123,9 +108,7 @@ test('withAbort', async () => {
 
   const ctx = createTestCtx()
 
-  const valueTrack = ctx.subscribeTrack(
-    a1.pipe(mapPayloadAwaited((ctx, v) => v)),
-  )
+  const valueTrack = ctx.subscribeTrack(a1.pipe(mapPayloadAwaited((ctx, v) => v)))
   const errorTrack = ctx.subscribeTrack(a1.onReject)
   const abortTrack = ctx.subscribeTrack(a1.onAbort)
 
@@ -134,17 +117,16 @@ test('withAbort', async () => {
   abortTrack.calls.length = 0
 
   const promise1 = a1(ctx, 1)
-  assert.equal(abortTrack.calls.length, 0)
+  expect(abortTrack.calls.length).toBe(0)
   const promise2 = a1(ctx, 2)
-  assert.equal(abortTrack.calls.length, 1)
+  expect(abortTrack.calls.length).toBe(1)
 
   await Promise.any([promise1, promise2])
 
-  assert.equal(valueTrack.calls.length, 1)
-  assert.equal(valueTrack.lastInput().at(-1)?.payload, 2)
-  assert.equal(errorTrack.calls.length, 0)
-  assert.equal(abortTrack.calls.length, 1)
-  ;`👍` //?
+  expect(valueTrack.calls.length).toBe(1)
+  expect(valueTrack.lastInput().at(-1)?.payload).toBe(2)
+  expect(errorTrack.calls.length).toBe(0)
+  expect(abortTrack.calls.length).toBe(1)
 })
 
 test('withAbort user abort', async () => {
@@ -165,51 +147,46 @@ test('withAbort user abort', async () => {
 
   const ctx = createTestCtx()
 
-  const valueSubscriber = ctx.subscribeTrack(
-    a1.pipe(mapPayloadAwaited((ctx, v) => v)),
-  )
+  const valueSubscriber = ctx.subscribeTrack(a1.pipe(mapPayloadAwaited((ctx, v) => v)))
   valueSubscriber.calls.length = 0
   const errorSubscriber = ctx.subscribeTrack(a1.onReject)
   errorSubscriber.calls.length = 0
 
   await a1(ctx)
 
-  assert.equal(valueSubscriber.lastInput().at(-1)?.payload, result)
+  expect(valueSubscriber.lastInput().at(-1)?.payload).toBe(result)
 
   shouldAbort = true
   const isError = await a1(ctx).then(
     () => false,
     () => true,
   )
-  assert.is(isError, true)
-  assert.is(valueSubscriber.calls.length, 1)
-  assert.is(errorSubscriber.calls.length, 0)
+  expect(isError).toBe(true)
+  expect(valueSubscriber.calls.length).toBe(1)
+  expect(errorSubscriber.calls.length).toBe(0)
 
   shouldAbort = false
   shouldThrow = true
   await a1(ctx).catch(noop)
-  assert.is(valueSubscriber.calls.length, 1)
-  assert.is(errorSubscriber.calls.length, 1)
-  assert.is(errorSubscriber.lastInput().at(-1)?.payload, error)
-  ;`👍` //?
+  expect(valueSubscriber.calls.length).toBe(1)
+  expect(errorSubscriber.calls.length).toBe(1)
+  expect(errorSubscriber.lastInput().at(-1)?.payload).toBe(error)
 })
 
 test('withAbort and real fetch', async () => {
   const handleError = mockFn((e) => {
     throw e
   })
-  const fetchData = reatomAsync((ctx) =>
-    fetch('https://www.google.ru/404', ctx.controller).catch(handleError),
-  ).pipe(withAbort())
+  const fetchData = reatomAsync((ctx) => fetch('https://www.google.ru/404', ctx.controller).catch(handleError)).pipe(
+    withAbort(),
+  )
 
   const ctx = createTestCtx()
 
-  const cb = ctx.subscribeTrack(
-    fetchData.pipe(mapPayloadAwaited((ctx, resp) => resp.status)),
-  )
+  const cb = ctx.subscribeTrack(fetchData.pipe(mapPayloadAwaited((ctx, resp) => resp.status)))
 
-  assert.is(cb.calls.length, 1)
-  assert.is(handleError.calls.length, 0)
+  expect(cb.calls.length).toBe(1)
+  expect(handleError.calls.length).toBe(0)
 
   fetchData(ctx).catch(noop)
   await sleep()
@@ -219,24 +196,21 @@ test('withAbort and real fetch', async () => {
 
   await take(ctx, fetchData.onFulfill)
 
-  assert.is(cb.calls.length, 2)
-  assert.is(cb.lastInput().at(-1)?.payload, 404)
-  assert.is(handleError.calls.length, 2)
-  assert.ok(handleError.calls.every(({ o }: any) => o.name === 'AbortError'))
-  ;`👍` //?
+  expect(cb.calls.length).toBe(2)
+  expect(cb.lastInput().at(-1)?.payload).toBe(404)
+  expect(handleError.calls.length).toBe(2)
+  expect(handleError.calls.every(({ o }: any) => o.name === 'AbortError')).toBeTruthy()
 })
 
 test('withAbort strategy first-in-win', async () => {
   const anAsync = reatomAsync(async (ctx, v: number) => {
     await ctx.schedule(() => sleep())
     return v
-  }).pipe(withAbort({strategy: 'first-in-win'}))
+  }).pipe(withAbort({ strategy: 'first-in-win' }))
 
   const ctx = createTestCtx()
 
-  const valueTrack = ctx.subscribeTrack(
-    anAsync.pipe(mapPayloadAwaited((ctx, v) => v)),
-  )
+  const valueTrack = ctx.subscribeTrack(anAsync.pipe(mapPayloadAwaited((ctx, v) => v)))
   const errorTrack = ctx.subscribeTrack(anAsync.onReject)
   const abortTrack = ctx.subscribeTrack(anAsync.onAbort)
 
@@ -245,21 +219,20 @@ test('withAbort strategy first-in-win', async () => {
   abortTrack.calls.length = 0
 
   const promise1 = anAsync(ctx, 1)
-  assert.is(abortTrack.calls.length, 0)
-  assert.is(ctx.get(anAsync.pendingAtom), 1)
+  expect(abortTrack.calls.length).toBe(0)
+  expect(ctx.get(anAsync.pendingAtom)).toBe(1)
   const promise2 = anAsync(ctx, 2)
-  assert.is(abortTrack.calls.length, 1, 'abortTrack')
+  expect(abortTrack.calls.length).toBe(1)
   // wait the promise fail handling
   await null
-  assert.is(ctx.get(anAsync.pendingAtom), 1, 'pending')
+  expect(ctx.get(anAsync.pendingAtom)).toBe(1)
 
   await Promise.any([promise1, promise2])
 
-  assert.is(valueTrack.calls.length, 1)
-  assert.is(valueTrack.lastInput().at(-1)?.payload, 1)
-  assert.is(errorTrack.calls.length, 0)
-  assert.is(abortTrack.calls.length, 1)
-  ;`👍` //?
+  expect(valueTrack.calls.length).toBe(1)
+  expect(valueTrack.lastInput().at(-1)?.payload).toBe(1)
+  expect(errorTrack.calls.length).toBe(0)
+  expect(abortTrack.calls.length).toBe(1)
 })
 
 test('hooks', async () => {
@@ -281,51 +254,43 @@ test('hooks', async () => {
   )
   const ctx = createTestCtx()
 
-  assert.equal([onEffect, onFulfill, onReject, onSettle], [0, 0, 0, 0])
+  expect([onEffect, onFulfill, onReject, onSettle]).toEqual([0, 0, 0, 0])
 
   const promise1 = effect(ctx, 1)
-  assert.equal([onEffect, onFulfill, onReject, onSettle], [1, 0, 0, 0])
+  expect([onEffect, onFulfill, onReject, onSettle]).toEqual([1, 0, 0, 0])
 
   await promise1
-  assert.equal([onEffect, onFulfill, onReject, onSettle], [1, 1, 0, 1])
+  expect([onEffect, onFulfill, onReject, onSettle]).toEqual([1, 1, 0, 1])
 
   const promise2 = effect(ctx, 0)
-  assert.equal([onEffect, onFulfill, onReject, onSettle], [2, 1, 0, 1])
+  expect([onEffect, onFulfill, onReject, onSettle]).toEqual([2, 1, 0, 1])
   await promise2.catch(noop)
-  assert.equal([onEffect, onFulfill, onReject, onSettle], [2, 1, 1, 2])
-  ;`👍` //?
+  expect([onEffect, onFulfill, onReject, onSettle]).toEqual([2, 1, 1, 2])
 })
 
 test('onConnect', async () => {
-  const fetchData = reatomAsync(async (ctx, payload: number) => payload).pipe(
-    withDataAtom(0),
-  )
+  const fetchData = reatomAsync(async (ctx, payload: number) => payload).pipe(withDataAtom(0))
   const ctx = createTestCtx()
   onConnect(fetchData.dataAtom, (ctx) => fetchData(ctx, 123))
   const track = ctx.subscribeTrack(fetchData.dataAtom)
 
   await sleep()
-  assert.is(track.lastInput(), 123)
-  ;`👍` //?
+  expect(track.lastInput()).toBe(123)
 })
 
 test('withErrorAtom resetTrigger', async () => {
   const effect = reatomAsync(async () => {
     if (1) throw 42
     return 42
-  }).pipe(
-    withDataAtom(),
-    withErrorAtom(undefined, { resetTrigger: 'dataAtom' }),
-  )
+  }).pipe(withDataAtom(), withErrorAtom(undefined, { resetTrigger: 'dataAtom' }))
   const ctx = createTestCtx()
 
   await effect(ctx).catch(noop)
 
-  assert.is(ctx.get(effect.errorAtom)?.message, '42')
+  expect(ctx.get(effect.errorAtom)?.message).toBe('42')
 
   effect.dataAtom(ctx, 42)
-  assert.is(ctx.get(effect.errorAtom), undefined)
-  ;`👍` //?
+  expect(ctx.get(effect.errorAtom)).toBe(undefined)
 })
 
 test('withErrorAtom should be computed first', async () => {
@@ -344,8 +309,7 @@ test('withErrorAtom should be computed first', async () => {
   const ctx = createTestCtx()
 
   await effect(ctx).catch(noop)
-  assert.is(error, 42)
-  ;`👍` //?
+  expect(error).toBe(42)
 })
 
 test('withErrorAtom initState', async () => {
@@ -356,14 +320,13 @@ test('withErrorAtom initState', async () => {
   }).pipe(withErrorAtom((ctx, e: any) => new Error(e), { initState: 'test' }))
   const ctx = createTestCtx()
 
-  assert.is(ctx.get(effect.errorAtom), 'test')
+  expect(ctx.get(effect.errorAtom)).toBe('test')
 
   await effect(ctx).catch(noop)
-  assert.instance(ctx.get(effect.errorAtom), Error)
+  expect(ctx.get(effect.errorAtom)).instanceOf
 
   effect.errorAtom.reset(ctx)
-  assert.is(ctx.get(effect.errorAtom), 'test')
-  ;`👍` //?
+  expect(ctx.get(effect.errorAtom)).toBe('test')
 })
 
 test('nested abort', async () => {
@@ -381,21 +344,20 @@ test('nested abort', async () => {
   do3(ctx).catch(() => {
     thrown = true
   })
-  assert.is(result, false)
+  expect(result).toBe(false)
   await sleep()
-  assert.is(result, true)
-  assert.is(thrown, false)
+  expect(result).toBe(true)
+  expect(thrown).toBe(false)
 
   result = false
   do3(ctx).catch(() => {
     thrown = true
   })
   do3.abort(ctx)
-  assert.is(result, false)
+  expect(result).toBe(false)
   await sleep()
-  assert.is(result, false)
-  assert.is(thrown, true)
-  ;`👍` //?
+  expect(result).toBe(false)
+  expect(thrown).toBe(true)
 })
 
 test('onConnect and take', async () => {
@@ -413,7 +375,7 @@ test('onConnect and take', async () => {
   const track = ctx.subscribeTrack(res)
   act(ctx)
   await sleep()
-  assert.is(ctx.get(res), true)
+  expect(ctx.get(res)).toBe(true)
 
   res(ctx, false)
   track.unsubscribe()
@@ -421,8 +383,7 @@ test('onConnect and take', async () => {
   ctx.subscribeTrack(res).unsubscribe()
   act(ctx)
   await sleep()
-  assert.is(ctx.get(res), false)
-  ;`👍` //?
+  expect(ctx.get(res)).toBe(false)
 })
 
 test('handle error correctly', async () => {
@@ -434,9 +395,8 @@ test('handle error correctly', async () => {
   })
   const ctx = createTestCtx()
 
-  assert.is(await doSome(ctx).catch((e: Error) => e.message), 'test error')
-  assert.is(await doSomeAsync(ctx).catch((e: Error) => e.message), 'test error')
-  ;`👍` //?
+  expect(await doSome(ctx).catch((e: Error) => e.message)).toBe('test error')
+  expect(await doSomeAsync(ctx).catch((e: Error) => e.message)).toBe('test error')
 })
 
 test('withRetry abort', async () => {
@@ -453,16 +413,15 @@ test('withRetry abort', async () => {
   const ctx = createTestCtx()
 
   const track = ctx.subscribeTrack(effect)
-  assert.is(ctx.get(effect.pendingAtom), 1)
-  assert.is(ctx.get(effect.retriesAtom), 0)
+  expect(ctx.get(effect.pendingAtom)).toBe(1)
+  expect(ctx.get(effect.retriesAtom)).toBe(0)
   await sleep(10)
-  assert.is(ctx.get(effect.pendingAtom), 0)
-  assert.ok(ctx.get(effect.retriesAtom) > 2)
+  expect(ctx.get(effect.pendingAtom)).toBe(0)
+  expect(ctx.get(effect.retriesAtom) > 2).toBeTruthy()
 
   track.unsubscribe()
   await sleep(10)
-  assert.is(ctx.get(effect.pendingAtom) + ctx.get(effect.retriesAtom), 0)
-  ;`👍` //?
+  expect(ctx.get(effect.pendingAtom) + ctx.get(effect.retriesAtom)).toBe(0)
 })
 
 test('withAbort + withRetry', async () => {
@@ -483,8 +442,5 @@ test('withAbort + withRetry', async () => {
   await sleep(10)
 
   setTimeout(() => track.unsubscribe())
-  assert.ok(track.calls.length > 2)
-  ;`👍` //?
+  expect(track.calls.length > 2).toBeTruthy()
 })
-
-test.run()

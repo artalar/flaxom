@@ -1,13 +1,11 @@
-import { suite } from 'uvu'
-import * as assert from 'uvu/assert'
+import { test, expect } from 'vitest'
 import { createTestCtx, mockFn } from '@reatom/testing'
 import { atom } from '@reatom/core'
 import { noop, sleep } from '@reatom/utils'
 import { isConnected, onConnect, onDisconnect } from '@reatom/hooks'
 import { reatomAsync, withAbort, withCache, withDataAtom, withErrorAtom, withRetry } from '.'
 import { reatomResource } from './reatomResource'
-
-export const test = suite('reatomResource')
+import { take } from '@reatom/effects'
 
 test('base', async () => {
   const paramsAtom = atom(0, 'paramsAtom')
@@ -25,15 +23,15 @@ test('base', async () => {
 
   ctx.subscribe(async2, (p) => p.then(track, noop))
   await sleep()
-  assert.is(track.calls.length, 1)
-  assert.is(track.lastInput(), 0)
+  expect(track.calls.length).toBe(1)
+  expect(track.lastInput()).toBe(0)
 
   paramsAtom(ctx, 1)
   paramsAtom(ctx, 2)
   paramsAtom(ctx, 3)
   await sleep()
-  assert.is(track.lastInput(), 3)
-  assert.is(track.calls.length, 2)
+  expect(track.lastInput()).toBe(3)
+  expect(track.calls.length).toBe(2)
 })
 
 test('withCache', async () => {
@@ -53,30 +51,30 @@ test('withCache', async () => {
 
   ctx.subscribe(bAtom.promiseAtom, (p) => p.then(track, noop))
   await sleep()
-  assert.is(track.calls.length, 1)
-  assert.is(track.lastInput(), 0)
+  expect(track.calls.length).toBe(1)
+  expect(track.lastInput()).toBe(0)
 
   paramsAtom(ctx, 1)
   paramsAtom(ctx, 2)
   paramsAtom(ctx, 3)
   await sleep()
-  assert.is(track.lastInput(), 3)
-  assert.is(track.calls.length, 2)
-  assert.is(sleepTrack.calls.length, 4)
+  expect(track.lastInput()).toBe(3)
+  expect(track.calls.length).toBe(2)
+  expect(sleepTrack.calls.length).toBe(4)
 
   paramsAtom(ctx, 1)
   paramsAtom(ctx, 2)
   await sleep()
-  assert.is(track.lastInput(), 3)
-  assert.is(track.calls.length, 2)
-  assert.is(sleepTrack.calls.length, 4)
+  expect(track.lastInput()).toBe(3)
+  expect(track.calls.length).toBe(2)
+  expect(sleepTrack.calls.length).toBe(4)
 
   paramsAtom(ctx, 1)
   paramsAtom(ctx, 2)
   await sleep()
-  assert.is(track.lastInput(), 3)
-  assert.is(track.calls.length, 2)
-  assert.is(sleepTrack.calls.length, 4)
+  expect(track.lastInput()).toBe(3)
+  expect(track.calls.length).toBe(2)
+  expect(sleepTrack.calls.length).toBe(4)
 })
 
 test('controller', async () => {
@@ -95,20 +93,20 @@ test('controller', async () => {
 
   ctx.subscribeTrack(someResource.promiseAtom)
   await sleep()
-  assert.is(controllerTrack.calls.length, 0)
-  assert.not.ok(collision)
+  expect(controllerTrack.calls.length).toBe(0)
+  expect(collision).toBeFalsy()
 
   paramsAtom(ctx, 1)
-  assert.is(controllerTrack.calls.length, 1)
+  expect(controllerTrack.calls.length).toBe(1)
   await sleep()
-  assert.is(controllerTrack.calls.length, 1)
-  assert.not.ok(collision)
+  expect(controllerTrack.calls.length).toBe(1)
+  expect(collision).toBeFalsy()
   paramsAtom(ctx, 2)
   paramsAtom(ctx, 3)
-  assert.is(controllerTrack.calls.length, 3)
+  expect(controllerTrack.calls.length).toBe(3)
   await sleep()
-  assert.is(controllerTrack.calls.length, 3)
-  assert.not.ok(collision)
+  expect(controllerTrack.calls.length).toBe(3)
+  expect(collision).toBeFalsy()
 })
 
 test('withDataAtom', async () => {
@@ -120,20 +118,20 @@ test('withDataAtom', async () => {
   }, 'someResource').pipe(withDataAtom(0))
   const ctx = createTestCtx()
 
-  assert.not.ok(isConnected(ctx, paramsAtom))
+  expect(isConnected(ctx, paramsAtom)).toBeFalsy()
   const un = ctx.subscribe(someResource.dataAtom, noop)
-  assert.ok(isConnected(ctx, paramsAtom))
+  expect(isConnected(ctx, paramsAtom)).toBeTruthy()
   un()
-  assert.not.ok(isConnected(ctx, paramsAtom))
+  expect(isConnected(ctx, paramsAtom)).toBeFalsy()
 })
 
 test('withErrorAtom withRetry', async () => {
-  let throwOnce = true
-  const paramsAtom = atom(123, 'paramsAtom')
+  let shouldThrow = true
+  const paramsAtom = atom(1, 'paramsAtom')
   const someResource = reatomResource(async (ctx) => {
     const params = ctx.spy(paramsAtom)
-    if (throwOnce) {
-      throwOnce = false
+    await sleep()
+    if (shouldThrow) {
       throw new Error('test error')
     }
     await ctx.schedule(() => sleep())
@@ -145,22 +143,32 @@ test('withErrorAtom withRetry', async () => {
     }),
     withRetry({
       onReject(ctx, error, retries) {
-        if (retries === 0) return 0
+        if (retries === 0) return 10
       },
     }),
   )
   const ctx = createTestCtx()
 
+  const retriesTrack = ctx.subscribeTrack(someResource.retriesAtom)
   ctx.subscribeTrack(someResource.dataAtom)
-  await sleep()
-  assert.is(ctx.get(someResource.dataAtom), 0)
-  assert.is(ctx.get(someResource.errorAtom)?.message, 'test error')
-  assert.is(ctx.get(someResource.pendingAtom), 1)
+  await ctx.get(someResource.promiseAtom).catch(noop)
+  expect(ctx.get(someResource.pendingAtom)).toBe(0)
+  expect(ctx.get(someResource.dataAtom)).toBe(0)
+  expect(ctx.get(someResource.errorAtom)?.message).toBe('test error')
+  expect(retriesTrack.inputs()).toEqual([0, 1])
 
-  await sleep()
-  assert.is(ctx.get(someResource.dataAtom), 123)
-  assert.is(ctx.get(someResource.errorAtom), undefined)
-  assert.is(ctx.get(someResource.pendingAtom), 0)
+  await take(ctx, someResource.pendingAtom)
+  expect(ctx.get(someResource.pendingAtom)).toBe(1)
+  expect(ctx.get(someResource.dataAtom)).toBe(0)
+  expect(ctx.get(someResource.errorAtom)?.message).toBe('test error')
+  expect(retriesTrack.inputs()).toEqual([0, 1])
+
+  shouldThrow = false
+  await take(ctx, someResource.pendingAtom)
+  expect(ctx.get(someResource.pendingAtom)).toBe(0)
+  expect(ctx.get(someResource.dataAtom)).toBe(1)
+  expect(ctx.get(someResource.errorAtom)?.message).toBe(undefined)
+  expect(retriesTrack.inputs()).toEqual([0, 1, 0])
 })
 
 test('abort should not stale', async () => {
@@ -176,7 +184,7 @@ test('abort should not stale', async () => {
   ctx.subscribe(someResource.dataAtom, noop)
 
   await sleep()
-  assert.is(ctx.get(someResource.dataAtom), 123)
+  expect(ctx.get(someResource.dataAtom)).toBe(123)
 })
 
 test('direct retry', async () => {
@@ -191,12 +199,12 @@ test('direct retry', async () => {
   ctx.get(someResource.promiseAtom)
   ctx.get(someResource.promiseAtom)
   ctx.get(someResource.promiseAtom)
-  assert.is(calls, 1)
+  expect(calls).toBe(1)
 
   someResource(ctx)
-  assert.is(calls, 2)
+  expect(calls).toBe(2)
   ctx.get(someResource.promiseAtom)
-  assert.is(calls, 2)
+  expect(calls).toBe(2)
 })
 
 test('withCache stale abort', async () => {
@@ -209,7 +217,25 @@ test('withCache stale abort', async () => {
   ctx.subscribe(someResource.dataAtom, noop)()
   ctx.subscribe(someResource.dataAtom, noop)
   await sleep()
-  assert.is(ctx.get(someResource.dataAtom), 1)
+  expect(ctx.get(someResource.dataAtom)).toBe(1)
+})
+
+test('withCache stale invalidation', async () => {
+  const ctx = createTestCtx()
+  const someResource = reatomResource(async (ctx): Promise<number> => {
+    return ctx.get(someResource.dataAtom) + 1
+  }, 'someResource').pipe(withDataAtom(0), withCache({ staleTime: 1 }))
+
+  ctx.subscribeTrack(someResource)
+  await sleep(10)
+  expect(ctx.get(someResource.dataAtom)).toBe(1)
+  expect(ctx.get(someResource.cacheAtom).size).toBe(0)
+
+  someResource.cacheAtom.invalidate(ctx)
+  expect(ctx.get(someResource.pendingAtom)).toBe(1)
+  await sleep()
+  expect(ctx.get(someResource.pendingAtom)).toBe(0)
+  expect(ctx.get(someResource.dataAtom)).toBe(2)
 })
 
 test('do not rerun without deps on read', async () => {
@@ -222,10 +248,10 @@ test('do not rerun without deps on read', async () => {
 
   ctx.get(someResource.promiseAtom)
   ctx.get(someResource.promiseAtom)
-  assert.is(i, 1)
+  expect(i).toBe(1)
 
   someResource(ctx)
-  assert.is(i, 2)
+  expect(i).toBe(2)
 })
 
 test('sync retry in onConnect', async () => {
@@ -246,7 +272,7 @@ test('sync retry in onConnect', async () => {
   await sleep()
   await sleep()
   track.unsubscribe()
-  assert.ok(ctx.get(getEventsSoon.dataAtom) > 1)
+  expect(ctx.get(getEventsSoon.dataAtom) > 1).toBeTruthy()
 })
 
 test('do not drop the cache of an error', async () => {
@@ -260,16 +286,16 @@ test('do not drop the cache of an error', async () => {
   const ctx = createTestCtx()
 
   const track = ctx.subscribeTrack(someResource.promiseAtom)
-  assert.is(calls, 1)
+  expect(calls).toBe(1)
 
   await sleep()
   track.unsubscribe()
   ctx.get(someResource.promiseAtom)
-  assert.is(calls, 1)
+  expect(calls).toBe(1)
 
   shouldThrowAtom(ctx, false)
   ctx.get(someResource.promiseAtom)
-  assert.is(calls, 2)
+  expect(calls).toBe(2)
 })
 
 test('reset', async () => {
@@ -281,18 +307,18 @@ test('reset', async () => {
   }, 'someResource')
   onDisconnect(someResource, someResource.reset)
 
-  assert.is(typeof someResource.reset, 'function')
+  expect(typeof someResource.reset).toBe('function')
 
   const track = ctx.subscribeTrack(someResource.pendingAtom)
-  assert.is(i, 1)
+  expect(i).toBe(1)
   await sleep()
   ctx.get(someResource.promiseAtom)
-  assert.is(i, 1)
+  expect(i).toBe(1)
 
   track.unsubscribe()
-  assert.is(i, 1)
+  expect(i).toBe(1)
   ctx.get(someResource.promiseAtom)
-  assert.is(i, 2)
+  expect(i).toBe(2)
 })
 
 test('ignore abort if a subscribers exists', async () => {
@@ -306,12 +332,10 @@ test('ignore abort if a subscribers exists', async () => {
   const track = ctx.subscribeTrack(res.dataAtom)
 
   await sleep()
-  assert.is(track.lastInput(), 1)
+  expect(track.lastInput()).toBe(1)
 
   call(ctx)
   call.abort(ctx)
   await sleep()
-  assert.is(track.lastInput(), 2)
+  expect(track.lastInput()).toBe(2)
 })
-
-test.run()

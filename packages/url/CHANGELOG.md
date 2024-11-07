@@ -1,5 +1,27 @@
 # Changelog
 
+## [3.8.0](https://github.com/artalar/reatom/compare/url-v3.7.5...url-v3.8.0) (2024-11-05)
+
+
+### Features
+
+* **url:** add subpath parameter ([#945](https://github.com/artalar/reatom/issues/945)) ([e9d882d](https://github.com/artalar/reatom/commit/e9d882d0749b5aa82a4732d3d02fbd8d65254883))
+* **url:** path instead of path ([526f9a7](https://github.com/artalar/reatom/commit/526f9a73d4f5a4b738a6cb049f616ca4ce79fc03))
+
+## [3.7.5](https://github.com/artalar/reatom/compare/url-v3.7.4...url-v3.7.5) (2024-10-11)
+
+
+### Bug Fixes
+
+* **url:** setting reinitialization ([742b303](https://github.com/artalar/reatom/commit/742b30370ba86bed048ecbd9fddf4c02242cd2fe))
+
+## [3.7.4](https://github.com/artalar/reatom/compare/url-v3.7.3...url-v3.7.4) (2024-10-08)
+
+
+### Bug Fixes
+
+* **url:** computed handling ([80bb777](https://github.com/artalar/reatom/commit/80bb777215842684cefbf0cc5bbbd5bd2ab791e0))
+
 ## [3.7.3](https://github.com/artalar/reatom/compare/url-v3.7.2...url-v3.7.3) (2024-06-22)
 
 

@@ -1,6 +1,6 @@
 {
   "name": "@reatom/devtools",
-  "version": "0.3.0",
+  "version": "0.7.0",
   "description": "Reatom developer tools for states and actions inspecting",
   "type": "module",
   "private": false,
@@ -54,7 +54,8 @@
   ],
   "devDependencies": {
     "@observablehq/inspector": "^5.0.0",
-    "@reatom/core": ">=3.8.1",
-    "@reatom/jsx": "^3.11.0"
+    "@reatom/framework": "latest",
+    "@reatom/jsx": "latest",
+    "zod": "^3.23.8"
   }
 }

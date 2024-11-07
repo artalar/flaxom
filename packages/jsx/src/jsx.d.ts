@@ -51,7 +51,17 @@ export namespace JSX {
     [css: `css:${string}`]: string | number | false | null | undefined
   }
 
-  interface EventHandler<T, E extends Event = Event> {
+  interface EventHandler<T extends Element = Element, E extends Event = Event> {
+    (
+      ctx: Ctx,
+      e: E & {
+        currentTarget: T
+        target: Element
+      },
+    ): void
+  }
+
+  interface MouseEventHandler<T extends Element = Element, E extends MouseEvent = MouseEvent> {
     (
       ctx: Ctx,
       e: E & {
@@ -660,10 +670,12 @@ export namespace JSX {
     // [key: ClassKeys]: boolean;
     accessKey?: string
     class?: string | undefined
+    /** Alias for `class`. */
+    className?: string | undefined
     contenteditable?: boolean | 'plaintext-only' | 'inherit'
     contextmenu?: string
     dir?: HTMLDir
-    draggable?: boolean | 'false' | 'true'
+    draggable?: 'false' | 'true'
     hidden?: boolean | 'hidden' | 'until-found'
     id?: string
     inert?: boolean
@@ -1169,6 +1181,8 @@ export namespace JSX {
   }
   interface StylableSVGAttributes extends CssAttributes {
     class?: string | undefined
+    /** Alias for `class`. */
+    className?: string | undefined
     style?: CSSProperties | string
   }
   interface TransformableSVGAttributes {
@@ -2072,7 +2086,7 @@ export namespace JSX {
     section: HTMLAttributes<HTMLElementTagNameMap['section']>
     select: SelectHTMLAttributes<HTMLElementTagNameMap['select']>
     slot: HTMLSlotElementAttributes
-HTMLElementTagNameMap: HTMLAttributes<HTMLElementTagNameMap['HTMLElementTagNameMap']>
+    HTMLElementTagNameMap: HTMLAttributes<HTMLElementTagNameMap['HTMLElementTagNameMap']>
     source: SourceHTMLAttributes<HTMLElementTagNameMap['source']>
     span: HTMLAttributes<HTMLElementTagNameMap['span']>
     strong: HTMLAttributes<HTMLElementTagNameMap['strong']>

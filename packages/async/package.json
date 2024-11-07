@@ -1,6 +1,6 @@
 {
   "name": "@reatom/async",
-  "version": "3.16.1",
+  "version": "3.16.3",
   "private": false,
   "sideEffects": false,
   "description": "Reatom for async",
@@ -22,15 +22,15 @@
   "scripts": {
     "prepublishOnly": "npm run build && npm run test",
     "build": "microbundle -f esm,cjs",
-    "test": "ts-node src/index.test.ts",
-    "test:watch": "tsx watch src/index.test.ts"
+    "test": "vitest run src/*.test.ts",
+    "test:watch": "vitest src/*.test.ts"
   },
   "dependencies": {
     "@reatom/core": "^3.5.0",
-    "@reatom/effects": "^3.7.0",
+    "@reatom/effects": "^3.10.0",
     "@reatom/hooks": "^3.2.0",
     "@reatom/primitives": "^3.5.0",
-    "@reatom/utils": "^3.4.0"
+    "@reatom/utils": "^3.11.0"
   },
   "devDependencies": {
     "@reatom/persist": "^3.1.0"

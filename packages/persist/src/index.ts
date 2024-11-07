@@ -1,5 +1,6 @@
 import {
   __root,
+  Action,
   atom,
   Atom,
   AtomCache,
@@ -99,7 +100,9 @@ export const reatomPersist = (
         version = 0,
       }: WithPersistOptions<AtomState<T>> = typeof options === 'string' ? { key: options } : options
       const proto = anAtom.__reatom
-      const { initState } = proto
+      const { initState, isAction } = proto
+
+      throwReatomError(isAction, 'cannot apply persist to an action')
 
       const getPersistRecord = (ctx: Ctx, state: PersistRecord | null = null) => {
         const rec = ctx.get(storageAtom).get(ctx, key)
@@ -135,7 +138,35 @@ export const reatomPersist = (
             state = fromPersistRecord(ctx, rec, state)
           })
 
-          return computer ? computer(ctx, state) : state
+          if (computer) {
+            const { pubs } = ctx.cause
+
+            const isInit = pubs.length === 0
+            const hasOtherDeps = pubs.length > 1
+
+            if (
+              isInit ||
+              (hasOtherDeps &&
+                pubs.some(
+                  (pub, i) =>
+                    i !== 0 &&
+                    !Object.is(
+                      pub.state,
+                      // @ts-expect-error
+                      ctx.get({ __reatom: pub.proto }),
+                    ),
+                ))
+            ) {
+              state = computer(ctx, state) as typeof state
+            } else {
+              for (let index = 1; index < pubs.length; index++) {
+                // @ts-expect-error
+                ctx.spy({ __reatom: pubs[index]!.proto })
+              }
+            }
+          }
+
+          return state
         }
 
         onConnect(

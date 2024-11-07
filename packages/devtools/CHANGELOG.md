@@ -1,5 +1,87 @@
 # Changelog
 
+## [0.7.0](https://github.com/artalar/reatom/compare/devtools-v0.6.2...devtools-v0.7.0) (2024-10-31)
+
+
+### Features
+
+* **devtools:** add size limit ([d4045a5](https://github.com/artalar/reatom/commit/d4045a5bcda25b17ec00f2e298d6534af973419e))
+* **devtools:** search box ([6d0fc98](https://github.com/artalar/reatom/commit/6d0fc98b8c34c3d1b07f647d7a81b9ebb3fc367a))
+
+
+### Bug Fixes
+
+* **devtools:** defaults ([280beb3](https://github.com/artalar/reatom/commit/280beb398cb7e0a778a14eea195ce81dc4be9b3d))
+
+## [0.6.2](https://github.com/artalar/reatom/compare/devtools-v0.6.1...devtools-v0.6.2) (2024-10-14)
+
+
+### Bug Fixes
+
+* **devtools:** perf optimizations ([042a77c](https://github.com/artalar/reatom/commit/042a77cc1399bf0abc32489371c1ee2cd7ca5027))
+* **devtools:** remove log ([24d6146](https://github.com/artalar/reatom/commit/24d61463a329e343ab467dc20f92539933853a66))
+
+## [0.6.1](https://github.com/artalar/reatom/compare/devtools-v0.6.0...devtools-v0.6.1) (2024-10-11)
+
+
+### Bug Fixes
+
+* **devtools:** restore missed styles ([4e81a31](https://github.com/artalar/reatom/commit/4e81a318d7cea0fd01c1d770edd720db4c2c5ace))
+
+## [0.6.0](https://github.com/artalar/reatom/compare/devtools-v0.5.0...devtools-v0.6.0) (2024-10-11)
+
+
+### Features
+
+* **devtools:** foldable actions and filters ([9442e27](https://github.com/artalar/reatom/commit/9442e27b73bc6e50919b019d5bf9abca4e7986fb))
+* **devtools:** foldable actions and filters ([fc76711](https://github.com/artalar/reatom/commit/fc76711714f6a8e729712fdb81b9fbf5f844842d))
+
+
+### Bug Fixes
+
+* **devtools:** cause lines dependencies ([0d46dd0](https://github.com/artalar/reatom/commit/0d46dd07491bd724900322811eb58c0f2c179bd2))
+* **devtools:** increase lines gap ([dc8407d](https://github.com/artalar/reatom/commit/dc8407d85c464ec845b5d25fdfdbfaa013a29bc1))
+
+## [0.5.0](https://github.com/artalar/reatom/compare/devtools-v0.4.1...devtools-v0.5.0) (2024-10-10)
+
+
+### Features
+
+* **devtools:** highlight color selector ([eacdb02](https://github.com/artalar/reatom/commit/eacdb020f7fbd2b37ebdfe6606ff4d4d6166090f))
+
+
+### Bug Fixes
+
+* **devtools:** improve styles and small other fixes ([eea2edb](https://github.com/artalar/reatom/commit/eea2edb64e1e50dfc73ba950f0bca8ef38fb135e))
+* **devtools:** lines drawing ([d5a6283](https://github.com/artalar/reatom/commit/d5a62838ee7861a07c2a3554e37c0fe5b58a416e))
+* **devtools:** reset styles on root ([1c36410](https://github.com/artalar/reatom/commit/1c36410962bcc075927319e6f5e3cffcca591f4c))
+
+## [0.4.1](https://github.com/artalar/reatom/compare/devtools-v0.4.0...devtools-v0.4.1) (2024-10-09)
+
+
+### Bug Fixes
+
+* **devtools:** timestamps and sticky scroll ([631d096](https://github.com/artalar/reatom/commit/631d096a6740acc8ce5958a5ccf8dcb445ef8cdd))
+
+## [0.4.0](https://github.com/artalar/reatom/compare/devtools-v0.3.0...devtools-v0.4.0) (2024-10-08)
+
+
+### Features
+
+* **devtools:** add graph view ([3b5a3d7](https://github.com/artalar/reatom/commit/3b5a3d71f8e98ea0760399935deae1f93c6fa973))
+* **devtools:** connectDevtools returns log function ([ea8194b](https://github.com/artalar/reatom/commit/ea8194b0d865677357272b9273434be490dce039))
+* **devtools:** exclude filters ([873df31](https://github.com/artalar/reatom/commit/873df31389050a2f160733a42b87bf31988c78a0))
+* **devtools:** graph view ([95b55f8](https://github.com/artalar/reatom/commit/95b55f8133c14d68c43707361caa0c5c0174b564))
+
+
+### Bug Fixes
+
+* **devtools:** another huge refactoring ([308a70b](https://github.com/artalar/reatom/commit/308a70bcf5e8c038acfb5c85083a5f1480a85b2a))
+* **devtools:** filters enum ([0604a16](https://github.com/artalar/reatom/commit/0604a166c8cc0905a1c0538606784f3660692878))
+* **devtools:** filters highlight ([9968f31](https://github.com/artalar/reatom/commit/9968f31fdf85154d87858ef39310428dc03340c8))
+* **devtools:** graph view filters ([1149751](https://github.com/artalar/reatom/commit/114975115687f355b96eef35308e2c799050f2c6))
+* **devtools:** search matching ([eedb14d](https://github.com/artalar/reatom/commit/eedb14dd1404a60c38aeae5e7a1ca1a5e1f038dd))
+
 ## [0.3.0](https://github.com/artalar/reatom/compare/devtools-v0.2.2...devtools-v0.3.0) (2024-06-26)
 
 

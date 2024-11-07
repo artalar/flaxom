@@ -1,5 +1,27 @@
 # Changelog
 
+## [3.15.0](https://github.com/artalar/reatom/compare/jsx-v3.14.0...jsx-v3.15.0) (2024-10-31)
+
+
+### Features
+
+* **jsx:** class name normalization helper ([#942](https://github.com/artalar/reatom/issues/942)) ([2803165](https://github.com/artalar/reatom/commit/2803165ccf21100c3bd37b371d680481474874f1))
+
+## [3.14.0](https://github.com/artalar/reatom/compare/jsx-v3.13.1...jsx-v3.14.0) (2024-10-08)
+
+
+### Features
+
+* **jsx:** add FC type ([2d3e1b3](https://github.com/artalar/reatom/commit/2d3e1b3a3efef815e9ba1ed677e7b0a6edcd66f0))
+* **jsx:** add MouseEventHandler type ([4c9ea78](https://github.com/artalar/reatom/commit/4c9ea783c83ac6c425d4215f5372d3e4abda5b3c))
+
+
+### Bug Fixes
+
+* **jsx:** bool attribute ([0e1ca0f](https://github.com/artalar/reatom/commit/0e1ca0f08e464b4bfd040450b71f8a1ee9aa91d8))
+* **jsx:** types ([f2dc64b](https://github.com/artalar/reatom/commit/f2dc64b04dcc8393cdcf45390ad352e97477a522))
+* **jsx:** unsubscribe when removing a parent element ([#919](https://github.com/artalar/reatom/issues/919)) ([ec71d33](https://github.com/artalar/reatom/commit/ec71d337be35ed2e9fd0bf6da6b13317238636e3))
+
 ## [3.13.1](https://github.com/artalar/reatom/compare/jsx-v3.13.0...jsx-v3.13.1) (2024-09-06)
 
 

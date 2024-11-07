@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.6.0](https://github.com/artalar/reatom/compare/web-v3.5.3...web-v3.6.0) (2024-10-14)
+
+
+### Features
+
+* **web:** add online atom ([#940](https://github.com/artalar/reatom/issues/940)) ([6413696](https://github.com/artalar/reatom/commit/6413696fc13ae8f10fc6c6a0616b12e8b31c5127))
+
 ## [3.5.3](https://github.com/artalar/reatom/compare/web-v3.5.2...web-v3.5.3) (2024-06-22)
 
 

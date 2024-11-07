@@ -2,8 +2,14 @@ import { action, Atom, AtomMut, createCtx, Ctx, Fn, isAtom, Rec, throwReatomErro
 import { isObject, random } from '@reatom/utils'
 import { type LinkedList, type LLNode, isLinkedListAtom, LL_NEXT } from '@reatom/primitives'
 import type { JSX } from './jsx'
+
 declare type JSXElement = JSX.Element
+
+export type FC<Props = {}> = (props: Props & { children?: JSXElement }) => JSXElement
+
 export type { JSXElement, JSX }
+
+export { type ClassNameValue, cn } from './utils'
 
 type DomApis = Pick<
   typeof window,
@@ -106,7 +112,7 @@ export const reatomJsx = (ctx: Ctx, DOM: DomApis = globalThis.window) => {
         styleId = styles[val] = random().toString()
         stylesheet.innerText += '[data-reatom="' + styleId + '"]{' + val + '}\n'
       }
-      /** @see https://www.measurethat.net/Benchmarks/Show/11819/0/dataset-vs-setattribute */
+      /** @see https://measurethat.net/Benchmarks/Show/11819 */
       element.setAttribute('data-reatom', styleId)
     } else if (key === 'style' && typeof val === 'object') {
       for (const key in val) {
@@ -114,13 +120,23 @@ export const reatomJsx = (ctx: Ctx, DOM: DomApis = globalThis.window) => {
         else element.style.setProperty(key, val[key])
       }
     } else if (key.startsWith('prop:')) {
-      ;(element as any)[key.slice(5)] = val
+      // @ts-expect-error
+      element[key.slice(5)] = val
     } else {
       if (key.startsWith('attr:')) {
         key = key.slice(5)
       }
-      if (val == null) element.removeAttribute(key)
-      else element.setAttribute(key, String(val))
+      if (key === 'className') key = 'class'
+      if (val == null || val === false) element.removeAttribute(key)
+      else {
+        val = val === true ? '' : String(val)
+        /**
+         * @see https://measurethat.net/Benchmarks/Show/54
+         * @see https://measurethat.net/Benchmarks/Show/31249
+         */
+        if (key === 'class' && element instanceof HTMLElement) element.className = val
+        else element.setAttribute(key, val)
+      }
     }
   }
 

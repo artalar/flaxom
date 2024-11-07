@@ -1,5 +1,19 @@
 # Changelog
 
+## [3.11.0](https://github.com/artalar/reatom/compare/utils-v3.10.0...utils-v3.11.0) (2024-10-08)
+
+
+### Features
+
+* **devtools:** graph view ([95b55f8](https://github.com/artalar/reatom/commit/95b55f8133c14d68c43707361caa0c5c0174b564))
+* **utils:** improve toStringKey ([9f9a7e8](https://github.com/artalar/reatom/commit/9f9a7e8cebd9d6229d3e9a50cdb2a03bd59d1a6b))
+
+
+### Bug Fixes
+
+* **utils:** prettify toStringKey output ([f7f9189](https://github.com/artalar/reatom/commit/f7f9189f2108165caca2f9d227f7c7054e582ca9))
+* **utils:** toStringKey for Symbol.for ([a0a985b](https://github.com/artalar/reatom/commit/a0a985b9cfcf0c5d6538d55992a4c79150811cd8))
+
 ## [3.10.0](https://github.com/artalar/reatom/compare/utils-v3.9.2...utils-v3.10.0) (2024-08-19)
 
 

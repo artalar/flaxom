@@ -1,5 +1,17 @@
 # Changelog
 
+## [3.10.0](https://github.com/artalar/reatom/compare/npm-react-v3.9.0...npm-react-v3.10.0) (2024-10-08)
+
+
+### Features
+
+* **npm-react:** add support for generic components ([#926](https://github.com/artalar/reatom/issues/926)) ([8901e76](https://github.com/artalar/reatom/commit/8901e76e479aed4f3b021536f822d1ef22d6739d))
+
+
+### Bug Fixes
+
+* **npm-react:** remove console.log ([#927](https://github.com/artalar/reatom/issues/927)) ([be53c6c](https://github.com/artalar/reatom/commit/be53c6c92200f35ff2611ab84099a8459aeeee37))
+
 ## [3.9.0](https://github.com/artalar/reatom/compare/npm-react-v3.8.10...npm-react-v3.9.0) (2024-09-18)
 
 

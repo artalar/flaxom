@@ -157,8 +157,18 @@ export const omit = <T, K extends keyof T>(target: T, keys: Array<K>): Plain<Omi
  */
 export const jsonClone = <T>(value: T): T => JSON.parse(JSON.stringify(value))
 
+let _random = (min = 0, max = Number.MAX_SAFE_INTEGER - 1) => Math.floor(Math.random() * (max - min + 1)) + min
 /** Get random integer. Parameters should be integers too. */
-export const random = (min = 0, max = Number.MAX_SAFE_INTEGER - 1) => Math.floor(Math.random() * (max - min + 1)) + min
+export const random: typeof _random = (min, max) => _random(min, max)
+
+/** Pass a callback to replace the exported random function. Returned function restores the original random behavior. */
+export const mockRandom = (fn: typeof random) => {
+  const origin = _random
+  _random = fn
+  return () => {
+    _random = origin
+  }
+}
 
 /**
  * Asserts that the value is not `null` or `undefined`.
@@ -171,6 +181,7 @@ export const nonNullable = <T>(value: T, message?: string): NonNullable<T> => {
 }
 
 const { toString } = Object.prototype
+const { toString: toStringArray } = []
 const visited = new WeakMap<{}, string>()
 /** Stringify any kind of data with some sort of stability.
  * Support: an object keys sorting, `Map`, `Set`, circular references, custom classes, functions and symbols.
@@ -178,28 +189,43 @@ const visited = new WeakMap<{}, string>()
  */
 export const toStringKey = (thing: any, immutable = true): string => {
   var tag = typeof thing
-  var isNominal = tag === 'function' || tag === 'symbol'
 
-  if (!isNominal && (tag !== 'object' || thing === null || thing instanceof Date || thing instanceof RegExp)) {
-    return tag + thing
+  if (tag === 'symbol') return `[reatom Symbol]${thing.description || 'symbol'}`
+
+  if (tag !== 'function' && (tag !== 'object' || thing === null || thing instanceof Date || thing instanceof RegExp)) {
+    return `[reatom ${tag}]` + thing
   }
 
   if (visited.has(thing)) return visited.get(thing)!
 
+  var name = Reflect.getPrototypeOf(thing)?.constructor.name || toString.call(thing).slice(8, -1)
   // get a unique prefix for each type to separate same array / map
-  var result = toString.call(thing)
-  var unique = result + random()
   // thing could be a circular or not stringifiable object from a userspace
-  visited.set(thing, unique)
+  var result = `[reatom ${name}#${random()}]`
+  if (tag === 'function') {
+    visited.set(thing, (result += thing.name))
+    return result
+  }
+  visited.set(thing, result)
 
-  if (isNominal || (thing.constructor !== Object && Symbol.iterator in thing === false)) {
-    return unique
+  var proto = Reflect.getPrototypeOf(thing)
+  if (
+    proto &&
+    Reflect.getPrototypeOf(proto) &&
+    thing.toString !== toStringArray &&
+    Symbol.iterator in thing === false
+  ) {
+    return result
   }
 
-  for (let item of Symbol.iterator in thing ? thing : Object.entries(thing).sort(([a], [b]) => a.localeCompare(b)))
-    result += toStringKey(item, immutable)
+  var iterator = Symbol.iterator in thing ? thing : Object.entries(thing).sort(([a], [b]) => a.localeCompare(b))
+  for (let item of iterator) result += toStringKey(item, immutable)
 
-  immutable ? visited.set(thing, result) : visited.delete(thing)
+  if (immutable) {
+    visited.set(thing, result)
+  } else {
+    visited.delete(thing)
+  }
 
   return result
 }

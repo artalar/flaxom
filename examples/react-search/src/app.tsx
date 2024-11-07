@@ -1,10 +1,9 @@
 import { reatomComponent } from '@reatom/npm-react'
-import { searchAtom, issuesResource } from './model'
+import { searchAtom, issuesResource, pageAtom } from './model'
 
 export const App = reatomComponent(({ ctx }) => {
-  const isLoading = Boolean(
-    ctx.spy(issuesResource.pendingAtom) || ctx.spy(issuesResource.retriesAtom),
-  )
+  const isLoading = Boolean(ctx.spy(issuesResource.pendingAtom) || ctx.spy(issuesResource.retriesAtom))
+  const page = ctx.spy(pageAtom)
 
   return (
     <main>
@@ -13,6 +12,11 @@ export const App = reatomComponent(({ ctx }) => {
         onChange={(e) => searchAtom(ctx, e.currentTarget.value)}
         placeholder="Search"
       />
+      <button disabled={!page} onClick={() => pageAtom(ctx, (s) => s - 1)}>
+        {'<'}
+      </button>
+      {page}
+      <button onClick={() => pageAtom(ctx, (s) => s + 1)}>{'>'}</button>
       {isLoading && 'Loading...'}
       <ul>
         {ctx.spy(issuesResource.dataAtom).map(({ title }, i) => (

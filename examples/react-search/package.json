@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@reatom/devtools": "*",
     "@reatom/framework": "^3.*.*",
     "@reatom/npm-react": "^3.*.*",
     "react": "^18.2.0",
