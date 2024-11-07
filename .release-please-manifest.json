@@ -5,7 +5,7 @@
   "packages/core-v1": "3.1.9",
   "packages/core-v2": "3.1.4",
   "packages/effects": "3.10.1",
-  "packages/eslint-plugin": "3.7.0",
+  "packages/eslint-plugin": "3.7.1",
   "packages/form": "3.3.2",
   "packages/form-web": "3.2.2",
   "packages/framework": "3.4.0",
