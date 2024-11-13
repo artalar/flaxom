@@ -1,6 +1,6 @@
 {
   "name": "@reatom/devtools",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "Reatom developer tools for states and actions inspecting",
   "type": "module",
   "private": false,

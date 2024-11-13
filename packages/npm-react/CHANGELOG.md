@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.10.2](https://github.com/artalar/reatom/compare/npm-react-v3.10.1...npm-react-v3.10.2) (2024-11-13)
+
+
+### Bug Fixes
+
+* **npm-react:** webpack bug ([ee4b9cc](https://github.com/artalar/reatom/commit/ee4b9cc5f4a54622a62974b18cc19ff71ee021dc))
+
 ## [3.10.1](https://github.com/artalar/reatom/compare/npm-react-v3.10.0...npm-react-v3.10.1) (2024-11-12)
 
 

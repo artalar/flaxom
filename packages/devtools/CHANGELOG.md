@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.1](https://github.com/artalar/reatom/compare/devtools-v0.7.0...devtools-v0.7.1) (2024-11-13)
+
+
+### Bug Fixes
+
+* **devtools:** url handling ([fe7aeba](https://github.com/artalar/reatom/commit/fe7aebad2e6c4a8525aee5518d4d7fcde19905cf))
+
 ## [0.7.0](https://github.com/artalar/reatom/compare/devtools-v0.6.2...devtools-v0.7.0) (2024-10-31)
 
 
