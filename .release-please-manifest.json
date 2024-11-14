@@ -11,7 +11,7 @@
   "packages/framework": "3.4.0",
   "packages/hooks": "3.6.0",
   "packages/jsx": "3.15.0",
-  "packages/lens": "3.11.4",
+  "packages/lens": "3.11.5",
   "packages/logger": "3.8.4",
   "packages/npm-cookie-baker": "3.1.5",
   "packages/npm-history": "3.1.8",
@@ -32,5 +32,5 @@
   "packages/url": "3.8.0",
   "packages/utils": "3.11.0",
   "packages/web": "3.6.0",
-  "packages/devtools": "0.7.1"
+  "packages/devtools": "0.7.2"
 }

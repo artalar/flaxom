@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.7.2](https://github.com/artalar/reatom/compare/devtools-v0.7.1...devtools-v0.7.2) (2024-11-14)
+
+
+### Bug Fixes
+
+* **devtools:** atom creation ([09d720f](https://github.com/artalar/reatom/commit/09d720fb623a9e89179dd42f1527d9ba23a51534))
+* **devtools:** icons restyle ([116138f](https://github.com/artalar/reatom/commit/116138f348b9590dcb517aaf27634711545febfb))
+
 ## [0.7.1](https://github.com/artalar/reatom/compare/devtools-v0.7.0...devtools-v0.7.1) (2024-11-13)
 
 

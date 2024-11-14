@@ -1,6 +1,6 @@
 {
   "name": "@reatom/lens",
-  "version": "3.11.4",
+  "version": "3.11.5",
   "private": false,
   "sideEffects": false,
   "description": "Reatom for lens",

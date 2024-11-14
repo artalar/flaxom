@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.11.5](https://github.com/artalar/reatom/compare/lens-v3.11.4...lens-v3.11.5) (2024-11-14)
+
+
+### Bug Fixes
+
+* **lens:** reactive match ([#973](https://github.com/artalar/reatom/issues/973)) ([659b78d](https://github.com/artalar/reatom/commit/659b78dbe650a2e6747e8f1918210054cf369940))
+
 ## [3.11.4](https://github.com/artalar/reatom/compare/lens-v3.11.3...lens-v3.11.4) (2024-09-06)
 
 
