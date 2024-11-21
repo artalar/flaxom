@@ -16,6 +16,8 @@ Core package of [Reatom](https://github.com/artalar/reatom) state manager.
 [![Open in vscode](https://img.shields.io/badge/Source-Open%20in%20editor-blue)](https://github.dev/artalar/reatom)
 [![open in gitpod](https://img.shields.io/badge/Gitpod-ready--to--code-orange)](https://gitpod.io/#https://github.com/artalar/reatom)
 
+[![Open in Codeanywhere](https://codeanywhere.com/img/open-in-codeanywhere-btn.svg)](https://app.codeanywhere.com/#https://github.com/artalar/reatom)
+
 ## Features
 
 - 🐣 **simple abstraction** and friendly DX: minimum boilerplate and tiny API
