@@ -264,8 +264,10 @@ export const withAbortableSchedule = <T extends Ctx>(ctx: T): T => {
 
 export const concurrentControllers = new WeakMap<Fn, Atom<null | AbortController>>()
 export const concurrent: {
-  <T extends (ctx: CtxSpy | Ctx, ...a: any[]) => any>(fn: T, strategy?: 'last-in-win'): T
-  <T extends (ctx: CtxSpy | Ctx, ...a: any[]) => Promise<any>>(fn: T, strategy: 'first-in-win'): T
+  <T extends (ctx: Ctx, ...a: any[]) => any>(fn: T, strategy?: 'last-in-win'): T
+  <T extends (ctx: CtxSpy, ...a: any[]) => any>(fn: T, strategy?: 'last-in-win'): T
+  <T extends (ctx: Ctx, ...a: any[]) => Promise<any>>(fn: T, strategy: 'first-in-win'): T
+  <T extends (ctx: CtxSpy, ...a: any[]) => Promise<any>>(fn: T, strategy: 'first-in-win'): T
 } = (fn: Fn, strategy: 'last-in-win' | 'first-in-win' = 'last-in-win'): Fn => {
   const abortControllerAtom = atom<null | AbortController>(null, `${__count('_concurrent')}.abortControllerAtom`)
 
