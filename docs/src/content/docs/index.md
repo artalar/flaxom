@@ -30,7 +30,7 @@ description: Reatom - tiny and powerful reactive system with immutable nature
 - **the best TypeScript** experience
   <small>[Type inference](/recipes/typescript/)  is one of the main priorities for Reatom.</small>
 
-[The core package](/core) includes most of these features and, due to its minimal overhead, can be used in any project, from small libraries to large applications.
+[The core package](/package/core) includes most of these features and, due to its minimal overhead, can be used in any project, from small libraries to large applications.
 
 Adopting our well-designed helper tools allows you to efficiently handle complex tasks with minimal code.
 We aim to build a stable and balanced ecosystem that enhances DX and guarantees predictable maintenance for the long haul.
@@ -112,7 +112,7 @@ document.getElementById('save').addEventListener('click', () => {
 })
 ```
 
-Check out [@reatom/core docs](/core) for a detailed explanation of fundamental principles and features.
+Check out [@reatom/core docs](/package/core) for a detailed explanation of fundamental principles and features.
 
 Do you use React.js? Check out [npm-react](/package/npm-react) package!
 
@@ -138,7 +138,7 @@ npm i @reatom/framework @reatom/npm-react
 
 ### Advanced example description
 
-In this example, we will use the [@reatom/core](/core), [@reatom/async](/package/async) and [@reatom/hooks](/package/hooks) from the meta [@reatom/framework](/package/framework) package.
+In this example, we will use the [@reatom/core](/package/core), [@reatom/async](/package/async) and [@reatom/hooks](/package/hooks) from the meta [@reatom/framework](/package/framework) package.
 It simplifies imports and dependencies management.
 
 `reatomAsync` is a simple decorator that wraps your async function and adds extra actions and atoms to track the async execution statuses.
@@ -227,7 +227,7 @@ The most impressive part is that the overhead is [less than 4KB (gzip)](https://
 On top of that, you’re not limited to network cache. Reatom is powerful and expressive enough to manage any state.
 
 Please take a look at the [tutorial](/getting-started/setup/) to get the most out of Reatom and its ecosystem.
-If you're looking for a lightweight solution, check out the [core package documentation](/core).
+If you're looking for a lightweight solution, check out the [core package documentation](/package/core).
 Additionally, we offer a [testing package](/package/testing) for your convenience!
 
 ## Roadmap
@@ -245,7 +245,7 @@ Additionally, we offer a [testing package](/package/testing) for your convenienc
 **Redux** is fantastic, and Reatom draws significant inspiration from it.
 The principles of immutability, separating computations, and managing effects are excellent architectural design principles.
 However, additional capabilities are often needed when building large applications or describing small features.
-Some limitations are challenging to address, such as [batching](/core#ctxget-batch-api), [O(n) complexity](/recipes/atomization/#reducing-computational-complexity), and non-inspectable selectors that break [atomicity](/handbook#data-consistency).
+Some limitations are challenging to address, such as [batching](/package/core#ctxget-batch-api), [O(n) complexity](/recipes/atomization/#reducing-computational-complexity), and non-inspectable selectors that break [atomicity](/handbook#data-consistency).
 Others are just [difficult to improve](https://github.com/reduxjs/reselect/discussions/491).
 And boilerplate, of course. [The difference is significant](https://github.com/artalar/RTK-entities-basic-example/pull/1/files#diff-43162f68100a9b5eb2e58684c7b9a5dc7b004ba28fd8a4eb6461402ec3a3a6c6).
 Reatom resolves these problems while offering many more features within a similar bundle size.

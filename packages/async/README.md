@@ -803,7 +803,7 @@ const listResource = reatomResource(async (ctx) => {
 
 That's all. The code becomes much cleaner and simpler! The only additional change is the need for `ctx.schedule` for effects, as the callback in the `reatomResource` is called in the pure computations queue (to make `spy` work).
 
-Also, `listResource` now has a `promiseAtom` that contains the last promise. You can use it with [useAtomPromise](https://www.reatom.dev/package/npm-react/#useatompromise) in a React application, for example.
+Also, `listResource` now has a `promiseAtom` that contains the last promise. You can use it with [useAtomPromise](https://www.reatom.dev/package/npm-react/#use-atom-promise) in a React application, for example.
 
 If you need to set up a default value and use it synchronously, simply use `withDataAtom` as you would with any other async action. All async operators work fine with `reatomResource`. You could use `withRetry` and even `withCache`!
 

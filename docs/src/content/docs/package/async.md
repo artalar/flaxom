@@ -812,7 +812,7 @@ const listResource = reatomResource(async (ctx) => {
 
 That's all. The code becomes much cleaner and simpler! The only additional change is the need for `ctx.schedule` for effects, as the callback in the `reatomResource` is called in the pure computations queue (to make `spy` work).
 
-Also, `listResource` now has a `promiseAtom` that contains the last promise. You can use it with [useAtomPromise](/package/npm-react/#useatompromise) in a React application, for example.
+Also, `listResource` now has a `promiseAtom` that contains the last promise. You can use it with [useAtomPromise](/package/npm-react/#use-atom-promise) in a React application, for example.
 
 If you need to set up a default value and use it synchronously, simply use `withDataAtom` as you would with any other async action. All async operators work fine with `reatomResource`. You could use `withRetry` and even `withCache`!
 
@@ -854,8 +854,7 @@ onDisconnect(myResource, myResource.reset)
 [source](https://github.com/artalar/reatom/blob/v3/packages/async/src/index.story.test.ts)
 
 ```ts
-import { test } from 'uvu'
-import * as assert from 'uvu/assert'
+import { describe, test, expect } from 'vitest'
 import { createTestCtx } from '@reatom/testing'
 import { atom } from '@reatom/core'
 import { onConnect } from '@reatom/hooks'
@@ -892,18 +891,14 @@ describe('optimistic update', () => {
   const getData = reatomAsync.from(api.getData).pipe(
     // add `dataAtom` and map the effect payload into it
     // try to prevent new reference stream if nothing really changed
-    withDataAtom([], (ctx, payload, state) =>
-      isDeepEqual(payload, state) ? state : payload,
-    ),
+    withDataAtom([], (ctx, payload, state) => (isDeepEqual(payload, state) ? state : payload)),
   )
   const putData = reatomAsync.from(api.putData)
   putData.onCall((ctx, promise, params) => {
     const [id, value] = params
     const oldList = ctx.get(getData.dataAtom)
     // optimistic update
-    const newList = getData.dataAtom(ctx, (state) =>
-      state.map((item) => (item.id === id ? { ...item, value } : item)),
-    )
+    const newList = getData.dataAtom(ctx, (state) => state.map((item) => (item.id === id ? { ...item, value } : item)))
     // rollback on error
     promise.catch((error) => {
       if (ctx.get(getData.dataAtom) === newList) {
@@ -929,26 +924,26 @@ describe('optimistic update', () => {
     const dataTrack = ctx.subscribeTrack(getData.dataAtom)
 
     // every subscription calls passed callback immediately
-    assert.is(effectTrack.calls.length, 1)
-    assert.is(dataTrack.calls.length, 1)
-    assert.equal(dataTrack.lastInput(), [])
+    expect(effectTrack.calls.length).toBe(1)
+    expect(dataTrack.calls.length).toBe(1)
+    expect(dataTrack.lastInput()).toEqual([])
 
     // `onConnect` calls `fetchData`, wait it and check changes
     await sleep()
-    assert.is(dataTrack.calls.length, 2)
-    assert.equal(dataTrack.lastInput(), [{ id: 1, value: 1 }])
+    expect(dataTrack.calls.length).toBe(2)
+    expect(dataTrack.lastInput()).toEqual([{ id: 1, value: 1 }])
 
     // call `updateData` and check changes
     putData(ctx, 1, 2)
-    assert.is(dataTrack.calls.length, 3)
-    assert.equal(dataTrack.lastInput(), [{ id: 1, value: 2 }])
+    expect(dataTrack.calls.length).toBe(3)
+    expect(dataTrack.lastInput()).toEqual([{ id: 1, value: 2 }])
 
     // wait for `fetchData` and check changes
-    assert.is(effectTrack.calls.length, 2)
+    expect(effectTrack.calls.length).toBe(2)
     await sleep(INTERVAL)
     // the effect is called again, but dataAtom is not updated
-    assert.is(effectTrack.calls.length, 3)
-    assert.is(dataTrack.calls.length, 3)
+    expect(effectTrack.calls.length).toBe(3)
+    expect(dataTrack.calls.length).toBe(3)
 
     // cleanup test
     dataTrack.unsubscribe()
@@ -1006,20 +1001,12 @@ describe('concurrent pooling', () => {
 
     await Promise.allSettled([promise1, promise2])
 
-    assert.is(ctx.get(progressAtom), 100)
+    expect(ctx.get(progressAtom)).toBe(100)
 
-    const expectedProgress = [
-      0, 10, /* start again */ 0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100,
-    ]
+    const expectedProgress = [0, 10, /* start again */ 0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
 
-    // assert.equal(track.inputs(), expectedProgress)
+    // TODO time flickering
+    // expect(track.inputs()).toEqual(expectedProgress)
   })
 })
-
-test.run()
-
-// uvu have no own describe
-function describe(name: string, fn: () => any) {
-  fn()
-}
 ```

@@ -8,7 +8,7 @@ npm i @reatom/npm-solid-js
 
 Also, you need to be installed `@reatom/core` or `@reatom/framework` and `solid-js`.
 
-> Read [the core docs](https://www.reatom.dev/core) first for production usage.
+> Read [the core docs](https://www.reatom.dev/package/core) first for production usage.
 
 ## Usage
 

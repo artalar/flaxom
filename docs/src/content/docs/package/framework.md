@@ -14,7 +14,7 @@ Docs around this package and it combination usage you could find in the [tutoria
 Included packages:
 
 - [@reatom/async](/package/async)
-- [@reatom/core](/core)
+- [@reatom/core](/package/core)
 - [@reatom/effects](/package/effects)
 - [@reatom/hooks](/package/hooks)
 - [@reatom/lens](/package/lens)

@@ -13,7 +13,7 @@ Tiny, efficient, featured, and extensible core to handle reactivity right. The u
 
 [Main introduction](/).
 
-The raw API description is [below](#api).
+The raw API description is [below](#atom-api).
 
 ## About
 
@@ -174,7 +174,7 @@ socket.on(
 import { atom } from '@reatom/core'
 ```
 
-The `atom()` function is a factory for an atomic-based reactive primitive. Atoms don't store their data (state, listeners, dependencies) within themselves; they only provide a key to a cache in [ctx](#ctx-api) (context). You can think of an atom as a prototype for a cache. One of the most powerful features of Reatom is that the cache is immutable, and it is recreated on each relative update. The immutability of the cache helps to process [transactions](#transaction-api) and is extremely useful for debugging. Don't worry, it is also quite [efficient](#performance).
+The `atom()` function is a factory for an atomic-based reactive primitive. Atoms don't store their data (state, listeners, dependencies) within themselves; they only provide a key to a cache in [ctx](#ctx-api) (context). You can think of an atom as a prototype for a cache. One of the most powerful features of Reatom is that the cache is immutable, and it is recreated on each relative update. The immutability of the cache helps to process [transactions](#ctxschedule) and is extremely useful for debugging. Don't worry, it is also quite [efficient](/#how-performant-reatom-is).
 
 As Atom is a key, it should be mapped somewhere to its cache. `ctx` has an internal [WeakMap](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakMap) `caches`, which store your data until there is a link to Atom. When you subscribe (connect) and unsubscribe (disconnect) from Atom, the state isn't reset or deleted; it is still stored in the cache, which will be cleared by the GC only after the link to the Atom disappears from your closures. This behavior is the most intuitive and works just like any variable storing. So, if you define a global Atom available in a few of your modules, the state will always persist in memory during the application lifetime, whether you subscribed or unsubscribed for the Atom, which is useful. If you need to clear the state on disconnect or do other lifetime transformations, check the [hooks package](/package/hooks) and [withreset](/package/lens#withreset) helper.
 
@@ -423,7 +423,7 @@ Subscribe to transaction end. Useful for logging.
 
 ## ctx.schedule
 
-To achieve [atomicity](/handbook#data-consistency), each update (action call / atom mutation) starts a complex batch operation, which tries to optimize your updates and collect them into a new immutable [log](#ctx.subscribe-log-API) of new immutable cache snapshots. If some computation throws an error (like `can't use property of undefined`) the whole update will be canceled, otherwise the new caches will be merged into the context internal `caches` weak map. To achieve purity of computations and the ability to cancel them, all side-effects should be called separately in a different queue, after all computations. This is where `schedule` comes in; it accepts an effect callback and returns a promise which will be resolved after the effect call or rejected if the transaction fails.
+To achieve [atomicity](/handbook#data-consistency), each update (action call / atom mutation) starts a complex batch operation, which tries to optimize your updates and collect them into a new immutable [log](#ctxsubscribe-log-api) of new immutable cache snapshots. If some computation throws an error (like `can't use property of undefined`) the whole update will be canceled, otherwise the new caches will be merged into the context internal `caches` weak map. To achieve purity of computations and the ability to cancel them, all side-effects should be called separately in a different queue, after all computations. This is where `schedule` comes in; it accepts an effect callback and returns a promise which will be resolved after the effect call or rejected if the transaction fails.
 
 ```ts
 const fetchData = action((ctx) => {

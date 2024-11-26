@@ -115,7 +115,7 @@ yarn add @reatom/core-v2
 
 ### Reatom goals
 
-The [features](#features) list is reflecting our vision of perfectly balanced tool for any kind of application data management. But most important goals probably are **performance**, **atomicity guaranties** and [tiny basic API](#Write-you-own-atom-creator) with **immutable principles** for predictable debugging.
+The [features](#features) list is reflecting our vision of perfectly balanced tool for any kind of application data management. But most important goals probably are **performance**, **atomicity guaranties** and [tiny basic API](#write-you-own-atom-creator) with **immutable principles** for predictable debugging.
 
 ### What is state management?
 
@@ -131,7 +131,7 @@ Those problem you may solve in other ways too: streams / services / classes, but
 
 The main item of Reatom core is `createAtom`. It is a pack of most needed features which helps you to solve most tasks. Generally, architecture of Reatom built around a store, which is an event emitter with two queues: pure computations and side effect. Atoms allows you to describe reactive computations with fine granted optimizations and schedule effects.
 
-> If you need \ interesting in detailed architecture design you should check [architecture chapter](#Internal-architecture) and [next chapter](#Write-you-own-atom-creator) about building your own atom creators.
+> If you need \ interesting in detailed architecture design you should check [architecture chapter](#internal-architecture) and [next chapter](#write-you-own-atom-creator) about building your own atom creators.
 
 As any computations, it results and effects processed by the store, it easy for debugging and testing. But not every application need it and for that case we have a `defaultStore` which binds to createAtom and allow to subscribe to it and dispatch it actions _inline_ without manual store management.
 
@@ -194,7 +194,7 @@ inputAtom.change.dispatch(`Bob`)
 
 As you may see, Reatom flow looks like Redux flow, but reducers and selectors are unified to atoms, which allows you to describe data receiving naturally as in MobX. Also atoms have an API for handling side-effects declaratively, but flexible, see below.
 
-Example above is a basic and don't show all cool features of Reatom. See [API section](#API) or [Guides](#Guides) to learn more about how to solve your tasks fastly and efficiently.
+Example above is a basic and don't show all cool features of Reatom. See [API section](#api) or [Guides](#guides) to learn more about how to solve your tasks fastly and efficiently.
 
 #### Timer example
 

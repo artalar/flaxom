@@ -42,7 +42,7 @@ onConnect(fetchSome.dataAtom, async (ctx) => {
 })
 ```
 
-> **Deprecated!** The passed `ctx` has an `isConnected` method to check the current status of the passed atom. You can refer to the [async example](https://www.reatom.dev/package/async#periodic-refresh-for-used-data) for more information. Additionally, the `ctx` includes a `controller` property, which is an AbortController. You can conveniently reuse it with `reatomAsync`. For further details, you can refer to [another async example](https://www.reatom.dev/package/async#abortable-process).
+> **Deprecated!** The passed `ctx` has an `isConnected` method to check the current status of the passed atom. You can refer to the [async example](https://www.reatom.dev/package/async#periodic-refresh-for-used-data) for more information. Additionally, the `ctx` includes a `controller` property, which is an AbortController. You can conveniently reuse it with `reatomAsync`. For further details, you can refer to [another async example](https://www.reatom.dev/package/async#withabort).
 
 ### Comparison with React
 
@@ -158,7 +158,7 @@ export const doSome = action((ctx, payload) => {
 
 ## onUpdate
 
-The `onUpdate` hook allows you to react to state updates of the passed atom. However, **this hook will be deprecated in the future**. It is recommended and more convenient to use the atom's `onChange` method and the action's `onCall` method. You can find more information about these methods in the [core package documentation](https://www.reatom.dev/core/#atomonchange-api).
+The `onUpdate` hook allows you to react to state updates of the passed atom. However, **this hook will be deprecated in the future**. It is recommended and more convenient to use the atom's `onChange` method and the action's `onCall` method. You can find more information about these methods in the [core package documentation](https://www.reatom.dev/package/core/#atomonchange-api).
 
 For general computed atoms (via `ctx.spy`), it is only called when the atom is connected. You can read more in the [lifecycle guide](https://www.reatom.dev/handbook#lifecycle).
 

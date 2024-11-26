@@ -333,7 +333,12 @@ To type your custom component props accepting general HTML attributes, for examp
 ```tsx
 import { type JSX } from '@reatom/jsx'
 
+// allow only plain data types
 export interface InputProps extends JSX.InputHTMLAttributes {
+  defaultValue?: string
+}
+// allow plain data types and atoms
+export type InputProps = JSX.IntrinsicElements['input'] & {
   defaultValue?: string
 }
 

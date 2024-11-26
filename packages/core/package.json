@@ -42,7 +42,7 @@
   "bugs": {
     "url": "https://github.com/artalar/reatom/issues"
   },
-  "homepage": "https://www.reatom.dev/core",
+  "homepage": "https://www.reatom.dev/package/core",
   "keywords": [
     "state",
     "store",

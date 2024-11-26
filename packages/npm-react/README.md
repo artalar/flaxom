@@ -48,7 +48,7 @@ export const Counter = reatomComponent(
 )
 ```
 
-You can describe props types in the generic, it can be any kind of values, regular string, JSON, and atoms too. For example, here is a controlled component with atom state. Also, you can use additional `bind` method instead of [`useAction`](#useaction) to bind an action to the component.
+You can describe props types in the generic, it can be any kind of values, regular string, JSON, and atoms too. For example, here is a controlled component with atom state. Also, you can use additional `bind` method instead of [`useAction`](#use-action) to bind an action to the component.
 
 ```tsx
 import { atom, Atom } from '@reatom/core'

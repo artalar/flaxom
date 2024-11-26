@@ -5,7 +5,7 @@ Docs around this package and it combination usage you could find in the [tutoria
 Included packages:
 
 - [@reatom/async](https://www.reatom.dev/package/async)
-- [@reatom/core](https://www.reatom.dev/core)
+- [@reatom/core](https://www.reatom.dev/package/core)
 - [@reatom/effects](https://www.reatom.dev/package/effects)
 - [@reatom/hooks](https://www.reatom.dev/package/hooks)
 - [@reatom/lens](https://www.reatom.dev/package/lens)

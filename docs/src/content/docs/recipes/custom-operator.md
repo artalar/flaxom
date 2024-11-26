@@ -3,10 +3,10 @@ title: Custom operator
 description: How to create custom operators to improve your code and modularize it
 ---
 
-All atoms and actions by default include the [pipe operator](/core#atompipe-api) for easy extending and composing.
+All atoms and actions by default include the [pipe operator](/package/core#atompipe-api) for easy extending and composing.
 You can create your own operators to enhance your code and make it more modular.
 
-We assume that you've already read the [core](/core) docs.
+We assume that you've already read the [core](/package/core) docs.
 
 ## Prefix and types
 
@@ -59,7 +59,7 @@ export const delay =
 
     return atom((ctx, prevState?: T) => {
       const state = ctx.spy(anAtom)
-      // more about action spying: https://www.reatom.dev/core#action-api
+      // more about action spying: https://www.reatom.dev/package/core#action-api
       const updates = ctx.spy(update)
 
       // first call, no need to delay

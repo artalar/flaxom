@@ -1,6 +1,7 @@
 import { $ } from 'zx'
 import { defineConfig } from 'astro/config'
 import starlight from '@astrojs/starlight'
+import starlightLinksValidator from 'starlight-links-validator'
 import rehypeExternalLinks from 'rehype-external-links'
 import rehypeAutolinkHeadings from 'rehype-autolink-headings'
 import rehypeSlug from 'rehype-slug'
@@ -16,6 +17,7 @@ export default defineConfig({
   },
   integrations: [
     starlight({
+      plugins: [starlightLinksValidator()],
       title: 'Reatom',
       logo: {
         src: './src/assets/logo_light.svg',
