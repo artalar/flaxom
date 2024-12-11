@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.11.6](https://github.com/artalar/reatom/compare/lens-v3.11.5...lens-v3.11.6) (2024-12-11)
+
+
+### Bug Fixes
+
+* **lens:** parseAtoms types ([e284d32](https://github.com/artalar/reatom/commit/e284d32158caf7233ca36670c345ed4626fec1d9))
+
 ## [3.11.5](https://github.com/artalar/reatom/compare/lens-v3.11.4...lens-v3.11.5) (2024-11-14)
 
 

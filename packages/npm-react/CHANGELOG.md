@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.10.3](https://github.com/artalar/reatom/compare/npm-react-v3.10.2...npm-react-v3.10.3) (2024-12-11)
+
+
+### Bug Fixes
+
+* **npm-react:** use named function in reatomComponent ([13d4be3](https://github.com/artalar/reatom/commit/13d4be3d7a5627c961f431408db5eaa8be420707))
+
 ## [3.10.2](https://github.com/artalar/reatom/compare/npm-react-v3.10.1...npm-react-v3.10.2) (2024-11-13)
 
 

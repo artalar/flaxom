@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.16.4](https://github.com/artalar/reatom/compare/async-v3.16.3...async-v3.16.4) (2024-12-11)
+
+
+### Bug Fixes
+
+* **async:** status AsyncStatusesAbortedPending [#985](https://github.com/artalar/reatom/issues/985) ([85e60ef](https://github.com/artalar/reatom/commit/85e60efcd8e64df6476ee5ad13d15454307bd439))
+
 ## [3.16.3](https://github.com/artalar/reatom/compare/async-v3.16.2...async-v3.16.3) (2024-10-31)
 
 

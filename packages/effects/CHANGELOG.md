@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.10.2](https://github.com/artalar/reatom/compare/effects-v3.10.1...effects-v3.10.2) (2024-12-11)
+
+
+### Bug Fixes
+
+* **effects:** unable to specify CtxSpy for concurrent ([#981](https://github.com/artalar/reatom/issues/981)) ([01af2b6](https://github.com/artalar/reatom/commit/01af2b615b4c4c3f9ba231764c2630acfde66fa5))
+
 ## [3.10.1](https://github.com/artalar/reatom/compare/effects-v3.10.0...effects-v3.10.1) (2024-10-31)
 
 
