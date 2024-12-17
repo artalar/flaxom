@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.8.0](https://github.com/artalar/reatom/compare/devtools-v0.7.2...devtools-v0.8.0) (2024-12-17)
+
+
+### Features
+
+* **devtools:** add ability to edit atoms states ([f22bce8](https://github.com/artalar/reatom/commit/f22bce8f3a047f09e6e96bbbd22b2a59c13a011d))
+* **devtools:** createDevtools and state logs ([6315923](https://github.com/artalar/reatom/commit/63159230fa210bd7bba87ca12b1f78930caec1c2))
+
 ## [0.7.2](https://github.com/artalar/reatom/compare/devtools-v0.7.1...devtools-v0.7.2) (2024-11-14)
 
 
