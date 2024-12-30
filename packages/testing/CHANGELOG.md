@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.4.8](https://github.com/artalar/reatom/compare/testing-v3.4.7...testing-v3.4.8) (2024-12-30)
+
+
+### Bug Fixes
+
+* **testing:** prevent first computed reading of mocked atom [#995](https://github.com/artalar/reatom/issues/995) ([5231d20](https://github.com/artalar/reatom/commit/5231d20cbbbc2ffeefb52e574f9f281273e0e8e1))
+
 ## [3.4.7](https://github.com/artalar/reatom/compare/testing-v3.4.6...testing-v3.4.7) (2024-06-22)
 
 

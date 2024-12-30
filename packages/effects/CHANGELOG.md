@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.11.0](https://github.com/artalar/reatom/compare/effects-v3.10.2...effects-v3.11.0) (2024-12-30)
+
+
+### Features
+
+* **effects:** add optional logging for the take [#987](https://github.com/artalar/reatom/issues/987) ([c57b83a](https://github.com/artalar/reatom/commit/c57b83a15d704ac715562cb2b143d6d908c9af41))
+
 ## [3.10.2](https://github.com/artalar/reatom/compare/effects-v3.10.1...effects-v3.10.2) (2024-12-11)
 
 

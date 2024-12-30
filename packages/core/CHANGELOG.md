@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.9.2](https://github.com/artalar/reatom/compare/core-v3.9.1...core-v3.9.2) (2024-12-30)
+
+
+### Bug Fixes
+
+* **core:** disconnect of the last version of pubs [#996](https://github.com/artalar/reatom/issues/996) ([52b6593](https://github.com/artalar/reatom/commit/52b6593d0485f825110524dcbeeb401d3f9309d4))
+
 ## [3.9.1](https://github.com/artalar/reatom/compare/core-v3.9.0...core-v3.9.1) (2024-12-11)
 
 

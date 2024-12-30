@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.10.4](https://github.com/artalar/reatom/compare/npm-react-v3.10.3...npm-react-v3.10.4) (2024-12-30)
+
+
+### Bug Fixes
+
+* **npm-react:** support react19 debug name ([65914e4](https://github.com/artalar/reatom/commit/65914e4ac3cd4b75b3d22d3d6829b1931f7bd034))
+
 ## [3.10.3](https://github.com/artalar/reatom/compare/npm-react-v3.10.2...npm-react-v3.10.3) (2024-12-11)
 
 

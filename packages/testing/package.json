@@ -1,6 +1,6 @@
 {
   "name": "@reatom/testing",
-  "version": "3.4.7",
+  "version": "3.4.8",
   "private": false,
   "sideEffects": false,
   "description": "Reatom testing package",
