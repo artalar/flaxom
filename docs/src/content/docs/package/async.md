@@ -829,7 +829,7 @@ const aResource = reatomResource(async (ctx) => {
 }, 'aResource')
 const bResource = reatomResource(async (ctx) => {
   const a = await ctx.spy(aResource.promiseAtom)
-  return await ctx.schedule(() => request(`/api/b/${b}`, ctx.controller))
+  return await ctx.schedule(() => request(`/api/b/${a}`, ctx.controller))
 }, 'bResource')
 ```
 

@@ -81,9 +81,7 @@ const fetchGoods = action(async (ctx, search: string) => {
 
   // schedule side-effects
   // which will be called after successful execution of all computations
-  const goods = await ctx.schedule(() =>
-    fetch(`/api/goods?search=${search}`).then((r) => r.json()),
-  )
+  const goods = await ctx.schedule(() => fetch(`/api/goods?search=${search}`).then((r) => r.json()))
 
   // use `batch` to prevent glitches and extra effects.
   batch(ctx, () => {
@@ -198,10 +196,7 @@ You could create a computed derived atom by passing a function to `atom`. The fi
 > **Note to TypeScript users**: It is impossible to describe the reducer type with an optional generic state argument, which is returned from the function. If you use the second `state` argument, you should define its type; do not rely on the return type.
 
 ```ts
-const isCountEvenAtom = atom(
-  (ctx) => ctx.spy(countAtom) % 2 === 0,
-  'isCountEven',
-)
+const isCountEvenAtom = atom((ctx) => ctx.spy(countAtom) % 2 === 0, 'isCountEven')
 // isCountEvenAtom: Atom<number>
 ```
 
@@ -267,9 +262,7 @@ export const currencyAtom = atom((ctx, state?: string) => {
 Pipe is a general chain helper, it applies an operator to the atom to map it to another thing. Classic operator interface is `<T extends Atom>(options?: any) => (anAtom: T) => aNewThing`. The main reason is a readable and type-safe way to apply decorators.
 
 ```ts
-const countAtom = atom(0).pipe(
-  withInit(() => localStorage.getItem('COUNT') ?? 0),
-)
+const countAtom = atom(0).pipe(withInit(() => localStorage.getItem('COUNT') ?? 0))
 // equals to
 const countAtom = withInit(() => localStorage.getItem('COUNT') ?? 0)(atom(0))
 ```
@@ -370,7 +363,6 @@ doSome.onCall((ctx, payload, params) => {
   // `doSome(ctx, 1, 2)` will log "{ a: 1, b: 2 }, [1, 2]"
 })
 ```
-
 
 ## createCtx API
 
@@ -476,10 +468,7 @@ import { action, atom, batch } from '@reatom/core'
 
 export const firstNameAtom = atom('', 'firstNameAtom')
 export const lastNameAtom = atom('', 'lastNameAtom')
-export const fullNameAtom = atom(
-  (ctx) => `${ctx.spy(firstNameAtom)} ${ctx.spy(lastNameAtom)}`,
-  'fullNameAtom',
-)
+export const fullNameAtom = atom((ctx) => `${ctx.spy(firstNameAtom)} ${ctx.spy(lastNameAtom)}`, 'fullNameAtom')
 export const fetchUser = action(async (ctx, id: string) => {
   const user = await ctx.schedule(() => api.getUser(id))
   firstNameAtom(ctx, user.firstName)
@@ -502,10 +491,7 @@ import { action, atom, batch } from '@reatom/core'
 
 export const firstNameAtom = atom('', 'firstNameAtom')
 export const lastNameAtom = atom('', 'lastNameAtom')
-export const fullNameAtom = atom(
-  (ctx) => `${ctx.spy(firstNameAtom)} ${ctx.spy(lastNameAtom)}`,
-  'fullNameAtom',
-)
+export const fullNameAtom = atom((ctx) => `${ctx.spy(firstNameAtom)} ${ctx.spy(lastNameAtom)}`, 'fullNameAtom')
 export const fetchUser = action(async (ctx, id: string) => {
   const user = await ctx.schedule(() => api.getUser(id))
   batch(ctx, () => {
@@ -530,10 +516,7 @@ import { action, atom, batch } from '@reatom/core'
 
 export const firstNameAtom = atom('', 'firstNameAtom')
 export const lastNameAtom = atom('', 'lastNameAtom')
-export const fullNameAtom = atom(
-  (ctx) => `${ctx.spy(firstNameAtom)} ${ctx.spy(lastNameAtom)}`,
-  'fullNameAtom',
-)
+export const fullNameAtom = atom((ctx) => `${ctx.spy(firstNameAtom)} ${ctx.spy(lastNameAtom)}`, 'fullNameAtom')
 export const saveUser = action((ctx, firstName: string, lastName: string) => {
   firstNameAtom(ctx, firstName)
   lastNameAtom(ctx, lastName)
@@ -562,10 +545,7 @@ import { action, atom, batch } from '@reatom/core'
 export const isUserLoadingAtom = atom(false, 'isUserLoadingAtom')
 export const firstNameAtom = atom('', 'firstNameAtom')
 export const lastNameAtom = atom('', 'lastNameAtom')
-export const fullNameAtom = atom(
-  (ctx) => `${ctx.spy(firstNameAtom)} ${ctx.spy(lastNameAtom)}`,
-  'fullNameAtom',
-)
+export const fullNameAtom = atom((ctx) => `${ctx.spy(firstNameAtom)} ${ctx.spy(lastNameAtom)}`, 'fullNameAtom')
 export const saveUser = action((ctx, firstName: string, lastName: string) => {
   firstNameAtom(ctx, firstName)
   lastNameAtom(ctx, lastName)
@@ -590,21 +570,15 @@ import { action, atom, batch } from '@reatom/core'
 export const isUserLoadingAtom = atom(false, 'isUserLoadingAtom')
 export const firstNameAtom = atom('', 'firstNameAtom')
 export const lastNameAtom = atom('', 'lastNameAtom')
-export const fullNameAtom = atom(
-  (ctx) => `${ctx.spy(firstNameAtom)} ${ctx.spy(lastNameAtom)}`,
-  'fullNameAtom',
-)
+export const fullNameAtom = atom((ctx) => `${ctx.spy(firstNameAtom)} ${ctx.spy(lastNameAtom)}`, 'fullNameAtom')
 export const saveUser = action((ctx, firstName: string, lastName: string) => {
   firstNameAtom(ctx, firstName)
   lastNameAtom(ctx, lastName)
 }, 'saveUser')
-export const resolveFetchUser = action(
-  (ctx, firstName: string, lastName: string) => {
-    saveUser(ctx, firstName, firstName)
-    isUserLoadingAtom(ctx, false)
-  },
-  'resolveFetchUser',
-)
+export const resolveFetchUser = action((ctx, firstName: string, lastName: string) => {
+  saveUser(ctx, firstName, firstName)
+  isUserLoadingAtom(ctx, false)
+}, 'resolveFetchUser')
 export const fetchUser = action(async (ctx, id: string) => {
   isUserLoadingAtom(ctx, true)
   try {
@@ -624,10 +598,7 @@ import { action, atom, batch } from '@reatom/core'
 export const isUserLoadingAtom = atom(false, 'isUserLoadingAtom')
 export const firstNameAtom = atom('', 'firstNameAtom')
 export const lastNameAtom = atom('', 'lastNameAtom')
-export const fullNameAtom = atom(
-  (ctx) => `${ctx.spy(firstNameAtom)} ${ctx.spy(lastNameAtom)}`,
-  'fullNameAtom',
-)
+export const fullNameAtom = atom((ctx) => `${ctx.spy(firstNameAtom)} ${ctx.spy(lastNameAtom)}`, 'fullNameAtom')
 export const fetchUser = action(async (ctx, id: string) => {
   isUserLoadingAtom(ctx, true)
   try {
@@ -641,4 +612,67 @@ export const fetchUser = action(async (ctx, id: string) => {
     isUserLoadingAtom(ctx, false)
   }
 }, 'fetchUser')
+```
+
+## TypeScript
+
+### Unions
+
+If you need to "get" or "spy" an atoms with a different types you will got an error in a generic inference.
+
+```ts
+const nameAtom = atom('')
+const ageAtom = atom(0)
+const valuesAtom = atom((ctx) => [nameAtom, ageAtom].map((a) => ctx.spy(a)))
+// Error: Argument of type 'AtomMut<string> | AtomMut<number>' is not assignable to parameter of type...
+```
+
+To fix it, you can add this declarations modification. We don't include it to the v3 version of the core package, as it can break the behavior of an existed code in very rare cases.
+
+```ts
+import { Atom, Fn, AtomProto, AtomCache, Action, Unsubscribe, Logs } from '@reatom/core'
+
+declare module '@reatom/core' {
+  export interface Ctx {
+    // @ts-expect-error
+    get: {
+      <T extends Atom>(anAtom: T): T extends Atom<infer State> ? State : never
+      <T>(anAtom: Atom<T>): T
+      <T>(
+        cb: Fn<
+          [
+            read: Fn<[proto: AtomProto], AtomCache<any> | undefined>,
+            // this is `actualize` function and
+            // the types intentionally awkward
+            // coz it only for internal usage
+            fn?: Fn,
+          ],
+          T
+        >,
+      ): T
+    }
+    // @ts-expect-error
+    spy?: {
+      <T extends Atom>(anAtom: T): T extends Atom<infer State> ? State : never
+      <T>(anAtom: Atom<T>): T
+      <Params extends any[] = any[], Payload = any>(
+        anAction: Action<Params, Payload>,
+        cb: Fn<[call: { params: Params; payload: Payload }]>,
+      ): void
+      <T>(atom: Atom<T>, cb: Fn<[newState: T, prevState: undefined | T]>): void
+    }
+
+    schedule<T = void>(cb: Fn<[Ctx], T>, step?: -1 | 0 | 1 | 2): Promise<Awaited<T>>
+
+    subscribe<T>(atom: Atom<T>, cb: Fn<[T]>): Unsubscribe
+    subscribe(cb: Fn<[patches: Logs, error?: Error]>): Unsubscribe
+
+    cause: AtomCache
+  }
+}
+
+const nameAtom = atom('')
+const ageAtom = atom(0)
+const valuesAtom = atom((ctx) => [nameAtom, ageAtom].map((a) => ctx.spy(a)))
+// all fine
 ```

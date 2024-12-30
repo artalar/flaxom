@@ -87,4 +87,21 @@ test('default should checks in the end', () => {
   ;`👍` //?
 })
 
+test('reactive change', () => {
+  const ctx = createTestCtx()
+
+  const boolAtom = atom(true)
+  const compAtom = match(true)
+    .is(boolAtom, () => 'a')
+    .default(() => 'b')
+
+  const track = ctx.subscribeTrack(compAtom)
+
+  assert.equal(track.inputs(), ['a'])
+
+  boolAtom(ctx, false)
+  boolAtom(ctx, true)
+  assert.equal(track.inputs(), ['a', 'b', 'a'])
+})
+
 test.run()

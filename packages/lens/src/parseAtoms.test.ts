@@ -14,7 +14,6 @@ test('should return value', () => {
   assert.is(parseAtoms(ctx, 'some bare value'), 'some bare value')
   assert.is(parseAtoms(ctx, 10), 10)
   assert.is(parseAtoms(ctx, Symbol.for('specialSymbol')), Symbol.for('specialSymbol'))
-  ;`👍` //?
 })
 
 test('should parse deep atoms', () => {
@@ -34,7 +33,6 @@ test('should parse deep atoms', () => {
     ),
     [['deep']],
   )
-  ;`👍` //?
 })
 
 test('should parse records', () => {
@@ -58,7 +56,6 @@ test('should parse records', () => {
       },
     },
   )
-  ;`👍` //?
 })
 
 test('should parse maps', () => {
@@ -76,7 +73,6 @@ test('should parse maps', () => {
   assert.equal(parsed.get(keyObj), { someKey: 'someValue' })
   assert.equal(parsed.get(keyAtom), 'someRawValue')
   assert.is(parsed.size, 3)
-  ;`👍` //?
 })
 test('should spy if inside atom', () => {
   const ctx = createTestCtx()
@@ -88,7 +84,6 @@ test('should spy if inside atom', () => {
 
   valueAtom(ctx, 'new')
   assert.equal(ctx.get(parsedAtom), { key: 'new' })
-  ;`👍` //?
 })
 
 test('should parse sets', () => {
@@ -114,7 +109,6 @@ test('should parse sets', () => {
   assert.ok(values.some((a: any) => a?.__id__ === symbol))
 
   // assert.is(parsed.size, 3)
-  ;`👍` //?
 })
 
 test('should parse mixed values', () => {
@@ -138,14 +132,12 @@ test('should parse mixed values', () => {
       },
     },
   )
-  ;`👍` //?
 })
 
 test('should parse deep structures', () => {
   const ctx = createTestCtx()
 
   assert.equal(parseAtoms(ctx, [[[[[atom('deepStruct')]]]]]), [[[[['deepStruct']]]]])
-  ;`👍` //?
 })
 
 test('should parse linked list as array', () => {
@@ -198,7 +190,14 @@ test('should parse linked list as array', () => {
       bool: false,
     },
   ])
-  ;`👍` //?
+})
+
+test('should ignore constructor', () => {
+  const ctx = createTestCtx()
+
+  const constructObject = new AbortController()
+
+  assert.is(parseAtoms(ctx, { constructObject }).constructObject, constructObject)
 })
 
 test.run()

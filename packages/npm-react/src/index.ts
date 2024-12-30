@@ -24,10 +24,11 @@ import { toAbortError } from '@reatom/utils'
 // useIsomorphicEffect removes it by replacing useLayoutEffect with useEffect during ssr
 export const useIsomorphicEffect = typeof document !== 'undefined' ? React.useLayoutEffect : React.useEffect
 
+// @ts-expect-error https://github.com/webpack/webpack/issues/12960#issuecomment-1086272918
+const { __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED } = React
+
 export const getComponentDebugName = (type: string): string => {
-  let Component =
-    // @ts-expect-error do we have another way?
-    React.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED?.ReactCurrentOwner?.current?.type
+  let Component = __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED?.ReactCurrentOwner?.current?.type
 
   let name = Component?.displayName ?? Component?.name
   return name ? `Component.${name}.${type}` : `_${type}`
@@ -55,6 +56,8 @@ export const withBatching = (ctx: Ctx): Ctx => {
       ),
   }
 }
+
+const anonFnName = (() => () => {})().name
 
 export const reatomContext = React.createContext<null | Ctx>(null)
 
@@ -216,6 +219,7 @@ export const reatomComponent = <T extends object>(
   name?: string,
 ): ((props: T extends PropsWithCtx<infer P> ? P : T) => JSX.Element) => {
   if (name) name = `Component.${name}`
+  else if (Component.name !== anonFnName) name = Component.name
   else name = __count('Component')
 
   let rendering = false
@@ -285,13 +289,16 @@ export const reatomComponent = <T extends object>(
       const [, forceUpdate] = React.useState({} as JSX.Element)
 
       React.useEffect(() => {
+        const initCause = ctx.get(propsAtom).ctx.cause
         let finalController = controller
         if (finalController.signal.aborted) {
           // Mount after unmount with the same cache.
           // Brave React World...
-          const initCause = ctx.get(propsAtom).ctx.cause
-          abortCauseContext.set(initCause, (finalController = new AbortController()))
+          finalController = new AbortController()
         }
+        // HMR case: ensure the last controller will be in the context.
+        abortCauseContext.set(initCause, finalController)
+
         const unsubscribe = ctx.subscribe(renderAtom, (element) => {
           if (element.REATOM_DEPS_CHANGE) forceUpdate(element)
         })

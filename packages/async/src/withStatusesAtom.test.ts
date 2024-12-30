@@ -210,6 +210,39 @@ test('do not reject on abort', async () => {
   ;`👍` //?
 })
 
+test('isEverSettled after abort', async () => {
+  const fetchData = reatomAsync(async () => sleep()).pipe(withAbort(), withStatusesAtom())
+  const ctx = createTestCtx()
+
+  expect(ctx.get(fetchData.statusesAtom)).toBe(asyncStatusesInitState)
+  await fetchData(ctx)
+  expect(ctx.get(fetchData.statusesAtom).isFulfilled).toBe(true)
+  expect(ctx.get(fetchData.statusesAtom)).toEqual({
+    isPending: false,
+    isFulfilled: true,
+    isRejected: false,
+    isSettled: true,
+
+    isFirstPending: false,
+    isEverPending: true,
+    isEverSettled: true,
+  } satisfies AsyncStatusesFulfilled)
+
+  fetchData(ctx).catch(noop)
+  fetchData(ctx).catch(noop)
+  await null
+  expect(ctx.get(fetchData.statusesAtom)).toEqual({
+    isPending: true,
+    isFulfilled: false,
+    isRejected: false,
+    isSettled: false,
+
+    isFirstPending: false,
+    isEverPending: true,
+    isEverSettled: true,
+  } satisfies AsyncStatusesAbortedPending)
+})
+
 test('do not reject on resource abort', async () => {
   const fetchData = reatomResource(async (ctx) => {}).pipe(withStatusesAtom())
   const ctx = createTestCtx()

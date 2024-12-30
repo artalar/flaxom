@@ -45,7 +45,7 @@ export interface AsyncStatusesAbortedPending {
 
   isFirstPending: false
   isEverPending: true
-  isEverSettled: false
+  isEverSettled: boolean
 }
 
 export interface AsyncStatusesAbortedFulfill {
@@ -70,9 +70,7 @@ export interface AsyncStatusesAbortedReject {
   isEverSettled: true
 }
 
-export type AsyncStatusesAbortedSettle =
-  | AsyncStatusesAbortedFulfill
-  | AsyncStatusesAbortedReject
+export type AsyncStatusesAbortedSettle = AsyncStatusesAbortedFulfill | AsyncStatusesAbortedReject
 
 export interface AsyncStatusesFulfilled {
   isPending: false
@@ -107,10 +105,7 @@ export interface AsyncStatusesAnotherPending {
   isEverSettled: true
 }
 
-export type AsyncStatusesPending =
-  | AsyncStatusesFirstPending
-  | AsyncStatusesAbortedPending
-  | AsyncStatusesAnotherPending
+export type AsyncStatusesPending = AsyncStatusesFirstPending | AsyncStatusesAbortedPending | AsyncStatusesAnotherPending
 
 export type AsyncStatuses =
   | AsyncStatusesNeverPending
@@ -162,10 +157,7 @@ export const withStatusesAtom =
         `${anAsync.__reatom.name}.statusesAtom._lastSettledStatusAtom`,
       )
 
-      const statusesAtom = atom<AsyncStatuses>(
-        asyncStatusesInitState,
-        `${anAsync.__reatom.name}.statusesAtom`,
-      )
+      const statusesAtom = atom<AsyncStatuses>(asyncStatusesInitState, `${anAsync.__reatom.name}.statusesAtom`)
 
       // @ts-expect-error computer dump types
       statusesAtom.__reatom.computer = (ctx, state: AsyncStatuses) => {
@@ -192,10 +184,7 @@ export const withStatusesAtom =
       anAsync.statusesAtom = Object.assign(statusesAtom, {
         reset: action((ctx) => {
           relatedPromisesAtom(ctx, new Set())
-          return statusesAtom(
-            ctx,
-            asyncStatusesInitState,
-          ) as AsyncStatusesNeverPending
+          return statusesAtom(ctx, asyncStatusesInitState) as AsyncStatusesNeverPending
         }),
       })
 
@@ -257,10 +246,8 @@ export const withStatusesAtom =
 
                         isFirstPending: false,
                         isEverPending: true,
-                        isEverSettled: false,
-                      } satisfies
-                        | AsyncStatusesAbortedPending
-                        | AsyncStatusesFirstAborted
+                        isEverSettled: state.isEverSettled,
+                      } as AsyncStatusesAbortedPending | AsyncStatusesFirstAborted | AsyncStatusesAbortedPending
                     }
                   }
 

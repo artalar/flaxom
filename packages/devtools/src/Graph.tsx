@@ -24,9 +24,10 @@ type Props = {
   getColor: typeof getColor
   width: Atom<string>
   height: Atom<string>
+  initSize: number
 }
 
-export const Graph = ({ clientCtx, getColor, width, height }: Props) => {
+export const Graph = ({ clientCtx, getColor, width, height, initSize }: Props) => {
   const name = '_ReatomDevtools.Graph'
 
   const list = reatomLinkedList(
@@ -211,7 +212,7 @@ export const Graph = ({ clientCtx, getColor, width, height }: Props) => {
   const redrawLines = action((ctx) => lines.redraw(ctx, svg), `${name}.redrawLines`)
 
   const filters = reatomFilters(
-    { list: list as unknown as LinkedListAtom, clearLines: lines.clear, redrawLines },
+    { list: list as unknown as LinkedListAtom, clearLines: lines.clear, redrawLines, initSize },
     `${name}.filters`,
   )
   const valuesSearch = atom((ctx) => {
@@ -220,7 +221,7 @@ export const Graph = ({ clientCtx, getColor, width, height }: Props) => {
     return search.length < 2 ? '' : search.toLocaleLowerCase()
   })
 
-  const inspector = reatomInspector({ filters }, `${name}.inspector`)
+  const inspector = reatomInspector({ clientCtx, filters }, `${name}.inspector`)
 
   const listHeight = reatomResource(async (ctx) => {
     ctx.spy(list)
@@ -228,10 +229,12 @@ export const Graph = ({ clientCtx, getColor, width, height }: Props) => {
     ctx.spy(height)
     parseAtoms(ctx, filters)
     await ctx.schedule(() => new Promise((r) => requestAnimationFrame(r)))
+    // TODO: the second one is required in Firefox
+    await ctx.schedule(() => new Promise((r) => requestAnimationFrame(r)))
     return `${listEl.getBoundingClientRect().height}px`
   }, `${name}.listHeight`).pipe(withDataAtom('0px')).dataAtom
 
-  const subscribe = () =>
+  // const subscribe = () =>
     clientCtx.subscribe(async (logs) => {
       // sort causes and insert only from this transaction
       const insertTargets = new Set<AtomCache>()
@@ -245,21 +248,24 @@ export const Graph = ({ clientCtx, getColor, width, height }: Props) => {
 
       let isTimeStampWritten = !ctx.get(filters.timestamps)
 
-      const exludes = ctx
+      const excludes = ctx
         .get(filters.list.array)
         .filter(({ type }) => ctx.get(type) === 'exclude')
         .map(({ search }) => ctx.get(search))
       const isPass = (patch: AtomCache) => {
-        const [prev] = history.get(patch.proto) ?? []
+        const historyState = history.get(patch.proto)
+        const [prev] = historyState ?? []
 
         const isConnection =
-          !prev && patch.cause!.proto.name === 'root' && (!patch.proto.isAction || patch.state.length === 0)
+          !historyState && patch.cause!.proto.name === 'root' && (!patch.proto.isAction || patch.state.length === 0)
+
+        if (!historyState) history.set(patch.proto, [])
 
         const result =
           !isConnection &&
           prev !== patch &&
           (!prev || !Object.is(patch.state, prev.state)) &&
-          exludes.every((search) => !new RegExp(`.*${search}.*`, 'i').test(patch.proto.name!))
+          excludes.every((search) => !new RegExp(`.*${search}.*`, 'i').test(patch.proto.name!))
 
         if (result && !isTimeStampWritten) {
           isTimeStampWritten = true
@@ -319,7 +325,7 @@ export const Graph = ({ clientCtx, getColor, width, height }: Props) => {
 
   const listEl = (
     <ul
-      ref={subscribe}
+      // ref={subscribe}
       css={`
         padding: 0;
         content-visibility: auto;

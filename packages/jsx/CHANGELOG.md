@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.16.0](https://github.com/artalar/reatom/compare/jsx-v3.15.0...jsx-v3.16.0) (2024-12-17)
+
+
+### Features
+
+* **jsx:** use component name in class name ([5eb91bb](https://github.com/artalar/reatom/commit/5eb91bbf02e0e11ac49a47c0b36254c26786a96f))
+
 ## [3.15.0](https://github.com/artalar/reatom/compare/jsx-v3.14.0...jsx-v3.15.0) (2024-10-31)
 
 

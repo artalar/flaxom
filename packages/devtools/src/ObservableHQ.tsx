@@ -27,7 +27,7 @@ export const ObservableHQActionButton = (props: JSX.ButtonHTMLAttributes<HTMLEle
   )
 }
 
-export const ObservableHQ: FC<{ snapshot: any; actions?: Element }> = ({ snapshot, actions }) => {
+export const ObservableHQ: FC<{ snapshot: any; actions?: Element | Array<Element>, children?: JSX.Element }> = ({ snapshot, actions, children }) => {
   let update = noop
 
   return (
@@ -80,6 +80,7 @@ export const ObservableHQ: FC<{ snapshot: any; actions?: Element }> = ({ snapsho
         {actions}
       </div>
       <div
+        class="observablehq-container"
         ref={(ctx, observableContainer) => {
           const shadowRoot = observableContainer.attachShadow({ mode: 'open' })
           shadowRoot.append(
@@ -109,7 +110,7 @@ export const ObservableHQ: FC<{ snapshot: any; actions?: Element }> = ({ snapsho
               `}
               ref={(ctx, inspectorEl) => {
                 const inspector = new Inspector(inspectorEl) as { fulfilled(data: any): void }
-                update = (data) => inspector.fulfilled(data)
+                update = (data) => inspector.fulfilled(data instanceof URL ? data.href : data)
 
                 if (isAtom(snapshot)) {
                   return ctx.subscribe(snapshot, update)
@@ -121,6 +122,7 @@ export const ObservableHQ: FC<{ snapshot: any; actions?: Element }> = ({ snapsho
           )
         }}
       />
+      {children}
     </div>
   )
 }

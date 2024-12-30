@@ -45,8 +45,7 @@ export const reatomLines = (name: string): Lines => {
             return cause.cause?.cause && calc(target, cause.cause)
           }
 
-          // @ts-expect-error
-          if (fromEl?.computedStyleMap().get('display')?.value === 'none') {
+          if (fromEl && window.getComputedStyle(fromEl).getPropertyValue('display') === 'none') {
             return cause.cause?.cause && calc(target, cause.cause)
           }
 

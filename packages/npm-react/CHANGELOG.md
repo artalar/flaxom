@@ -1,5 +1,26 @@
 # Changelog
 
+## [3.10.3](https://github.com/artalar/reatom/compare/npm-react-v3.10.2...npm-react-v3.10.3) (2024-12-11)
+
+
+### Bug Fixes
+
+* **npm-react:** use named function in reatomComponent ([13d4be3](https://github.com/artalar/reatom/commit/13d4be3d7a5627c961f431408db5eaa8be420707))
+
+## [3.10.2](https://github.com/artalar/reatom/compare/npm-react-v3.10.1...npm-react-v3.10.2) (2024-11-13)
+
+
+### Bug Fixes
+
+* **npm-react:** webpack bug ([ee4b9cc](https://github.com/artalar/reatom/commit/ee4b9cc5f4a54622a62974b18cc19ff71ee021dc))
+
+## [3.10.1](https://github.com/artalar/reatom/compare/npm-react-v3.10.0...npm-react-v3.10.1) (2024-11-12)
+
+
+### Bug Fixes
+
+* **npm-react:** reatomComponent hmr ([43abda7](https://github.com/artalar/reatom/commit/43abda79f34526fb3329be96c4bb80ec64cf2881))
+
 ## [3.10.0](https://github.com/artalar/reatom/compare/npm-react-v3.9.0...npm-react-v3.10.0) (2024-10-08)
 
 

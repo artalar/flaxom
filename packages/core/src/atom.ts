@@ -325,24 +325,19 @@ export const createCtx = ({
       let newPubs: typeof pubs = []
 
       patchCtx.spy = ({ __reatom: depProto }: Atom, cb?: Fn) => {
-        // this changed after computer exit
-        if (patch.pubs === pubs) {
-          let depPatch = actualize(patchCtx, depProto)
-          let prevDepPatch = newPubs.push(depPatch) <= pubs.length ? pubs[newPubs.length - 1] : undefined
-          let isDepChanged = prevDepPatch?.proto !== depPatch.proto
-          isDepsChanged ||= isDepChanged
+        let depPatch = actualize(patchCtx, depProto)
+        let prevDepPatch = newPubs.push(depPatch) <= pubs.length ? pubs[newPubs.length - 1] : undefined
+        let isDepChanged = prevDepPatch?.proto !== depPatch.proto
+        isDepsChanged ||= isDepChanged
 
-          let state =
-            depProto.isAction && !isDepChanged ? depPatch.state.slice(prevDepPatch!.state.length) : depPatch.state
+        let state =
+          depProto.isAction && !isDepChanged ? depPatch.state.slice(prevDepPatch!.state.length) : depPatch.state
 
-          if (cb && (isDepChanged || !Object.is(state, prevDepPatch!.state))) {
-            if (depProto.isAction) for (const call of state) cb(call)
-            else cb(state, isDepChanged ? undefined : prevDepPatch?.state)
-          } else {
-            return state
-          }
+        if (cb && (isDepChanged || !Object.is(state, prevDepPatch!.state))) {
+          if (depProto.isAction) for (const call of state) cb(call)
+          else cb(state, isDepChanged ? undefined : prevDepPatch?.state)
         } else {
-          throwReatomError(true, 'async spy')
+          return state
         }
       }
 
@@ -361,6 +356,11 @@ export const createCtx = ({
           }
         }
       }
+
+      // this changed after computer exit
+      patchCtx.spy = () => throwReatomError(true, 'async spy')
+      // @ts-expect-error
+      patch = proto = pubs = newPubs = null
     }
   }
 

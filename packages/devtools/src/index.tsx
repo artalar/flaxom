@@ -1,11 +1,46 @@
-import { atom, type AtomProto, type Ctx, type Rec, reatomBoolean, withAssign, action } from '@reatom/framework'
+import {
+  atom,
+  type Ctx,
+  type Rec,
+  reatomBoolean,
+  withAssign,
+  action,
+  createCtx,
+  Atom,
+  Action,
+  AtomMut,
+  bind,
+  BooleanAtom,
+} from '@reatom/framework'
 import { h, mount, ctx } from '@reatom/jsx'
 import { withLocalStorage } from '@reatom/persist-web-storage'
-import { ObservableHQ } from './ObservableHQ'
 import { Graph } from './Graph'
 import { getColor } from './Graph/utils'
+import { update } from './Graph/reatomInspector'
+import { States } from './States'
 
 export { getColor }
+
+export interface DevtoolsOptions {
+  separator?: string | RegExp | ((name: string) => Array<string>)
+  privatePrefix?: string
+  getColor?: typeof getColor
+  visible?: BooleanAtom
+  initSize?: number
+}
+
+export interface DevtoolsState<T = any> {
+  (newState: T): void
+  subscribe(cb: (state: T) => void): () => void
+}
+
+export interface Devtools {
+  log(name: string, payload?: any): void
+  state<T>(name: string, initState: T): DevtoolsState<T>
+
+  show(): void
+  hide(): void
+}
 
 export const _connectDevtools = async (
   clientCtx: Ctx,
@@ -13,11 +48,9 @@ export const _connectDevtools = async (
     separator = /\.|#/,
     privatePrefix = '_',
     getColor: _getColor = getColor,
-  }: {
-    separator?: string | RegExp | ((name: string) => Array<string>)
-    privatePrefix?: string
-    getColor?: typeof getColor
-  } = {},
+    visible = reatomBoolean(true, `_ReatomDevtools.visible`),
+    initSize = 1000,
+  }: DevtoolsOptions = {},
 ) => {
   const name = '_ReatomDevtools'
 
@@ -31,8 +64,8 @@ export const _connectDevtools = async (
   const viewSwitch = reatomBoolean(true, `${name}.viewSwitch`).pipe(withLocalStorage(`${name}.viewSwitch`))
 
   const snapshot = atom<Rec>({}, `${name}.snapshot`).pipe(
-    withAssign((target) => ({
-      forceUpdate: (ctx: Ctx) => target(ctx, (state) => ({ ...state })),
+    withAssign((target, name) => ({
+      forceUpdate: action((ctx) => target(ctx, (state) => ({ ...state })), `${name}.forceUpdate`),
     })),
   )
 
@@ -132,67 +165,6 @@ export const _connectDevtools = async (
     </button>
   )
 
-  const reloadEl = (
-    <button
-      css={`
-        position: absolute;
-        top: 1px;
-        left: 70px;
-        width: 30px;
-        height: 30px;
-        border: none;
-        border-radius: 0 0 6px 6px;
-        font-size: 0.8em;
-        z-index: 10;
-        background: transparent;
-        color: #7f7f7f;
-        cursor: pointer;
-        font-size: 1em;
-      `}
-      title="Reload"
-      aria-label="Reload"
-      on:click={async (ctx) => {
-        snapshot.forceUpdate(ctx)
-      }}
-    >
-      ↻
-    </button>
-  )
-
-  const logEl = (
-    <button
-      css={`
-        position: absolute;
-        top: 1px;
-        left: 100px;
-        width: 30px;
-        height: 30px;
-        border: none;
-        border-radius: 0 0 6px 6px;
-        font-size: 0.8em;
-        z-index: 10;
-        background: transparent;
-        color: #7f7f7f;
-        cursor: pointer;
-        font-size: 1em;
-      `}
-      title="Log structured clone"
-      aria-label="Log structured clone"
-      on:click={() => {
-        try {
-          console.log(structuredClone(ctx.get(snapshot)))
-        } catch {
-          console.warn(
-            "Reatom: can't make a structured clone to log a snapshot, log live state instead, the values could be changed during a time.",
-          )
-          console.log(ctx.get(snapshot))
-        }
-      }}
-    >
-      log
-    </button>
-  )
-
   const containerEl = (
     <div
       css={`
@@ -213,16 +185,13 @@ export const _connectDevtools = async (
     >
       {logo}
       {viewSwitchEl}
-      <div
-        css={`
-          display: var(--display);
-        `}
-        css:display={atom((ctx) => (ctx.spy(viewSwitch) ? 'none' : 'block'))}
-      >
-        {reloadEl}
-        {logEl}
-        <ObservableHQ snapshot={snapshot} />
-      </div>
+      <States
+        clientCtx={clientCtx}
+        viewSwitch={viewSwitch}
+        separator={separator}
+        snapshot={snapshot}
+        privatePrefix={privatePrefix}
+      />
       <div
         css={`
           display: var(--display);
@@ -231,68 +200,78 @@ export const _connectDevtools = async (
         `}
         css:display={atom((ctx) => (ctx.spy(viewSwitch) ? 'block' : 'none'))}
       >
-        <Graph clientCtx={clientCtx} getColor={_getColor} width={width} height={height} />
+        <Graph clientCtx={clientCtx} getColor={_getColor} width={width} height={height} initSize={initSize} />
       </div>
     </div>
   )
 
-  const touched = new WeakSet<AtomProto>()
+  if (ctx.get(visible)) mount(document.body, containerEl)
 
-  clientCtx.subscribe(async (logs) => {
-    // await null // needed to prevent `Maximum call stack size exceeded` coz `parseAtoms`
-
-    for (const { proto, state } of logs) {
-      let name = proto.name!
-      const path = typeof separator === 'function' ? separator(name) : name.split(separator)
-
-      if (proto.isAction || touched.has(proto) || path.some((key) => key.startsWith(privatePrefix))) {
-        continue
-      }
-
-      let thisLogObject = ctx.get(snapshot)
-
-      path.forEach((key, i, { length }) => {
-        if (i === length - 1) {
-          name = key
-        } else {
-          thisLogObject = thisLogObject[`[${key}]`] ??= {}
-        }
-      })
-
-      let update = (state: any) => {
-        thisLogObject[name] = state // parseAtoms(ctx, state)
-      }
-
-      if (name === 'urlAtom') {
-        update = (state) => {
-          thisLogObject[name] = state.href
-        }
-      }
-
-      update(state)
-      ;(proto.updateHooks ??= new Set()).add((ctx, { state }) => {
-        update(state)
-      })
-
-      touched.add(proto)
+  visible.onChange((ctx, state) => {
+    if (state) {
+      mount(document.body, containerEl)
+    } else {
+      containerEl.remove()
     }
   })
-
-  const clearId = setInterval(() => {
-    if (Object.keys(ctx.get(snapshot)).length > 0) {
-      snapshot.forceUpdate(ctx)
-      clearTimeout(clearId)
-    }
-  }, 100)
-
-  mount(document.body, containerEl)
 }
 
+/** @deprecated use `createDevtools` instead */
 export const connectDevtools = (...[ctx, options]: Parameters<typeof _connectDevtools>) => {
   _connectDevtools(ctx, options)
 
   return <T,>(name: string, payload: T): T => {
     const logAction = action((ctx, payload: T) => payload, name)
     return logAction(ctx, payload)
+  }
+}
+
+export const createDevtools = ({
+  ctx: clientCtx = createCtx(),
+  initVisibility = true,
+  ...options
+}: Omit<DevtoolsOptions, 'visible'> & { ctx?: Ctx; initVisibility?: boolean } = {}): Devtools => {
+  const visible = reatomBoolean(initVisibility, '_ReatomDevtools.visible')
+
+  _connectDevtools(clientCtx, { ...options, visible })
+
+  const cache = new Map<string, Atom>()
+
+  const log: Devtools['log'] = (name: string, payload: any) => {
+    let target = cache.get(name) as Action | undefined
+    if (!target) {
+      cache.set(name, (target = action(name)))
+    }
+    target(clientCtx, payload)
+  }
+
+  const state: Devtools['state'] = (name, initState) => {
+    let target = cache.get(name) as AtomMut | undefined
+    if (!target) {
+      cache.set(name, (target = atom(initState, name)))
+    } else if (ctx.get(target) !== initState) {
+      target(clientCtx, initState)
+    }
+
+    // memoize the reference to the atom
+    const result = bind(clientCtx, target) as DevtoolsState
+
+    const subscribe: DevtoolsState['subscribe'] = (cb) =>
+      target.onChange((ctx, state) => {
+        if (ctx.cause.cause?.proto === update.__reatom) {
+          cb(state)
+        }
+      })
+
+    result.subscribe ??= subscribe
+
+    return result
+  }
+
+  return {
+    log,
+    state,
+    show: bind(ctx, visible.setTrue),
+    hide: bind(ctx, visible.setFalse),
   }
 }

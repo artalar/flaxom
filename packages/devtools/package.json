@@ -1,6 +1,6 @@
 {
   "name": "@reatom/devtools",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "Reatom developer tools for states and actions inspecting",
   "type": "module",
   "private": false,
@@ -50,7 +50,9 @@
   ],
   "files": [
     "/build",
-    "/package.json"
+    "/package.json",
+    "/devtools1.png",
+    "/devtools2.png"
   ],
   "devDependencies": {
     "@observablehq/inspector": "^5.0.0",

@@ -12,6 +12,8 @@
     "@reatom/devtools": "*",
     "@reatom/framework": "^3.*.*",
     "@reatom/npm-react": "^3.*.*",
+    "@reatom/persist-web-storage": "^3.*.*",
+    "@reatom/url": "^3.*.*",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },

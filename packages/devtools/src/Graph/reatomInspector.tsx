@@ -1,22 +1,36 @@
-import { __root, action, atom, AtomCache, parseAtoms, withReset } from '@reatom/framework'
+import { __root, action, atom, AtomCache, AtomProto, Ctx, parseAtoms, withReset } from '@reatom/framework'
 import { h, hf, JSX } from '@reatom/jsx'
 import { ObservableHQ, ObservableHQActionButton } from '../ObservableHQ'
 import { reatomFilters } from './reatomFilters'
 import { actionsStates, history } from './utils'
-import { withComputed } from '@reatom/primitives'
+import { reatomBoolean, withComputed } from '@reatom/primitives'
 
 type InspectorState =
   | { kind: 'hidden' }
   | { kind: 'open'; patch: AtomCache }
   | { kind: 'fixed'; patch: AtomCache; element: HTMLElement }
 
-export const reatomInspector = ({ filters }: { filters: ReturnType<typeof reatomFilters> }, name: string) => {
+// separate action for naming purpose, CALL ONLY WITH `clientCtx`
+export const update = action((ctx, proto: AtomProto, value: string) => {
+  ctx.get((read, actualize) => {
+    actualize!(ctx, proto, (patchCtx: Ctx, patch: AtomCache) => {
+      patch.state = JSON.parse(value)
+    })
+  })
+}, 'update')
+
+export const reatomInspector = (
+  { clientCtx, filters }: { clientCtx: Ctx; filters: ReturnType<typeof reatomFilters> },
+  name: string,
+) => {
   const state = atom<InspectorState>({ kind: 'hidden' }, `${name}.state`)
+
   const patch = atom((ctx) => {
     const s = ctx.spy(state)
 
     return s.kind === 'hidden' ? null : s.patch
   }, `${name}.patch`)
+
   const patchState = atom<any>(null, `${name}.patchState`).pipe(
     withComputed((ctx) => {
       const patchState = ctx.spy(patch)
@@ -26,9 +40,25 @@ export const reatomInspector = ({ filters }: { filters: ReturnType<typeof reatom
         return calls?.length === 1 ? calls[calls.length - 1] : calls
       }
 
-      return patchState?.state instanceof URL ? patchState?.state.href : patchState?.state
+      return patchState?.state
     }),
   )
+
+  const edit = reatomBoolean(false, `${name}.edit`).pipe(
+    withComputed((ctx) => {
+      ctx.spy(patch)
+      return false
+    }),
+  )
+
+  const json = atom((ctx) => {
+    try {
+      return JSON.stringify(ctx.spy(patch)?.state, null, 2) ?? ''
+    } catch (error) {
+      return ''
+    }
+  }, `${name}.json`)
+
   const patchHistory = atom((ctx) => {
     const patchState = ctx.spy(patch)
 
@@ -138,8 +168,17 @@ export const reatomInspector = ({ filters }: { filters: ReturnType<typeof reatom
       `}
     >
       <div
+        css:observablehq-display={atom((ctx) => (ctx.spy(edit) ? 'none' : 'block'))}
+        css:form-display={atom((ctx) => (ctx.spy(edit) ? 'block' : 'none'))}
         css={`
           min-height: 100px;
+
+          & .observablehq-container {
+            display: var(--observablehq-display);
+          }
+          & form {
+            display: var(--form-display);
+          }
         `}
       >
         <h4
@@ -156,11 +195,60 @@ export const reatomInspector = ({ filters }: { filters: ReturnType<typeof reatom
         <ObservableHQ
           snapshot={patchState}
           actions={
-            <ObservableHQActionButton on:click={close} title="Close" aria-label="Close this inspector">
-              x
-            </ObservableHQActionButton>
+            <>
+              <ObservableHQActionButton
+                // @ts-ignore TODO
+                css:display={atom((ctx) => (ctx.spy(patch)?.proto.isAction ? 'none' : ''))}
+                on:click={edit.toggle}
+                title="Edit"
+                aria-label="Toggle editing"
+                css={`
+                  display: var(--display);
+                `}
+              >
+                ✏️
+              </ObservableHQActionButton>
+              <ObservableHQActionButton on:click={close} title="Close" aria-label="Close this inspector">
+                x
+              </ObservableHQActionButton>
+            </>
           }
-        />
+        >
+          <form
+            on:submit={(ctx, e) => {
+              e.preventDefault()
+              const proto = ctx.get(patch)?.proto
+              const textarea = e.currentTarget.firstChild
+              if (proto && textarea instanceof HTMLTextAreaElement) {
+                update(clientCtx, proto, textarea.value)
+                textarea.value = ctx.get(json)
+              }
+            }}
+            aria-label="Update state"
+          >
+            <textarea
+              placeholder="JSON"
+              css={`
+                margin: 1rem;
+                font-family: monospace;
+                resizable: both;
+                min-width: 50%;
+                min-height: 5rem;
+              `}
+              prop:value={atom((ctx) => (ctx.spy(edit) ? ctx.spy(json) : ''))}
+            />
+            <div
+              css={`
+                margin: 0 1rem;
+              `}
+            >
+              <button>Update</button>
+              <button type="button" on:click={edit.setFalse}>
+                Cancel
+              </button>
+            </div>
+          </form>
+        </ObservableHQ>
       </div>
       <div>
         <hr />

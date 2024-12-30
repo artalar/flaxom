@@ -38,7 +38,6 @@ const initState: FiltersJSON = {
   size: 1000,
   list: [{ name: 'private', search: `(^_)|(\._)`, type: 'mismatch', color: DEFAULT_COLOR, default: true }],
 }
-const initSnapshot = JSON.stringify(initState)
 const version = 'v24'
 
 const FilterView = ({ id, filter, remove }: { id: string; filter: Filter; remove: Fn<[Ctx]> }) => (
@@ -103,8 +102,11 @@ const FilterView = ({ id, filter, remove }: { id: string; filter: Filter; remove
           aria-label="exclude"
           disabled={atom((ctx) => ctx.spy(filter.type) === 'exclude')}
           on:click={filter.type.setExclude}
+          css={`
+            font-size: 10px;
+          `}
         >
-          ⊘
+          🗑️
         </FilterButton>
       )}
       <FilterButton
@@ -113,7 +115,7 @@ const FilterView = ({ id, filter, remove }: { id: string; filter: Filter; remove
         disabled={atom((ctx) => ctx.spy(filter.type) === 'off')}
         on:click={filter.type.setOff}
       >
-        {atom((ctx) => (ctx.spy(filter.type) === 'off' ? '▶' : '◼'))}
+        {atom((ctx) => (ctx.spy(filter.type) === 'off' ? 'll' : '◼'))}
       </FilterButton>
     </td>
     <td>
@@ -164,17 +166,27 @@ export const reatomFilters = (
     list,
     clearLines,
     redrawLines,
-  }: { list: LinkedListAtom; clearLines: Action<[], void>; redrawLines: Action<[], void> },
+    initSize,
+  }: {
+    list: LinkedListAtom
+    clearLines: Action<[], void>
+    redrawLines: Action<[], void>
+    initSize: number
+  },
   name: string,
 ) => {
   const KEY = name + version
 
   try {
-    var snapshot: undefined | FiltersJSON = Filters.parse(JSON.parse(localStorage.getItem(KEY) || initSnapshot))
-  } catch {}
+    const snapshotString = localStorage.getItem(KEY)
+    const snapshotObject = snapshotString && JSON.parse(snapshotString)
+    var snapshot: undefined | FiltersJSON = Filters.parse(snapshotObject || { ...initState, size: initSize })
+  } catch {
+    snapshot = { ...initState, size: initSize }
+  }
 
   const filters = reatomZod(Filters, {
-    initState: snapshot || initState,
+    initState: snapshot,
     sync: (ctx) => {
       redrawLines(ctx)
       ctx.schedule(() => {

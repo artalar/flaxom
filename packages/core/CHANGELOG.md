@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.9.1](https://github.com/artalar/reatom/compare/core-v3.9.0...core-v3.9.1) (2024-12-11)
+
+
+### Bug Fixes
+
+* **core:** mem leak for recursion ([e84e7f6](https://github.com/artalar/reatom/commit/e84e7f634f37e93ac88d8eea0a13f0e727e5fd72))
+
 ## [3.9.0](https://github.com/artalar/reatom/compare/core-v3.8.3...core-v3.9.0) (2024-07-16)
 
 
