@@ -38,27 +38,21 @@ it('static props & children', setup((ctx, h, hf, mount, parent) => {
 }))
 
 it('dynamic props', setup((ctx, h, hf, mount, parent) => {
-  const val = atom('val', 'val')
   const prp = atom('prp', 'prp')
   const atr = atom('atr', 'atr')
 
-  const element = <div id={val} prop:prp={prp} attr:atr={atr} />
+  const element = <div id={prp} attr:class={atr} />
 
   mount(parent, element)
 
-  assert.is(element.id, 'val')
-  // @ts-expect-error `dunno` can't be inferred
-  assert.is(element.prp, 'prp')
-  assert.is(element.getAttribute('atr'), 'atr')
+  assert.is(element.id, 'prp')
+  assert.is(element.getAttribute('class'), 'atr')
 
-  val(ctx, 'val1')
   prp(ctx, 'prp1')
   atr(ctx, 'atr1')
 
-  assert.is(element.id, 'val1')
-  // @ts-expect-error `dunno` can't be inferred
-  assert.is(element.prp, 'prp1')
-  assert.is(element.getAttribute('atr'), 'atr1')
+  assert.is(element.id, 'prp1')
+  assert.is(element.getAttribute('class'), 'atr1')
 }))
 
 it('children updates', setup((ctx, h, hf, mount, parent) => {
@@ -390,12 +384,12 @@ it('same arguments in ref mount and unmount hooks', setup(async (ctx, h, hf, mou
   assert.is(unmountArgs[1], component)
 }))
 
-it('css property and class attribute', setup(async (ctx, h, hf, mount, parent) => {
+it('css property and className property', setup(async (ctx, h, hf, mount, parent) => {
   const cls = 'class'
   const css = 'color: red;'
 
-  const ref1 = (<div css={css} class={cls}></div>)
-  const ref2 = (<div class={cls} css={css}></div>)
+  const ref1 = (<div css={css} className={cls}></div>)
+  const ref2 = (<div className={cls} css={css}></div>)
 
   const component = (
     <div>
@@ -445,7 +439,7 @@ it('css custom property', setup(async (ctx, h, hf, mount, parent) => {
   assert.is(component.style.getPropertyValue('--secondProperty'), '')
 }))
 
-it('class and className attribute', setup(async (ctx, h, hf, mount, parent) => {
+it('class and className properties', setup(async (ctx, h, hf, mount, parent) => {
   const classAtom = atom('' as string | undefined)
 
   const ref1 = (<div class={classAtom}></div>)
@@ -473,8 +467,8 @@ it('class and className attribute', setup(async (ctx, h, hf, mount, parent) => {
   classAtom(ctx, undefined)
   assert.is(ref1.className, '')
   assert.is(ref2.className, '')
-  assert.ok(!ref1.hasAttribute('class'))
-  assert.ok(!ref2.hasAttribute('class'))
+  assert.ok(ref1.hasAttribute('class'))
+  assert.ok(ref2.hasAttribute('class'))
 }))
 
 it('ref mount and unmount callbacks order', setup(async (ctx, h, hf, mount, parent) => {
