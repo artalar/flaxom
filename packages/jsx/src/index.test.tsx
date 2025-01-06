@@ -390,12 +390,12 @@ it('same arguments in ref mount and unmount hooks', setup(async (ctx, h, hf, mou
   assert.is(unmountArgs[1], component)
 }))
 
-it('css property and class attribute', setup(async (ctx, h, hf, mount, parent) => {
+it('css property and className property', setup(async (ctx, h, hf, mount, parent) => {
   const cls = 'class'
   const css = 'color: red;'
 
-  const ref1 = (<div css={css} class={cls}></div>)
-  const ref2 = (<div class={cls} css={css}></div>)
+  const ref1 = (<div css={css} className={cls}></div>)
+  const ref2 = (<div className={cls} css={css}></div>)
 
   const component = (
     <div>
@@ -445,7 +445,7 @@ it('css custom property', setup(async (ctx, h, hf, mount, parent) => {
   assert.is(component.style.getPropertyValue('--secondProperty'), '')
 }))
 
-it('class and className attribute', setup(async (ctx, h, hf, mount, parent) => {
+it('class and className properties', setup(async (ctx, h, hf, mount, parent) => {
   const classAtom = atom('' as string | undefined)
 
   const ref1 = (<div class={classAtom}></div>)
@@ -473,8 +473,8 @@ it('class and className attribute', setup(async (ctx, h, hf, mount, parent) => {
   classAtom(ctx, undefined)
   assert.is(ref1.className, '')
   assert.is(ref2.className, '')
-  assert.ok(!ref1.hasAttribute('class'))
-  assert.ok(!ref2.hasAttribute('class'))
+  assert.ok(ref1.hasAttribute('class'))
+  assert.ok(ref2.hasAttribute('class'))
 }))
 
 it('ref mount and unmount callbacks order', setup(async (ctx, h, hf, mount, parent) => {
