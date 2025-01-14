@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.10.5](https://github.com/artalar/reatom/compare/npm-react-v3.10.4...npm-react-v3.10.5) (2025-01-14)
+
+
+### Bug Fixes
+
+* **npm-react:** getComponentDebugName internals ([4c22ee5](https://github.com/artalar/reatom/commit/4c22ee57e0f3c67487fa08f5831b4d85f1a2ddc1))
+
 ## [3.10.4](https://github.com/artalar/reatom/compare/npm-react-v3.10.3...npm-react-v3.10.4) (2024-12-30)
 
 
