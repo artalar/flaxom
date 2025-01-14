@@ -2,4 +2,4 @@
 // without mentioning `globalThis`, as it adds `/// <reference types="node" />` to the bundle
 // https://github.com/artalar/reatom/issues/983
 // (you can't get `typeof setTimeout` in the index file with `setTimeout` variable in the module scope)
-export const _setTimeout = setTimeout
+export type SetTimeout = typeof setTimeout

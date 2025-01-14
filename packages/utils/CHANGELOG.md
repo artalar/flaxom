@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.11.2](https://github.com/artalar/reatom/compare/utils-v3.11.1...utils-v3.11.2) (2025-01-14)
+
+
+### Bug Fixes
+
+* **utils:** setTimeout types [#1002](https://github.com/artalar/reatom/issues/1002) ([3201541](https://github.com/artalar/reatom/commit/3201541b0df9c90cdfb1dc5eafe1183042804d80))
+
 ## [3.11.1](https://github.com/artalar/reatom/compare/utils-v3.11.0...utils-v3.11.1) (2024-12-30)
 
 

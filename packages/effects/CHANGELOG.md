@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.11.1](https://github.com/artalar/reatom/compare/effects-v3.11.0...effects-v3.11.1) (2025-01-14)
+
+
+### Bug Fixes
+
+* **effects:** concurrent abort [#1003](https://github.com/artalar/reatom/issues/1003) ([469b0d4](https://github.com/artalar/reatom/commit/469b0d44193b09953721db9072bc75e29b42a4c8))
+
 ## [3.11.0](https://github.com/artalar/reatom/compare/effects-v3.10.2...effects-v3.11.0) (2024-12-30)
 
 

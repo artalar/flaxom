@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.16.5](https://github.com/artalar/reatom/compare/async-v3.16.4...async-v3.16.5) (2025-01-14)
+
+
+### Bug Fixes
+
+* **effects:** concurrent abort [#1003](https://github.com/artalar/reatom/issues/1003) ([469b0d4](https://github.com/artalar/reatom/commit/469b0d44193b09953721db9072bc75e29b42a4c8))
+
 ## [3.16.4](https://github.com/artalar/reatom/compare/async-v3.16.3...async-v3.16.4) (2024-12-11)
 
 

@@ -351,7 +351,7 @@ export const reatomFilters = (
                 align-items: center;
               `}
             >
-              size
+              {atom((ctx) => `size ${ctx.spy(list).size} of `)}
               <input
                 model:valueAsNumber={filters.size}
                 css:width={atom((ctx) => `${Math.max(3, ctx.spy(filters.size).toString().length)}em`)}

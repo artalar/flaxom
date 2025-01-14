@@ -1,4 +1,4 @@
-import { _setTimeout } from './setTimeout'
+import { SetTimeout } from './setTimeout'
 
 export type UndefinedToOptional<T extends object> = Partial<T> & PickValues<T, {} | null>
 
@@ -270,8 +270,8 @@ export const throwAbort = (message: string, controller?: AbortController): never
   throw error
 }
 
-export const setTimeout: typeof _setTimeout = Object.assign((...a: Parameters<typeof _setTimeout>) => {
-  const intervalId = _setTimeout(...a)
+export const setTimeout: SetTimeout = Object.assign((...a: Parameters<SetTimeout>) => {
+  const intervalId = globalThis.setTimeout(...a)
   return typeof intervalId === 'number'
     ? intervalId
     : Object.assign(intervalId, {
@@ -279,7 +279,7 @@ export const setTimeout: typeof _setTimeout = Object.assign((...a: Parameters<ty
           return -1
         },
       })
-}, _setTimeout)
+}, globalThis.setTimeout)
 
 /** @link https://developer.mozilla.org/en-US/docs/Web/API/setTimeout#maximum_delay_value */
 export const MAX_SAFE_TIMEOUT = 2 ** 31 - 1

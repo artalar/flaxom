@@ -299,40 +299,37 @@ export const concurrent: {
       }
       if (strategy === 'last-in-win') {
         abortControllerAtom(ctx, controller)
-        if (prevController) {
-          // TODO is it better to do it sync?
-          ctx.schedule(() => prevController.abort(abort))
-        }
+
+        prevController?.abort(abort)
       }
 
       const unabort = onCtxAbort(topCtx, (error) => {
         // prevent unhandled error for abort
-        if (res instanceof Promise) res.catch(noop)
+        if (result instanceof Promise) result.catch(noop)
         controller.abort(error)
       })
 
       abortCauseContext.set(ctx.cause, controller)
 
-      var res = fn(withAbortableSchedule({ ...ctx, spy: topCtx.spy }) as CtxSpy, ...a)
-      if (res instanceof Promise) {
-        res = res.finally(() => {
+      var result = fn(withAbortableSchedule({ ...ctx, spy: topCtx.spy }) as CtxSpy, ...a)
+      if (result instanceof Promise) {
+        result = result.finally(() => {
           if (strategy === 'first-in-win') {
             abortControllerAtom(ctx, null)
           }
 
           unabort?.()
           // prevent uncaught rejection for the abort
-          if (controller.signal.aborted) res.catch(noop)
-          throwIfAborted(controller)
+          if (controller.signal.aborted) result.catch(noop)
         })
         // prevent uncaught rejection for the abort
         controller.signal.addEventListener('abort', () => {
-          res.catch(noop)
+          result.catch(noop)
         })
       } else {
         throwReatomError(strategy === 'first-in-win', 'can\'t apply "first-in-win" strategy for non-async function')
       }
-      return res
+      return result
     },
     isAtom(fn) ? `${fn.__reatom.name}._concurrent` : '_concurrent',
   )

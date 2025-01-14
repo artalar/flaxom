@@ -1,7 +1,7 @@
 import { test, expect } from 'vitest'
 import { action, atom } from '@reatom/core'
 import { mapPayloadAwaited } from '@reatom/lens'
-import { take } from '@reatom/effects'
+import { take, concurrent } from '@reatom/effects'
 import { onConnect } from '@reatom/hooks'
 import { createTestCtx, mockFn } from '@reatom/testing'
 import { noop, random, sleep } from '@reatom/utils'
@@ -443,4 +443,38 @@ test('withAbort + withRetry', async () => {
 
   setTimeout(() => track.unsubscribe())
   expect(track.calls.length > 2).toBeTruthy()
+})
+
+test('effects concurrent without unhandled rejection', async () => {
+  const ctx = createTestCtx()
+
+  const track = mockFn()
+
+  const nAtom = atom(0)
+  nAtom.onChange(
+    concurrent(async (ctx, n) => {
+      try {
+        await ctx.schedule(() => sleep())
+        track(n)
+      } catch {}
+    }),
+  )
+  const doSome = reatomAsync(async (ctx, n: number) => {
+    // await ctx.schedule(() => sleep()) // this fixed the issue
+    nAtom(ctx, n)
+  })
+
+  doSome(ctx, 1).catch(noop)
+  // await // this fixed the issue
+  doSome(ctx, 2).catch(noop)
+
+  const promise = doSome(ctx, 3).catch(noop)
+
+  expect(track.calls.length).toBe(0)
+
+  await promise
+  await sleep()
+
+  expect(track.calls.length).toBe(1)
+  expect(track.lastInput()).toBe(3)
 })

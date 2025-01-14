@@ -31,7 +31,7 @@ const {
 } = React as any
 
 export const getComponentDebugName = (type: string): string => {
-  let Component = oldInternals?.ReactCurrentOwner?.current?.type ?? newInternals.A.getOwner().type
+  let Component = oldInternals?.ReactCurrentOwner?.current?.type ?? newInternals?.A?.getOwner?.()?.type
 
   let name = Component?.displayName ?? Component?.name
   return name ? `Component.${name}.${type}` : `_${type}`

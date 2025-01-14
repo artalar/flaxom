@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.1](https://github.com/artalar/reatom/compare/devtools-v0.8.0...devtools-v0.8.1) (2025-01-14)
+
+
+### Bug Fixes
+
+* **devtools:** show the amount of loaded logs ([38101dd](https://github.com/artalar/reatom/commit/38101dd2d9802f12c9042bc8edaca6c235abaa67))
+
 ## [0.8.0](https://github.com/artalar/reatom/compare/devtools-v0.7.2...devtools-v0.8.0) (2024-12-17)
 
 
