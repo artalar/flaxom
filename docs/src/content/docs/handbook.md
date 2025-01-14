@@ -391,7 +391,7 @@ You can find many great examples in the [async package docs](/package/async).
 
 ### Lifecycle scheme
 
-Reatom operates a few queues to manage mutations and pure computations, effects with different priorities to archive most intuitive and efficient execution order, with batching and transactions. We have a few nested loops, which warks the same way as "tasks" and "microtasks" in a browser: a parent loop tick wait all children loops to complete.
+Reatom operates a few queues to manage mutations and pure computations, effects with different priorities to achieve most intuitive and efficient execution order, with batching and transactions. We have a few nested loops, which works the same way as "tasks" and "microtasks" in a browser: a parent loop tick wait all children loops to complete.
 
 > For more details on how to use the queues, refer to the [ctx.schedule](/package/core#ctxschedule) documentation.
 

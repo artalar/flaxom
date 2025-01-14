@@ -596,7 +596,7 @@ Return `0` to retry immediately. With this pattern your loader will not blink, a
 ```ts
 import { reatomAsync, withRetry } from '@reatom/async'
 
-const fetchData = export const fetchList = reatomAsync(
+export const fetchList = reatomAsync(
   (ctx) => request('api/list', ctx.controller),
   'fetchList',
 ).pipe(
