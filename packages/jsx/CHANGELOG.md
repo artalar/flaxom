@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.16.1](https://github.com/artalar/reatom/compare/jsx-v3.16.0...jsx-v3.16.1) (2025-01-17)
+
+
+### Bug Fixes
+
+* **jsx:** class name generator ([f61f1c2](https://github.com/artalar/reatom/commit/f61f1c2bbce907c1d00dff3d579838e6c500df98))
+
 ## [3.16.0](https://github.com/artalar/reatom/compare/jsx-v3.15.0...jsx-v3.16.0) (2024-12-17)
 
 

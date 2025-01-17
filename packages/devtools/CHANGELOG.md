@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.8.2](https://github.com/artalar/reatom/compare/devtools-v0.8.1...devtools-v0.8.2) (2025-01-17)
+
+
+### Bug Fixes
+
+* **devtools:** action log ([56e6380](https://github.com/artalar/reatom/commit/56e6380fb0efa42c18fcfc1cfddccab0f5dd9daf))
+* **devtools:** improve filters design ([d9ad7e8](https://github.com/artalar/reatom/commit/d9ad7e8a8c832702cd6d5df7220704a5ba34db43))
+
 ## [0.8.1](https://github.com/artalar/reatom/compare/devtools-v0.8.0...devtools-v0.8.1) (2025-01-14)
 
 
