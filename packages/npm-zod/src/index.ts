@@ -319,6 +319,14 @@ export const reatomZod = <Schema extends z.ZodFirstPartySchemaTypes>(
       })
     }
 
+    case z.ZodFirstPartyTypeKind.ZodEffects: {
+      return reatomZod(def.schema, {
+        sync,
+        initState: initState,
+        name,
+      })
+    }
+
     default: {
       // @ts-expect-error // TODO
       const typeName: never = def.typeName

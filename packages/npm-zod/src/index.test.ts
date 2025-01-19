@@ -27,4 +27,35 @@ test("base API", async () => {
   assert.equal(track.lastInput(), { n: 42, s: "bar", readonly: "foo" });
 });
 
+
+
+test('ZodEffects should throw error', async () => {
+  const effectsSchema = z
+    .object({
+      n: z.number(),
+      s: z.string(),
+    })
+    .transform((data) => ({ ...data, transformed: true }))
+
+  const ctx = createTestCtx()
+
+  const createEffectsModel = reatomZod(effectsSchema, {
+    initState: {
+      n: 2,
+      s: '123',
+    },
+    name: 'createEffectsModel',
+  })
+
+  try {
+    console.log(createEffectsModel)
+
+    assert.unreachable('Expected error was not thrown')
+  } catch (error) {
+    assert.instance(error as TypeError, TypeError)
+    assert.is((error as TypeError).message, 'Unsupported Zod type: ZodEffects')
+    console.log(error)
+  }
+})
+
 test.run();
