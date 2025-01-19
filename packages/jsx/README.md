@@ -148,6 +148,18 @@ Correct:
 ></div>
 ```
 
+To define a style property value, you should prepend the namespace `style:`:
+
+```tsx
+// <div style="top: 10px; right: 0;"></div>
+<div
+  style:top={atom('10px')}
+  style:right={0}
+  style:bottom={undefined}
+  style:left={null}
+></div>
+```
+
 ### Class name utility
 
 The `cn` function is designed for creating a string of CSS classes. It allows the use of multiple data types: strings, objects, arrays, functions, and atoms, which are converted into a class string.

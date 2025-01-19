@@ -83,6 +83,11 @@ const walkLinkedList = (ctx: Ctx, el: JSX.Element, list: Atom<LinkedList<LLNode<
   )
 }
 
+const patchStyleProperty = (style: CSSStyleDeclaration, key: string, value: any): void => {
+  if (value == null) style.removeProperty(key)
+  else style.setProperty(key, value)
+}
+
 export const reatomJsx = (ctx: Ctx, DOM: DomApis = globalThis.window) => {
   const StylesheetId = 'reatom-jsx-styles'
   let styles: Rec<string> = {}
@@ -115,10 +120,10 @@ export const reatomJsx = (ctx: Ctx, DOM: DomApis = globalThis.window) => {
       /** @see https://measurethat.net/Benchmarks/Show/11819 */
       element.setAttribute('data-reatom', styleId)
     } else if (key === 'style' && typeof val === 'object') {
-      for (const key in val) {
-        if (val[key] == null) element.style.removeProperty(key)
-        else element.style.setProperty(key, val[key])
-      }
+      for (const key in val) patchStyleProperty(element.style, key, val[key])
+    } else if (key.startsWith('style:')) {
+      key = key.slice(6)
+      patchStyleProperty(element.style, key, val)
     } else if (key.startsWith('prop:')) {
       // @ts-expect-error
       element[key.slice(5)] = val

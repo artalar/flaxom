@@ -507,25 +507,40 @@ it('ref mount and unmount callbacks order', setup(async (ctx, h, hf, mount, pare
 }))
 
 it('style object update', setup((ctx, h, hf, mount, parent) => {
-  const styleAtom = atom({
-    top: '0',
-    right: undefined,
-    bottom: null as unknown as undefined,
-    left: '0',
-  } as JSX.CSSProperties)
+  const styleTopAtom = atom<JSX.StyleProperties['top']>('0')
+  const styleRightAtom = atom<JSX.StyleProperties['right']>(undefined)
+  const styleBottomAtom = atom<JSX.StyleProperties['bottom']>(null)
+  const styleLeftAtom = atom<JSX.StyleProperties['left']>('0')
+  const styleAtom = atom<JSX.StyleProperties>((ctx) => ({
+    top: ctx.spy(styleTopAtom),
+    right: ctx.spy(styleRightAtom),
+    bottom: ctx.spy(styleBottomAtom),
+    left: ctx.spy(styleLeftAtom),
+  }))
+
+  const firstEl = (<div style={styleAtom}></div>)
+  const secondEl = (<div
+    style:top={styleTopAtom}
+    style:right={styleRightAtom}
+    style:bottom={styleBottomAtom}
+    style:left={styleLeftAtom}
+  ></div>)
 
   const component = (
-    <div style={styleAtom}></div>
+    <div>
+      {firstEl}
+      {secondEl}
+    </div>
   )
 
   mount(parent, component)
 
-  assert.is(component.getAttribute('style'), 'top: 0px; left: 0px;')
+  assert.is(firstEl.getAttribute('style'), 'top: 0px; left: 0px;')
+  assert.is(secondEl.getAttribute('style'), 'top: 0px; left: 0px;')
 
-  styleAtom(ctx, {
-    top: undefined,
-    bottom: '0',
-  })
+  styleTopAtom(ctx, undefined)
+  styleBottomAtom(ctx, 0)
 
-  assert.is(component.getAttribute('style'), 'left: 0px; bottom: 0px;')
+  assert.is(firstEl.getAttribute('style'), 'left: 0px; bottom: 0px;')
+  assert.is(secondEl.getAttribute('style'), 'left: 0px; bottom: 0px;')
 }))
