@@ -22,8 +22,8 @@
   "scripts": {
     "prepublishOnly": "npm run build && npm run test",
     "build": "microbundle -f esm,cjs",
-    "test": "ts-node src/index.test.ts",
-    "test:watch": "echo 'Note: Tests could be run only with built sources' && tsx watch src/index.test.ts"
+    "test": "vitest run src/*.test.ts",
+    "test:watch": "vitest src/*.test.ts"
   },
   "dependencies": {
     "@reatom/core": "^3.2.0",

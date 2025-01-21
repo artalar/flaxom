@@ -64,10 +64,7 @@ export class Tree {
   }
 
   _getFns(key: Leaf) {
-    return (
-      this.fnsMap.get(key) ||
-      (this.fnsMap.set(key, new SetCounted()).get(key) as SetCounted)
-    )
+    return this.fnsMap.get(key) || (this.fnsMap.set(key, new SetCounted()).get(key) as SetCounted)
   }
 
   addFn(fn: Fn, key: Leaf) {

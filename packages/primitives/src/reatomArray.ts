@@ -8,19 +8,12 @@ export interface ArrayAtom<T> extends AtomMut<Array<T>> {
   with: Action<[i: number, value: T], T[]>
 }
 
-export const reatomArray = <T>(
-  initState = [] as T[],
-  name?: string,
-): ArrayAtom<T> =>
+export const reatomArray = <T>(initState = [] as T[], name?: string): ArrayAtom<T> =>
   atom(initState, name).pipe(
     withAssign((target, name) => ({
-      toReversed: action(
-        (ctx) => target(ctx, (prev) => prev.slice().reverse()),
-        `${name}.toReversed`,
-      ),
+      toReversed: action((ctx) => target(ctx, (prev) => prev.slice().reverse()), `${name}.toReversed`),
       toSorted: action(
-        (ctx, compareFn?: (a: T, b: T) => number) =>
-          target(ctx, (prev) => prev.slice().sort(compareFn)),
+        (ctx, compareFn?: (a: T, b: T) => number) => target(ctx, (prev) => prev.slice().sort(compareFn)),
         `${name}.toSorted`,
       ),
       toSpliced: action(

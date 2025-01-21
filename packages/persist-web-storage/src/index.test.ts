@@ -1,10 +1,7 @@
-import { test } from 'uvu'
-import * as assert from 'uvu/assert'
+import { describe, it, expect } from 'vitest'
 
-import {} from './'
-
-test(`base API`, async () => {
-  // TODO
+describe('base API', () => {
+  it('should implement the base API', async () => {
+    // TODO
+  })
 })
-
-test.run()

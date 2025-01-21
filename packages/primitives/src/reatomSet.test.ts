@@ -51,76 +51,46 @@ test(`reatomSet. reset`, () => {
 test(`reatomSet. intersection`, () => {
   const ctx = createCtx()
 
-  assert.equal(
-    reatomSet(new Set([1, 2, 3])).intersection(ctx, new Set([2, 3, 4])),
-    new Set([2, 3]),
-  )
+  assert.equal(reatomSet(new Set([1, 2, 3])).intersection(ctx, new Set([2, 3, 4])), new Set([2, 3]))
 })
 
 test(`reatomSet. union`, () => {
   const ctx = createCtx()
 
-  assert.equal(
-    reatomSet(new Set([1, 2, 3])).union(ctx, new Set([2, 3, 4])),
-    new Set([1, 2, 3, 4]),
-  )
+  assert.equal(reatomSet(new Set([1, 2, 3])).union(ctx, new Set([2, 3, 4])), new Set([1, 2, 3, 4]))
 })
 
 test(`reatomSet. difference`, () => {
   const ctx = createCtx()
 
-  assert.equal(
-    reatomSet(new Set([1, 2, 3])).difference(ctx, new Set([2, 3, 4])),
-    new Set([1]),
-  )
+  assert.equal(reatomSet(new Set([1, 2, 3])).difference(ctx, new Set([2, 3, 4])), new Set([1]))
 })
 
 test(`reatomSet. symmetricDifference`, () => {
   const ctx = createCtx()
 
-  assert.equal(
-    reatomSet(new Set([1, 2, 3])).symmetricDifference(ctx, new Set([2, 3, 4])),
-    new Set([1, 4]),
-  )
+  assert.equal(reatomSet(new Set([1, 2, 3])).symmetricDifference(ctx, new Set([2, 3, 4])), new Set([1, 4]))
 })
 
 test(`reatomSet. isSubsetOf`, () => {
   const ctx = createCtx()
 
-  assert.equal(
-    reatomSet(new Set([1, 2, 3])).isSubsetOf(ctx, new Set([2, 3, 4])),
-    false,
-  )
-  assert.equal(
-    reatomSet(new Set([1, 2, 3])).isSubsetOf(ctx, new Set([1, 2, 3])),
-    true,
-  )
+  assert.equal(reatomSet(new Set([1, 2, 3])).isSubsetOf(ctx, new Set([2, 3, 4])), false)
+  assert.equal(reatomSet(new Set([1, 2, 3])).isSubsetOf(ctx, new Set([1, 2, 3])), true)
 })
 
 test(`reatomSet. isSupersetOf`, () => {
   const ctx = createCtx()
 
-  assert.equal(
-    reatomSet(new Set([1, 2, 3])).isSupersetOf(ctx, new Set([2, 3, 4])),
-    false,
-  )
-  assert.equal(
-    reatomSet(new Set([1, 2, 3])).isSupersetOf(ctx, new Set([1, 2, 3])),
-    true,
-  )
+  assert.equal(reatomSet(new Set([1, 2, 3])).isSupersetOf(ctx, new Set([2, 3, 4])), false)
+  assert.equal(reatomSet(new Set([1, 2, 3])).isSupersetOf(ctx, new Set([1, 2, 3])), true)
 })
 
 test(`reatomSet. isDisjointFrom`, () => {
   const ctx = createCtx()
 
-  assert.equal(
-    reatomSet(new Set([1, 2, 3])).isDisjointFrom(ctx, new Set([4, 5, 6])),
-    true,
-  )
-  assert.equal(
-    reatomSet(new Set([1, 2, 3])).isDisjointFrom(ctx, new Set([3, 4, 5])),
-    false,
-  )
+  assert.equal(reatomSet(new Set([1, 2, 3])).isDisjointFrom(ctx, new Set([4, 5, 6])), true)
+  assert.equal(reatomSet(new Set([1, 2, 3])).isDisjointFrom(ctx, new Set([3, 4, 5])), false)
 })
 
 test(`reatomSet. size`, () => {

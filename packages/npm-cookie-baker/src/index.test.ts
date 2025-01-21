@@ -1,5 +1,4 @@
-import { test } from 'uvu'
-import * as assert from 'uvu/assert'
+import { test, expect } from 'vitest'
 import { createCtx } from '@reatom/core'
 import { CookieController, RealTimeCookie } from '@cookie-baker/core'
 import { reatomCookie } from './'
@@ -26,8 +25,9 @@ test('get actual cookie when immediately subscribe after create', () => {
   const { cookieAtom } = reatomCookie(cookie, realTimeCookie)
   let result = null
   ctx.subscribe(cookieAtom, (x) => (result = x))
-  assert.equal(actual, result)
+  expect(actual).toEqual(result)
 })
+
 test('remove cookie from atom store', () => {
   const init: CookieModel = { a: 'a', b: 'b' }
   const actual: CookieModel = { a: 'a' }
@@ -46,8 +46,9 @@ test('remove cookie from atom store', () => {
   const ctx = createCtx()
   ctx.subscribe(cookieAtom, (x) => (result = x))
   remove(ctx, 'b')
-  assert.equal(actual, result)
+  expect(actual).toEqual(result)
 })
+
 test('remove cookie from source cookie', () => {
   const init: CookieModel = { a: 'a', b: 'b' }
   const actual: keyof CookieModel = 'b'
@@ -65,8 +66,9 @@ test('remove cookie from source cookie', () => {
   const ctx = createCtx()
   ctx.subscribe(cookieAtom, () => {})
   remove(ctx, 'b')
-  assert.equal(actual, result)
+  expect(actual).toEqual(result)
 })
+
 test('set cookie for atom store', () => {
   const init: CookieModel = { a: 'a', b: 'b' }
   const actual = { a: 'a', b: 'newB' }
@@ -84,8 +86,9 @@ test('set cookie for atom store', () => {
   const ctx = createCtx()
   ctx.subscribe(cookieAtom, (x) => (result = x))
   set(ctx, 'b', 'newB', { httpOnly: true })
-  assert.equal(actual, result)
+  expect(actual).toEqual(result)
 })
+
 test('set cookie for source cookie', () => {
   const init: CookieModel = { a: 'a', b: 'b' }
   const actual = { name: 'b', value: 'newB', options: { httpOnly: true } }
@@ -104,8 +107,9 @@ test('set cookie for source cookie', () => {
   ctx.subscribe(cookieAtom, () => {})
   set(ctx, 'b', 'newB', { httpOnly: true })
 
-  assert.equal(actual, result)
+  expect(actual).toEqual(result)
 })
+
 test('update cookie when emit event RealTimeCookie', () => {
   const init: CookieModel = { a: 'a', b: 'b' }
   const newCookie: CookieModel = { a: 'a' }
@@ -125,9 +129,10 @@ test('update cookie when emit event RealTimeCookie', () => {
   const ctx = createCtx()
   ctx.subscribe(cookieAtom, (x) => (result = x))
   handler(newCookie)
-  assert.equal(actual, result)
+  expect(actual).toEqual(result)
 })
-test./* FIXME */ skip('unsubscribe from RealTimeCookie when have not subscriber', () => {
+
+test.skip('unsubscribe from RealTimeCookie when have not subscriber', () => {
   const cookie: CookieController<CookieModel> = {
     get: () => ({}),
     set: () => {},
@@ -143,7 +148,5 @@ test./* FIXME */ skip('unsubscribe from RealTimeCookie when have not subscriber'
   const ctx = createCtx()
   const removeSubscribe = ctx.subscribe(cookieAtom, (x) => {})
   removeSubscribe()
-  assert.equal(result, true)
+  expect(result).toBe(true)
 })
-
-test.run()

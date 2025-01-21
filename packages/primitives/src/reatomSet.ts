@@ -30,23 +30,12 @@ interface ProposalSet<T> extends Set<T> {
   union(other: Set<T>): Set<T>
 }
 
-export const reatomSet = <T>(
-  initState = new Set<T>(),
-  name?: string,
-): SetAtom<T> =>
+export const reatomSet = <T>(initState = new Set<T>(), name?: string): SetAtom<T> =>
   atom(initState, name).pipe(
     withAssign((target, name) => ({
-      add: action(
-        (ctx, el) =>
-          target(ctx, (prev) => (prev.has(el) ? prev : new Set(prev).add(el))),
-        `${name}.add`,
-      ),
+      add: action((ctx, el) => target(ctx, (prev) => (prev.has(el) ? prev : new Set(prev).add(el))), `${name}.add`),
       /** @deprecated */
-      set: action(
-        (ctx, el) =>
-          target(ctx, (prev) => (prev.has(el) ? prev : new Set(prev).add(el))),
-        `${name}.set`,
-      ),
+      set: action((ctx, el) => target(ctx, (prev) => (prev.has(el) ? prev : new Set(prev).add(el))), `${name}.set`),
       delete: action((ctx, el) => {
         return target(ctx, (prev) => {
           if (!prev.has(el)) return prev
@@ -63,25 +52,16 @@ export const reatomSet = <T>(
       }, `${name}.clear`),
       reset: action((ctx) => target(ctx, initState), `${name}.reset`),
       intersection: action(
-        (ctx, set) =>
-          target(ctx, (prev) => (prev as ProposalSet<T>).intersection(set)),
+        (ctx, set) => target(ctx, (prev) => (prev as ProposalSet<T>).intersection(set)),
         `${name}.intersection`,
       ),
-      union: action(
-        (ctx, set) =>
-          target(ctx, (prev) => (prev as ProposalSet<T>).union(set)),
-        `${name}.union`,
-      ),
+      union: action((ctx, set) => target(ctx, (prev) => (prev as ProposalSet<T>).union(set)), `${name}.union`),
       difference: action(
-        (ctx, set) =>
-          target(ctx, (prev) => (prev as ProposalSet<T>).difference(set)),
+        (ctx, set) => target(ctx, (prev) => (prev as ProposalSet<T>).difference(set)),
         `${name}.difference`,
       ),
       symmetricDifference: action(
-        (ctx, set) =>
-          target(ctx, (prev) =>
-            (prev as ProposalSet<T>).symmetricDifference(set),
-          ),
+        (ctx, set) => target(ctx, (prev) => (prev as ProposalSet<T>).symmetricDifference(set)),
         `${name}.symmetricDifference`,
       ),
       toggle: action((ctx, el) => {
@@ -93,12 +73,9 @@ export const reatomSet = <T>(
         })
       }, `${name}.toggle`),
       has: (ctx: Ctx, el: T) => ctx.get(target).has(el),
-      isSubsetOf: (ctx: Ctx, set: Set<T>) =>
-        (ctx.get(target) as ProposalSet<T>).isSubsetOf(set),
-      isSupersetOf: (ctx: Ctx, set: Set<T>) =>
-        (ctx.get(target) as ProposalSet<T>).isSupersetOf(set),
-      isDisjointFrom: (ctx: Ctx, set: Set<T>) =>
-        (ctx.get(target) as ProposalSet<T>).isDisjointFrom(set),
+      isSubsetOf: (ctx: Ctx, set: Set<T>) => (ctx.get(target) as ProposalSet<T>).isSubsetOf(set),
+      isSupersetOf: (ctx: Ctx, set: Set<T>) => (ctx.get(target) as ProposalSet<T>).isSupersetOf(set),
+      isDisjointFrom: (ctx: Ctx, set: Set<T>) => (ctx.get(target) as ProposalSet<T>).isDisjointFrom(set),
       size: (ctx: Ctx) => ctx.get(target).size,
     })),
   )

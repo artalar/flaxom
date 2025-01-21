@@ -1,15 +1,14 @@
 import { action, atom, CtxSpy } from '@reatom/core'
 import { createTestCtx, mockFn } from '@reatom/testing'
 import { noop, sleep } from '@reatom/utils'
-import { test } from 'uvu'
-import * as assert from 'uvu/assert'
+import { test, expect } from 'vitest'
 
 import { withInit, controlConnection, isConnected, onConnect, isInit } from './'
 
 test('withInit', () => {
   const a = atom(0).pipe(withInit(() => 123))
   const ctx = createTestCtx()
-  assert.is(ctx.get(a), 123)
+  expect(ctx.get(a)).toBe(123)
   ;`👍` //?
 })
 
@@ -21,17 +20,17 @@ test('controlledConnection', () => {
   const ctx = createTestCtx()
 
   ctx.subscribe(bAtomControlled, () => {})
-  assert.is(track.calls.length, 1)
-  assert.is(isConnected(ctx, bAtom), true)
+  expect(track.calls.length).toBe(1)
+  expect(isConnected(ctx, bAtom)).toBe(true)
 
   aAtom(ctx, (s) => (s += 1))
-  assert.is(track.calls.length, 2)
-  assert.is(isConnected(ctx, bAtom), true)
+  expect(track.calls.length).toBe(2)
+  expect(isConnected(ctx, bAtom)).toBe(true)
 
   bAtomControlled.toggleConnection(ctx)
   aAtom(ctx, (s) => (s += 1))
-  assert.is(track.calls.length, 2)
-  assert.is(isConnected(ctx, bAtom), false)
+  expect(track.calls.length).toBe(2)
+  expect(isConnected(ctx, bAtom)).toBe(false)
   ;`👍` //?
 })
 
@@ -49,14 +48,14 @@ test('onConnect ctx.isConnect', async () => {
   })
 
   const track = ctx.subscribeTrack(a)
-  assert.is(i, 1)
+  expect(i).toBe(1)
 
   await sleep(delay)
-  assert.is(i, 2)
+  expect(i).toBe(2)
 
   track.unsubscribe()
   await sleep(delay)
-  assert.is(i, 2)
+  expect(i).toBe(2)
   ;`👍` //?
 })
 
@@ -82,16 +81,18 @@ test('onConnect ctx.controller', async () => {
 
   const track = ctx.subscribeTrack(a)
   await sleep()
-  assert.is(aborted, false)
-  assert.is(connected, true)
-  assert.is(throwed, false)
+  expect(aborted).toBe(false)
+  expect(connected).toBe(true)
+  expect(throwed).toBe(false)
 
   track.unsubscribe()
   ctx.subscribeTrack(a).unsubscribe()
   await sleep()
-  assert.is(aborted, true)
-  assert.is(connected, false)
-  assert.is(throwed, true)
+
+  expect(aborted!).toBe(true)
+  expect(connected!).toBe(true)
+  expect(throwed).toBe(true)
+  ;`👍` //?
 })
 
 test('isInit', () => {
@@ -105,12 +106,10 @@ test('isInit', () => {
   const work = action((ctx) => isInit(ctx))
 
   ctx.get(computation)
-  assert.equal(logs, [true, true])
+  expect(logs).toEqual([true, true])
   ctx.get(computation)
-  assert.equal(logs, [true, true, false, false])
+  expect(logs).toEqual([true, true, false, false])
 
-  assert.is(work(ctx), true)
-  assert.is(work(ctx), false)
+  expect(work(ctx)).toBe(true)
+  expect(work(ctx)).toBe(false)
 })
-
-test.run()

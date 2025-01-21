@@ -31,8 +31,8 @@
   "scripts": {
     "prepublishOnly": "npm run build && npm run test",
     "build": "microbundle -f esm,cjs && cp src/jsx.d.ts build/ && cp -r build/ jsx-runtime/build && cp -r build/ jsx-dev-runtime/build",
-    "test": "tsc && wtr src/*.test.{ts,tsx}",
-    "test:watch": "wtr src/*.test.{ts,tsx} --watch"
+    "test": "vitest run src/*.test.ts",
+    "test:watch": "vitest src/*.test.ts"
   },
   "dependencies": {
     "@reatom/core": ">=3.6.0",

@@ -35,9 +35,6 @@ export function isAction(thing: any): thing is Action {
   return isObject(thing) && isString(thing.type) && 'payload' in thing
 }
 
-export function getState<State>(
-  atom: Atom<State>,
-  store = defaultStore,
-): State {
+export function getState<State>(atom: Atom<State>, store = defaultStore): State {
   return store.getState(atom)
 }

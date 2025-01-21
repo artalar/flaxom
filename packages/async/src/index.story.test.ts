@@ -1,4 +1,4 @@
-import { describe, test, expect } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import { createTestCtx } from '@reatom/testing'
 import { atom } from '@reatom/core'
 import { onConnect } from '@reatom/hooks'
@@ -62,7 +62,7 @@ describe('optimistic update', () => {
     }
   })
 
-  test('optimistic update', async () => {
+  it('optimistic update', async () => {
     const ctx = createTestCtx()
     const effectTrack = ctx.subscribeTrack(getData.onFulfill)
     const dataTrack = ctx.subscribeTrack(getData.dataAtom)
@@ -89,9 +89,7 @@ describe('optimistic update', () => {
     expect(effectTrack.calls.length).toBe(3)
     expect(dataTrack.calls.length).toBe(3)
 
-    // cleanup test
     dataTrack.unsubscribe()
-    ;`👍` //?
   })
 })
 
@@ -101,7 +99,7 @@ describe('concurrent pooling', () => {
     every 5 seconds. We want to abort the previous pooling if the new one
     was started. The problem with the most tooling for async management is that no causes tracking
     and we can't abort some step of the previous pooling if the new one was started.
-    Reatom handle it perfectly, because `ctx` is immutable and could be traced when needed.
+    Reatom handle it perfectly, because ctx is immutable and could be traced when needed.
   */
 
   //#region BACKEND IMITATION
@@ -114,7 +112,6 @@ describe('concurrent pooling', () => {
       await sleep(5)
       const progress = (tasks.get(taskId) ?? -10) + 10
       tasks.set(taskId, progress)
-
       return progress
     },
   }
@@ -136,7 +133,7 @@ describe('concurrent pooling', () => {
     }
   }).pipe(withAbort({ strategy: 'last-in-win' }))
 
-  test('concurrent pooling', async () => {
+  it('concurrent pooling', async () => {
     const ctx = createTestCtx()
     const track = ctx.subscribeTrack(progressAtom)
 

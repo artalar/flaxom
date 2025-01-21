@@ -20,8 +20,8 @@
     "sandbox": "vite",
     "prepublishOnly": "npm run build && npm run test",
     "build": "microbundle",
-    "test": "tsx src/index.test.ts",
-    "test:watch": "tsx watch src/index.test.ts"
+    "test": "vitest run src/*.test.ts",
+    "test:watch": "vitest src/*.test.ts"
   },
   "dependencies": {
     "@reatom/core": ">=3.1.0",

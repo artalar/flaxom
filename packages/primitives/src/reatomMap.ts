@@ -11,10 +11,7 @@ export interface MapAtom<Key, Value> extends AtomMut<Map<Key, Value>> {
   reset: Action<[], Map<Key, Value>>
 }
 
-export const reatomMap = <Key, Value>(
-  initState = new Map<Key, Value>(),
-  name?: string,
-): MapAtom<Key, Value> =>
+export const reatomMap = <Key, Value>(initState = new Map<Key, Value>(), name?: string): MapAtom<Key, Value> =>
   atom(initState, name).pipe(
     withAssign((target, name) => {
       const getOrCreate = action((ctx, key: Key, value: Value) => {
@@ -25,16 +22,13 @@ export const reatomMap = <Key, Value>(
       const actions = {
         get: (ctx: Ctx, key: Key) => ctx.get(target).get(key),
         getOrCreate: (ctx: Ctx, key: Key, creator: () => Value) =>
-          actions.has(ctx, key)
-            ? actions.get(ctx, key)!
-            : getOrCreate(ctx, key, creator()),
+          actions.has(ctx, key) ? actions.get(ctx, key)! : getOrCreate(ctx, key, creator()),
         has: (ctx: Ctx, key: Key) => ctx.get(target).has(key),
         set: action(
           (ctx, key: Key, value: Value) =>
             target(ctx, (prev) => {
               const valuePrev = prev.get(key)
-              return Object.is(valuePrev, value) &&
-                (value !== undefined || prev.has(key))
+              return Object.is(valuePrev, value) && (value !== undefined || prev.has(key))
                 ? prev
                 : new Map(prev).set(key, value)
             }),

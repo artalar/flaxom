@@ -1,48 +1,45 @@
 import { createCtx } from '@reatom/core'
-import { suite } from 'uvu'
-import * as assert from 'uvu/assert'
+import { describe, it, expect } from 'vitest'
 import { reatomRecord } from './reatomRecord'
 
-const test = suite('reatomRecord')
+describe('reatomRecord', () => {
+  it('should manage record state correctly', () => {
+    const ctx = createCtx()
+    const person = reatomRecord({
+      civis: true,
+      paterfamilias: true,
+      servus: false,
+      vir: true,
+      coniugium: false,
+      senator: true,
+    })
 
-test('reatomRecord', () => {
-  const ctx = createCtx()
-  const person = reatomRecord({
-    civis: true,
-    paterfamilias: true,
-    servus: false,
-    vir: true,
-    coniugium: false,
-    senator: true,
-  })
+    person.merge(ctx, {
+      civis: false,
+      servus: true,
+      senator: false,
+    })
 
-  person.merge(ctx, {
-    civis: false,
-    servus: true,
-    senator: false,
-  })
+    expect(ctx.get(person)).toEqual({
+      civis: false,
+      paterfamilias: true,
+      servus: true,
+      vir: true,
+      coniugium: false,
+      senator: false,
+    })
 
-  assert.equal(ctx.get(person), {
-    civis: false,
-    paterfamilias: true,
-    servus: true,
-    vir: true,
-    coniugium: false,
-    senator: false,
-  })
+    person.reset(ctx, 'civis', 'servus')
+    person.omit(ctx, 'coniugium')
 
-  person.reset(ctx, 'civis', 'servus')
-  person.omit(ctx, 'coniugium')
-
-  assert.equal(ctx.get(person), {
-    civis: true,
-    paterfamilias: true,
-    servus: false,
-    vir: true,
-    // omitted:
-    // coniugium: false,
-    senator: false,
+    expect(ctx.get(person)).toEqual({
+      civis: true,
+      paterfamilias: true,
+      servus: false,
+      vir: true,
+      // omitted:
+      // coniugium: false,
+      senator: false,
+    })
   })
 })
-
-test.run()

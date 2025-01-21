@@ -1,5 +1,4 @@
-import { test } from 'uvu'
-import * as assert from 'uvu/assert'
+import { expect, test } from 'vitest'
 import { createTestCtx, mockFn } from '@reatom/testing'
 import { ReatomFetchConfig, createReatomFetch, reatomFetch } from './index'
 
@@ -14,12 +13,10 @@ test('configuration', async () => {
 
   const reatomFetch = createReatomFetch({ transport })
 
-  async function configure(
-    input: ReatomFetchConfig<any> | (() => ReatomFetchConfig<any>),
-  ) {
+  async function configure(input: ReatomFetchConfig<any> | (() => ReatomFetchConfig<any>)) {
     const fetcher = reatomFetch(input)
     await fetcher(ctx)
-    assert.is(transport.lastInput(0), `${API}/`)
+    expect(transport.lastInput(0)).toBe(`${API}/`)
   }
 
   await configure({ url: API })
@@ -38,7 +35,7 @@ test('merges URLs', async () => {
       urlBase,
     })
     await fetcher(ctx)
-    assert.is(transport.lastInput(0), result)
+    expect(transport.lastInput(0)).toBe(result)
   }
 
   await mergeUrls(API, '', `${API}/`)
@@ -49,11 +46,7 @@ test('merges URLs', async () => {
 test('merges headers', async () => {
   const ctx = createTestCtx()
 
-  async function mergeHeaders(
-    headersBase: HeadersInit,
-    headers: HeadersInit,
-    result: HeadersInit,
-  ) {
+  async function mergeHeaders(headersBase: HeadersInit, headers: HeadersInit, result: HeadersInit) {
     const fetcher = reatomFetch({
       transport,
       url: API,
@@ -61,12 +54,7 @@ test('merges headers', async () => {
       headersBase,
     })
     await fetcher(ctx)
-    assert.equal(
-      Object.fromEntries([
-        ...(
-          (transport.lastInput(1) as RequestInit).headers as Headers
-        ).entries(),
-      ]),
+    expect(Object.fromEntries([...((transport.lastInput(1) as RequestInit).headers as Headers).entries()])).toEqual(
       result,
     )
   }
@@ -89,12 +77,9 @@ test('content parsing', async () => {
 
   const fetcher = reatomFetch({
     transport: (url, init) => {
-      return new Response(
-        JSON.stringify({ got: JSON.parse(init.body as string) }),
-        {
-          headers: { 'content-type': 'application/json' },
-        },
-      )
+      return new Response(JSON.stringify({ got: JSON.parse(init.body as string) }), {
+        headers: { 'content-type': 'application/json' },
+      })
     },
     url: API,
     body: 'Hello world!',
@@ -102,7 +87,5 @@ test('content parsing', async () => {
 
   const result = await fetcher(ctx)
 
-  assert.equal(result, { got: 'Hello world!' })
+  expect(result).toEqual({ got: 'Hello world!' })
 })
-
-test.run()
