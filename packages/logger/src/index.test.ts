@@ -1,11 +1,12 @@
-import { describe, test, expect, vi, it } from 'vitest'
+import { test, expect } from 'vitest'
 
 import { action, atom, createCtx } from '@reatom/core'
-import { mapPayloadAwaited, toAtom } from '@reatom/lens'
-import { omit, sleep } from '@reatom/utils'
+import { mapPayloadAwaited } from '@reatom/lens'
+import { sleep } from '@reatom/utils'
 import { mockFn } from '@reatom/testing'
 
 import { connectLogger, createLogBatched } from '.'
+
 test('base', async () => {
   const a1 = atom(0)
   const a2 = atom(0, 'a2')
