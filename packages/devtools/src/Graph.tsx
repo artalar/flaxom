@@ -212,7 +212,7 @@ export const Graph = ({ clientCtx, getColor, width, height, initSize }: Props) =
   const redrawLines = action((ctx) => lines.redraw(ctx, svg), `${name}.redrawLines`)
 
   const filters = reatomFilters(
-    { list: list as unknown as LinkedListAtom, clearLines: lines.clear, redrawLines, initSize },
+    { list: list as unknown as LinkedListAtom, lines, redrawLines, initSize },
     `${name}.filters`,
   )
   const valuesSearch = atom((ctx) => {
@@ -235,75 +235,74 @@ export const Graph = ({ clientCtx, getColor, width, height, initSize }: Props) =
   }, `${name}.listHeight`).pipe(withDataAtom('0px')).dataAtom
 
   // const subscribe = () =>
-    clientCtx.subscribe(async (logs) => {
-      // sort causes and insert only from this transaction
-      const insertTargets = new Set<AtomCache>()
-      for (let i = 0; i < logs.length; i++) {
-        const patch = logs[i]!
-        insertTargets.add(patch)
-        if (patch.proto.isAction) actionsStates.set(patch, patch.state.slice(0))
+  clientCtx.subscribe(async (logs) => {
+    // sort causes and insert only from this transaction
+    const insertTargets = new Set<AtomCache>()
+    for (let i = 0; i < logs.length; i++) {
+      const patch = logs[i]!
+      insertTargets.add(patch)
+      if (patch.proto.isAction) actionsStates.set(patch, patch.state.slice(0))
+    }
+
+    await null
+
+    let isTimeStampWritten = !ctx.get(filters.timestamps)
+
+    const excludes = ctx
+      .get(filters.list.array)
+      .filter(({ type }) => ctx.get(type) === 'exclude')
+      .map(({ search }) => ctx.get(search))
+    const isPass = (patch: AtomCache) => {
+      const historyState = history.get(patch.proto)
+      const [prev] = historyState ?? []
+
+      const isConnection =
+        (patch.proto.isAction && patch.state.length === 0) || (!historyState && patch.cause!.proto.name === 'root')
+
+      if (!historyState) history.set(patch.proto, [])
+
+      const result =
+        !isConnection &&
+        prev !== patch &&
+        (!prev || !Object.is(patch.state, prev.state)) &&
+        excludes.every((search) => !new RegExp(`.*${search}.*`, 'i').test(patch.proto.name!))
+
+      if (result && !isTimeStampWritten) {
+        isTimeStampWritten = true
+        list.create(ctx, null)
       }
 
-      await null
+      return result
+    }
 
-      let isTimeStampWritten = !ctx.get(filters.timestamps)
-
-      const excludes = ctx
-        .get(filters.list.array)
-        .filter(({ type }) => ctx.get(type) === 'exclude')
-        .map(({ search }) => ctx.get(search))
-      const isPass = (patch: AtomCache) => {
-        const historyState = history.get(patch.proto)
-        const [prev] = historyState ?? []
-
-        const isConnection =
-          !historyState && patch.cause!.proto.name === 'root' && (!patch.proto.isAction || patch.state.length === 0)
-
-        if (!historyState) history.set(patch.proto, [])
-
-        const result =
-          !isConnection &&
-          prev !== patch &&
-          (!prev || !Object.is(patch.state, prev.state)) &&
-          excludes.every((search) => !new RegExp(`.*${search}.*`, 'i').test(patch.proto.name!))
-
-        if (result && !isTimeStampWritten) {
-          isTimeStampWritten = true
-          list.create(ctx, null)
-        }
-
-        return result
+    // fix the case when "cause" appears in the logs after it patch
+    const insert = (patch: AtomCache) => {
+      const cause = patch.cause!
+      if (insertTargets.has(cause)) {
+        if (cause.cause) insert(cause.cause)
+        if (isPass(cause)) list.create(ctx, cause)
+        insertTargets.delete(cause)
+      }
+      if (insertTargets.has(patch)) {
+        if (isPass(patch)) list.create(ctx, patch)
+        insertTargets.delete(patch)
+      }
+    }
+    list.batch(ctx, () => {
+      for (const patch of logs) {
+        insert(patch)
       }
 
-      // fix the case when "cause" appears in the logs after it patch
-      const insert = (patch: AtomCache) => {
-        const cause = patch.cause!
-        if (insertTargets.has(cause)) {
-          if (cause.cause) insert(cause.cause)
-          if (isPass(cause)) list.create(ctx, cause)
-          insertTargets.delete(cause)
-        }
-        if (insertTargets.has(patch)) {
-          if (isPass(patch)) list.create(ctx, patch)
-          insertTargets.delete(patch)
-        }
-      }
-      list.batch(ctx, () => {
-        for (const patch of logs) {
-          insert(patch)
-        }
+      requestAnimationFrame(() => {
+        const isBottom =
+          listEl.parentElement!.scrollHeight - listEl.parentElement!.scrollTop < listEl.parentElement!.clientHeight + 10
 
-        requestAnimationFrame(() => {
-          const isBottom =
-            listEl.parentElement!.scrollHeight - listEl.parentElement!.scrollTop <
-            listEl.parentElement!.clientHeight + 10
-
-          if (isBottom) {
-            listEl.parentElement!.scrollTop = listEl.parentElement!.scrollHeight
-          }
-        })
+        if (isBottom) {
+          listEl.parentElement!.scrollTop = listEl.parentElement!.scrollHeight
+        }
       })
     })
+  })
 
   const svg = (
     <svg:svg

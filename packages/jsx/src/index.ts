@@ -109,7 +109,7 @@ export const reatomJsx = (ctx: Ctx, DOM: DomApis = globalThis.window) => {
 
       let styleId = styles[val]
       if (!styleId) {
-        styleId = styles[val] = `${name ? name + '.' : ''}${random(0, 1e6).toString()}`
+        styleId = styles[val] = `${name ? name + '_' : ''}${random(0, 1e6).toString()}`
         stylesheet.innerText += '[data-reatom="' + styleId + '"]{' + val + '}\n'
       }
       /** @see https://measurethat.net/Benchmarks/Show/11819 */
@@ -150,7 +150,7 @@ export const reatomJsx = (ctx: Ctx, DOM: DomApis = globalThis.window) => {
         props.children = children
       }
 
-      let _name = tag.name
+      let _name = name
       try {
         name = tag.name
         return tag(props)
@@ -303,3 +303,15 @@ export const reatomJsx = (ctx: Ctx, DOM: DomApis = globalThis.window) => {
 
 export const ctx = createCtx()
 export const { h, hf, mount } = reatomJsx(ctx)
+
+/**
+ * This simple utility needed only for syntax highlighting and it just concatenates all passed strings.
+ * Falsy values are ignored, except for `0`.
+ */
+export const css = (strings: TemplateStringsArray, ...values: any[]) => {
+  let result = ''
+  for (let i = 0; i < strings.length; i++) {
+    result += strings[i] + (values[i] || values[i] === 0 ? values[i] : '')
+  }
+  return result
+}

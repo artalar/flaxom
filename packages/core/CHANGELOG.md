@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.9.3](https://github.com/artalar/reatom/compare/core-v3.9.2...core-v3.9.3) (2025-01-17)
+
+
+### Bug Fixes
+
+* **core:** complex connection logic ([f8f3e25](https://github.com/artalar/reatom/commit/f8f3e25324f55fdc01a214d7d3b783ce77f6f68e))
+
 ## [3.9.2](https://github.com/artalar/reatom/compare/core-v3.9.1...core-v3.9.2) (2024-12-30)
 
 

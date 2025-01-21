@@ -307,7 +307,7 @@ export const createCtx = ({
           nearEffects.push(...pubPatch.proto.connectHooks)
         }
 
-        for (let parentParentPatch of pubPatch.pubs) {
+        for (let parentParentPatch of (pubPatch.proto.patch ?? read(pubPatch.proto)!).pubs) {
           connect(pubPatch.proto, parentParentPatch)
         }
       }
@@ -561,10 +561,10 @@ export const createCtx = ({
           cache = actualize(this, proto, (patchCtx, patch) => {})
           cache.listeners.add(listener)
           trRollbacks.push(() => proto.patch!.listeners.delete(listener))
+          for (let pubPatch of cache.pubs) connect(proto, pubPatch)
           if (proto.connectHooks !== null) {
             nearEffects.push(...proto.connectHooks)
           }
-          for (let pubPatch of cache.pubs) connect(proto, pubPatch)
         })
       } else {
         cache.listeners.add(listener)

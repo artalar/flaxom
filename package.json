@@ -54,7 +54,7 @@
     "react-dom": "^18.2.0",
     "rimraf": "^5.0.5",
     "svelte": "^4.2.12",
-    "tsx": "^4.7.1",
+    "tsx": "^4.19.2",
     "turbo": "^1.13.0",
     "typescript": "^5.4.3",
     "use-sync-external-store": "^1.2.0",

@@ -223,6 +223,8 @@ test(`display name`, () => {
   )
   const effect = mockFn()
 
+  onConnect(firstNameAtom, () => effect(`firstNameAtom init`))
+  onDisconnect(firstNameAtom, () => effect(`firstNameAtom cleanup`))
   onConnect(fullNameAtom, () => effect(`fullNameAtom init`))
   onDisconnect(fullNameAtom, () => effect(`fullNameAtom cleanup`))
   onConnect(displayNameAtom, () => effect(`displayNameAtom init`))
@@ -234,7 +236,7 @@ test(`display name`, () => {
 
   assert.equal(
     effect.calls.map(({ i }) => i[0]),
-    ['displayNameAtom init', 'fullNameAtom init'],
+    ['firstNameAtom init', 'fullNameAtom init', 'displayNameAtom init'],
   )
   effect.calls = []
 
@@ -255,7 +257,7 @@ test(`display name`, () => {
   un()
   assert.equal(
     effect.calls.map(({ i }) => i[0]),
-    [`displayNameAtom cleanup`, `fullNameAtom cleanup`],
+    ['displayNameAtom cleanup', 'fullNameAtom cleanup', 'firstNameAtom cleanup'],
   )
   ;`👍` //?
 })
@@ -746,6 +748,29 @@ test('disconnect of the last version of pubs', async () => {
   uns()
 
   assert.equal(logs, ['', 'dep', 'end disconnected', 'dep disconnected'])
+})
+
+test('computed deps change during unconnection', () => {
+  const ctx = createCtx()
+
+  const reatomSome = (name: string) => {
+    const params = atom(0, `${name}.params`)
+    const data = atom((ctx) => ctx.spy(params), `${name}.data`)
+    return { params, data }
+  }
+  const some1 = reatomSome('one')
+  const some2 = reatomSome('two')
+
+  const toggler = atom(some1, 'toggler')
+  const data = atom((ctx) => ctx.spy(ctx.spy(toggler).data), 'data')
+  const subscription = atom((ctx) => ctx.spy(data), 'subscription')
+
+  assert.is(ctx.get(subscription), 0)
+
+  toggler(ctx, some2)
+  ctx.subscribe(subscription, () => {})
+  some2.params(ctx, 1)
+  assert.is(ctx.get(subscription), 1)
 })
 
 // test(`maximum call stack`, () => {
