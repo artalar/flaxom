@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.9.0](https://github.com/artalar/reatom/compare/devtools-v0.8.3...devtools-v0.9.0) (2025-01-22)
+
+
+### Features
+
+* **devtools:** filters redesign [#1010](https://github.com/artalar/reatom/issues/1010) ([0e3c655](https://github.com/artalar/reatom/commit/0e3c6555f8d71bcbb7bfe9bbcbc3a2f9dcaea356))
+
+
+### Bug Fixes
+
+* **devtools:** actions handling ([f04397a](https://github.com/artalar/reatom/commit/f04397accfdffa8f227f291d484be5e64087191d))
+
 ## [0.8.3](https://github.com/artalar/reatom/compare/devtools-v0.8.2...devtools-v0.8.3) (2025-01-18)
 
 
