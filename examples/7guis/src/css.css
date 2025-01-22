@@ -1,0 +1,34 @@
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  /* macOS CSS https://codepen.io/JohJakob/pen/YPxgwo */
+  .titlebar {
+    background: linear-gradient(to top, #ebebeb, #d5d5d5);
+    color: #4d494d;
+    font-size: 11pt;
+    line-height: 20px;
+    text-align: center;
+    width: 100%;
+    height: 20px;
+    border-top: 1px solid #f3f1f3;
+    border-bottom: 1px solid #b1aeb1;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    user-select: none;
+    cursor: default;
+  }
+
+  .window {
+    background: #ebebeb;
+    border: 1px solid #acacac;
+    border-radius: 6px;
+    box-shadow: 0px 4px 15px rgba(172, 172, 172, 0.75);
+    color: #4d494d;
+  }
+
+  .icon-file-code {
+    display: inline-block;
+    vertical-align: -0.125em;
+  }
+}
