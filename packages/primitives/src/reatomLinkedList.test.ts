@@ -1,7 +1,7 @@
 import { action, atom } from '@reatom/core'
 import { createTestCtx } from '@reatom/testing'
 import { describe, it, expect } from 'vitest'
-import { reatomLinkedList } from './reatomLinkedList'
+import { LL_NEXT, LL_PREV, reatomLinkedList } from './reatomLinkedList'
 import { parseAtoms } from '@reatom/lens'
 import { isCausedBy } from '@reatom/effects'
 
@@ -134,7 +134,7 @@ describe('reatomLinkedList', () => {
     const list = reatomLinkedList((ctx, n: number) => ({ n }))
 
     const node = list.create(ctx, 1)
-    expect(ctx.get(list.array)).toEqual([{ n: 1 }])
+    expect(ctx.get(list.array)).toEqual([{ n: 1, [LL_PREV]: null, [LL_NEXT]: null }])
     expect(ctx.get(list).size).toBe(1)
 
     list.remove(ctx, node)

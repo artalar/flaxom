@@ -164,7 +164,7 @@ test(`transaction batch`, () => {
   expect(track).toHaveBeenCalledTimes(1)
   expect(track).lastCalledWith(1)
 
-  ctx.get(() => {
+  ctx.get((): void => {
     pushNumber(ctx, 2)
     expect(track).toHaveBeenCalledTimes(1)
     pushNumber(ctx, 3)
@@ -173,7 +173,7 @@ test(`transaction batch`, () => {
   expect(track).toHaveBeenCalledTimes(3)
   expect(track).lastCalledWith(3)
 
-  ctx.get(() => {
+  ctx.get((): void => {
     pushNumber(ctx, 4)
     expect(track).toHaveBeenCalledTimes(3)
     ctx.get(numberAtom)
@@ -235,9 +235,11 @@ test(`display name`, () => {
 
   const un = ctx.subscribe(displayNameAtom, () => {})
 
-  expect(effect).toHaveBeenCalledTimes(2)
-  expect(effect).toHaveBeenNthCalledWith(1, 'firstNameAtom init')
-  expect(effect).toHaveBeenNthCalledWith(2, 'fullNameAtom init', 'displayNameAtom init')
+  expect(effect.mock.calls.map((i) => i[0])).toEqual([
+    'firstNameAtom init',
+    'fullNameAtom init',
+    'displayNameAtom init',
+  ])
   effect.mockClear()
 
   firstNameAtom(ctx, `Joooooooooooohn`)
@@ -249,13 +251,11 @@ test(`display name`, () => {
   effect.mockClear()
 
   un()
-  // assert.equal(
-  //   effect.calls.map(({ i }) => i[0]),
-  //   ['displayNameAtom cleanup', 'fullNameAtom cleanup', 'firstNameAtom cleanup'],
-  // )
-  expect(effect).toHaveBeenCalledTimes(2)
-  expect(effect).toHaveBeenNthCalledWith(1, `displayNameAtom cleanup`)
-  expect(effect).toHaveBeenNthCalledWith(2, `fullNameAtom cleanup`)
+  expect(effect.mock.calls.map((i) => i[0])).toEqual([
+    'displayNameAtom cleanup',
+    'fullNameAtom cleanup',
+    'firstNameAtom cleanup',
+  ])
   ;`👍` //?
 })
 

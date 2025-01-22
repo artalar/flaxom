@@ -32,7 +32,7 @@ describe('base', () => {
     expect(ctx.get(a2)).toBe(2)
     expect(ctx.get(withSomePersist.storageAtom).get(ctx, 'a1')?.data).toBe(11)
 
-    ctx.get(() => {
+    ctx.get((): void => {
       a1(ctx, 12)
       a1(ctx, (state) => (state ? state : state))
     })
