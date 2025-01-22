@@ -1,7 +1,3 @@
-/**
- * @jest-environment jsdom
- */
-
 import React, { createContext } from 'react'
 import { renderHook, act as actHooks } from '@testing-library/react-hooks'
 import { render, act as actReact } from '@testing-library/react'
@@ -43,7 +39,7 @@ describe('@reatom/react-v2', () => {
 
     test('subscribe once only at mount', () => {
       const store = createStore()
-      const subscriber = jest.fn()
+      const subscriber = vi.fn()
       store.subscribe = subscriber
       const { rerender } = renderHook(() => useAtom(countAtom), {
         wrapper: (props) => <Provider {...props} store={store} />,
@@ -92,7 +88,7 @@ describe('@reatom/react-v2', () => {
     test('unsubscribes from previous dynamic atom', () => {
       const store = createStore()
       store.subscribe(countAtom, noop)
-      const subscriber = jest.fn()
+      const subscriber = vi.fn()
       const _subscribe = store.subscribe
       store.subscribe = (atom) => _subscribe(atom, subscriber)
 
@@ -123,7 +119,7 @@ describe('@reatom/react-v2', () => {
     test('does not rerender if atom value is not changing', () => {
       const store = createStore()
       store.subscribe(countAtom, noop)
-      const render = jest.fn()
+      const render = vi.fn()
       const useTest = () => {
         render()
         useAtom(countAtom, () => null, [])
@@ -154,7 +150,7 @@ describe('@reatom/react-v2', () => {
     test('unsubscribes from store after unmount', () => {
       const store = createStore()
       const _subscribe = store.subscribe
-      const subscriber = jest.fn()
+      const subscriber = vi.fn()
       store.subscribe = (atom) => _subscribe(atom, subscriber)
 
       const { unmount } = renderHook(() => useAtom(countAtom, () => null, []), {
@@ -197,8 +193,8 @@ describe('@reatom/react-v2', () => {
 
     test('unsubscribes from previous store instance', () => {
       function getMocks(store: Store) {
-        const subscribeMock = jest.fn()
-        const unsubscribeMock = jest.fn()
+        const subscribeMock = vi.fn()
+        const unsubscribeMock = vi.fn()
 
         store.subscribe = () => {
           subscribeMock()
@@ -309,7 +305,7 @@ describe('@reatom/react-v2', () => {
 
     test('updates action wrapper after props change', () => {
       const store = createStore()
-      const dispatch = jest.fn()
+      const dispatch = vi.fn()
       store.dispatch = dispatch
 
       const { rerender, result } = renderHook(
@@ -337,10 +333,10 @@ describe('@reatom/react-v2', () => {
       const store1 = createStore()
       const store2 = createStore()
 
-      const dispatch1 = jest.fn()
+      const dispatch1 = vi.fn()
       store1.dispatch = dispatch1
 
-      const dispatch2 = jest.fn()
+      const dispatch2 = vi.fn()
       store2.dispatch = dispatch2
 
       let store = store1
@@ -372,11 +368,11 @@ describe('@reatom/react-v2', () => {
   //     const useCustomAction = createActionHook(NestedContext)
 
   //     const store1 = createStore()
-  //     const dispatch1 = jest.fn()
+  //     const dispatch1 = vi.fn()
   //     store1.dispatch = dispatch1
 
   //     const store2 = createStore()
-  //     const dispatch2 = jest.fn()
+  //     const dispatch2 = vi.fn()
   //     store2.dispatch = dispatch2
 
   //     const { result } = renderHook(

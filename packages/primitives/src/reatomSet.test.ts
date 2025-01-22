@@ -1,103 +1,98 @@
 import 'core-js/proposals/set-methods-v2'
-
+import { it, expect } from 'vitest'
 import { createCtx } from '@reatom/core'
-import { suite } from 'uvu'
-import * as assert from 'uvu/assert'
-
 import { reatomSet } from './reatomSet'
 
-const test = suite('reatomSet')
 
-test(`reatomSet. init`, () => {
+it(`reatomSet. init`, () => {
   const ctx = createCtx()
 
-  assert.equal(ctx.get(reatomSet(new Set([1, 2, 3]))), new Set([1, 2, 3]))
+  expect(ctx.get(reatomSet(new Set([1, 2, 3])))).toEqual(new Set([1, 2, 3]))
 })
 
-test(`reatomSet. add`, () => {
+it(`reatomSet. add`, () => {
   const ctx = createCtx()
 
-  assert.equal(reatomSet(new Set([1, 2, 3])).add(ctx, 4), new Set([1, 2, 3, 4]))
+  expect(reatomSet(new Set([1, 2, 3])).add(ctx, 4)).toEqual(new Set([1, 2, 3, 4]))
 })
 
-test(`reatomSet. delete`, () => {
+it(`reatomSet. delete`, () => {
   const ctx = createCtx()
 
-  assert.equal(reatomSet(new Set([1, 2, 3])).delete(ctx, 3), new Set([1, 2]))
+  expect(reatomSet(new Set([1, 2, 3])).delete(ctx, 3)).toEqual(new Set([1, 2]))
 })
 
-test(`reatomSet. toggle`, () => {
-  const ctx = createCtx()
-  const a = reatomSet(new Set([1, 2, 3]))
-
-  assert.equal(a.toggle(ctx, 3), new Set([1, 2]))
-  assert.equal(a.toggle(ctx, 3), new Set([1, 2, 3]))
-})
-
-test(`reatomSet. clear`, () => {
-  const ctx = createCtx()
-
-  assert.equal(reatomSet(new Set([1, 2, 3])).clear(ctx), new Set())
-})
-
-test(`reatomSet. reset`, () => {
+it(`reatomSet. toggle`, () => {
   const ctx = createCtx()
   const a = reatomSet(new Set([1, 2, 3]))
 
-  assert.equal(a.add(ctx, 4), new Set([1, 2, 3, 4]))
-  assert.equal(a.reset(ctx), new Set([1, 2, 3]))
+  expect(a.toggle(ctx, 3)).toEqual(new Set([1, 2]))
+  expect(a.toggle(ctx, 3)).toEqual(new Set([1, 2, 3]))
 })
 
-test(`reatomSet. intersection`, () => {
+it(`reatomSet. clear`, () => {
   const ctx = createCtx()
 
-  assert.equal(reatomSet(new Set([1, 2, 3])).intersection(ctx, new Set([2, 3, 4])), new Set([2, 3]))
+  expect(reatomSet(new Set([1, 2, 3])).clear(ctx)).toEqual(new Set())
 })
 
-test(`reatomSet. union`, () => {
+it(`reatomSet. reset`, () => {
+  const ctx = createCtx()
+  const a = reatomSet(new Set([1, 2, 3]))
+
+  expect(a.add(ctx, 4)).toEqual(new Set([1, 2, 3, 4]))
+  expect(a.reset(ctx)).toEqual(new Set([1, 2, 3]))
+})
+
+it(`reatomSet. intersection`, () => {
   const ctx = createCtx()
 
-  assert.equal(reatomSet(new Set([1, 2, 3])).union(ctx, new Set([2, 3, 4])), new Set([1, 2, 3, 4]))
+  expect(reatomSet(new Set([1, 2, 3])).intersection(ctx, new Set([2, 3, 4]))).toEqual(new Set([2, 3]))
 })
 
-test(`reatomSet. difference`, () => {
+it(`reatomSet. union`, () => {
   const ctx = createCtx()
 
-  assert.equal(reatomSet(new Set([1, 2, 3])).difference(ctx, new Set([2, 3, 4])), new Set([1]))
+  expect(reatomSet(new Set([1, 2, 3])).union(ctx, new Set([2, 3, 4]))).toEqual(new Set([1, 2, 3, 4]))
 })
 
-test(`reatomSet. symmetricDifference`, () => {
+it(`reatomSet. difference`, () => {
   const ctx = createCtx()
 
-  assert.equal(reatomSet(new Set([1, 2, 3])).symmetricDifference(ctx, new Set([2, 3, 4])), new Set([1, 4]))
+  expect(reatomSet(new Set([1, 2, 3])).difference(ctx, new Set([2, 3, 4]))).toEqual(new Set([1]))
 })
 
-test(`reatomSet. isSubsetOf`, () => {
+it(`reatomSet. symmetricDifference`, () => {
   const ctx = createCtx()
 
-  assert.equal(reatomSet(new Set([1, 2, 3])).isSubsetOf(ctx, new Set([2, 3, 4])), false)
-  assert.equal(reatomSet(new Set([1, 2, 3])).isSubsetOf(ctx, new Set([1, 2, 3])), true)
+  expect(reatomSet(new Set([1, 2, 3])).symmetricDifference(ctx, new Set([2, 3, 4]))).toEqual(new Set([1, 4]))
 })
 
-test(`reatomSet. isSupersetOf`, () => {
+it(`reatomSet. isSubsetOf`, () => {
   const ctx = createCtx()
 
-  assert.equal(reatomSet(new Set([1, 2, 3])).isSupersetOf(ctx, new Set([2, 3, 4])), false)
-  assert.equal(reatomSet(new Set([1, 2, 3])).isSupersetOf(ctx, new Set([1, 2, 3])), true)
+  expect(reatomSet(new Set([1, 2, 3])).isSubsetOf(ctx, new Set([2, 3, 4]))).toBe(false)
+  expect(reatomSet(new Set([1, 2, 3])).isSubsetOf(ctx, new Set([1, 2, 3]))).toBe(true)
 })
 
-test(`reatomSet. isDisjointFrom`, () => {
+it(`reatomSet. isSupersetOf`, () => {
   const ctx = createCtx()
 
-  assert.equal(reatomSet(new Set([1, 2, 3])).isDisjointFrom(ctx, new Set([4, 5, 6])), true)
-  assert.equal(reatomSet(new Set([1, 2, 3])).isDisjointFrom(ctx, new Set([3, 4, 5])), false)
+  expect(reatomSet(new Set([1, 2, 3])).isSupersetOf(ctx, new Set([2, 3, 4]))).toBe(false)
+  expect(reatomSet(new Set([1, 2, 3])).isSupersetOf(ctx, new Set([1, 2, 3]))).toBe(true)
 })
 
-test(`reatomSet. size`, () => {
+it(`reatomSet. isDisjointFrom`, () => {
   const ctx = createCtx()
 
-  assert.equal(reatomSet(new Set()).size(ctx), 0)
-  assert.equal(reatomSet(new Set([1, 2, 3])).size(ctx), 3)
+  expect(reatomSet(new Set([1, 2, 3])).isDisjointFrom(ctx, new Set([4, 5, 6]))).toBe(true)
+  expect(reatomSet(new Set([1, 2, 3])).isDisjointFrom(ctx, new Set([3, 4, 5]))).toBe(false)
 })
 
-test.run()
+it(`reatomSet. size`, () => {
+  const ctx = createCtx()
+
+  expect(reatomSet(new Set()).size(ctx)).toEqual(0)
+  expect(reatomSet(new Set([1, 2, 3])).size(ctx)).toEqual(3)
+})
+

@@ -1,5 +1,5 @@
-import { describe, test, expect, vi } from 'vitest'
-import { isDeepEqual, toAbortError, toStringKey, random, mockRandom } from './'
+import { describe, test, expect } from 'vitest'
+import { isDeepEqual, toAbortError, toStringKey, mockRandom } from './'
 
 describe('Utility Functions Tests', () => {
   test('isDeepEqual Set', () => {

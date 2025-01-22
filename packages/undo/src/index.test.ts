@@ -1,11 +1,12 @@
 import { AtomMut, atom } from '@reatom/core'
-import { createTestCtx, mockFn } from '@reatom/testing'
-import { describe, it, expect } from 'vitest'
+import { createTestCtx } from '@reatom/testing'
+import { expect, test, vi } from 'vitest'
 
 import { reatomDynamicUndo, reatomUndo, withUndo } from './'
 import { reatomMap } from '@reatom/primitives'
 import { parseAtoms } from '@reatom/lens'
 import { createMemStorage, reatomPersist } from '@reatom/persist'
+
 test('withUndo', async () => {
   const a = atom(0).pipe(withUndo({ length: 5 }))
   const ctx = createTestCtx()
@@ -123,7 +124,7 @@ test('reatomDynamicUndo', () => {
     parseAtoms(ctx, listAtom)
   })
   const ctx = createTestCtx()
-  const track = jest.fn()
+  const track = vi.fn()
   ctx.subscribe(listUndoAtom, track)
   track.mockClear()
 
@@ -160,7 +161,7 @@ test('reatomDynamicUndo', () => {
   expect(listAtom.get(ctx, 3)).toBe(elementAtom)
 })
 
-test('"shouldReplace"', () => {
+test('shouldReplace', () => {
   const inputAtom = atom('').pipe(withUndo({ shouldReplace: (ctx, state) => !state.endsWith(' ') }))
   const ctx = createTestCtx()
 
@@ -178,7 +179,7 @@ test('"shouldReplace"', () => {
   expect(ctx.get(inputAtom)).toBe('This')
 })
 
-test('"shouldUpdate"', () => {
+test('shouldUpdate', () => {
   const ctx = createTestCtx()
   const inputAtom = atom('').pipe(withUndo({ shouldUpdate: () => true }))
 

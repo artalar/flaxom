@@ -32,6 +32,9 @@
     "@reatom/primitives": "^3.6.0",
     "@reatom/utils": "^3.1.0"
   },
+  "devDependencies": {
+    "@reatom/npm-zod": "^3.10.3"
+  },
   "author": "artalar",
   "license": "MIT",
   "repository": {

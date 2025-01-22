@@ -1,5 +1,4 @@
 import { test, expect } from 'vitest'
-
 import { action, atom, createCtx } from '@reatom/core'
 import { mapPayloadAwaited } from '@reatom/lens'
 import { sleep } from '@reatom/utils'

@@ -2,7 +2,7 @@ import { Action, Atom, AtomState, action, atom } from '@reatom/core'
 import { sleep } from '@reatom/utils'
 import { reatomNumber } from '@reatom/primitives'
 import { createTestCtx, mockFn } from '@reatom/testing'
-import { describe, test, expect, vi, it } from 'vitest'
+import { test, expect } from 'vitest'
 
 import './match.test'
 import './parseAtoms.test'

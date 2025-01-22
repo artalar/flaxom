@@ -1,5 +1,5 @@
 import { action, atom } from '@reatom/core'
-import { createTestCtx, mockFn } from '@reatom/testing'
+import { createTestCtx } from '@reatom/testing'
 import { describe, it, expect } from 'vitest'
 import { reatomLinkedList } from './reatomLinkedList'
 import { parseAtoms } from '@reatom/lens'

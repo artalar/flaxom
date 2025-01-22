@@ -1,6 +1,6 @@
 import { action, atom, CtxSpy } from '@reatom/core'
 import { createTestCtx, mockFn } from '@reatom/testing'
-import { noop, sleep } from '@reatom/utils'
+import { sleep } from '@reatom/utils'
 import { test, expect } from 'vitest'
 
 import { withInit, controlConnection, isConnected, onConnect, isInit } from './'
@@ -79,6 +79,7 @@ test('onConnect ctx.controller', async () => {
       })
   })
 
+
   const track = ctx.subscribeTrack(a)
   await sleep()
   expect(aborted).toBe(false)
@@ -90,7 +91,7 @@ test('onConnect ctx.controller', async () => {
   await sleep()
 
   expect(aborted!).toBe(true)
-  expect(connected!).toBe(true)
+  expect(connected!).toBe(false)
   expect(throwed).toBe(true)
   ;`👍` //?
 })

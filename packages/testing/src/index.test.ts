@@ -2,7 +2,7 @@ import { action, atom } from '@reatom/core'
 import { it, expect } from 'vitest'
 import { createTestCtx } from './'
 
-it('createTestCtx', () => {
+it('createTestCtx', async () => {
   const act = action((ctx) => ctx.schedule(() => 123))
   const ctx = createTestCtx()
   const listener = ctx.subscribeTrack(act)
