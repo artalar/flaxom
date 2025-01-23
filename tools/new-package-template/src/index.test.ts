@@ -1,12 +1,8 @@
-import { test } from 'uvu'
-import * as assert from 'uvu/assert'
+import { it, expect } from 'vitest'
 import { createTestCtx } from '@reatom/testing'
 
-// TODO (agarkov): change to vitest
-test('stub', () => {
+it('stub', () => {
   const ctx = createTestCtx()
 
-  assert.ok(false, 'No tests!')
+  expect(false).toEqual('No tests!')
 })
-
-test.run()
