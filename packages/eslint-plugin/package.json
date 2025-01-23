@@ -54,6 +54,9 @@
     "@types/eslint": "^8.0.0",
     "eslint": "^8.0.0"
   },
+  "peerDependencies": {
+    "eslint": "^8.0.0"
+  },
   "dependencies": {
     "@types/estree": "^1.0.6"
   }
