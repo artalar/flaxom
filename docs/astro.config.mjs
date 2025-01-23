@@ -77,6 +77,8 @@ export default defineConfig({
       ],
       components: {
         MarkdownContent: './src/components/MarkdownContent.astro',
+        Header: './src/components/Header.astro',
+        MobileMenuFooter: './src/components/MobileMenuFooter.astro'
       },
     }),
   ],
