@@ -1,5 +1,7 @@
 /* EXPERIMENTAL */
 
+// TODO (agarkov): What is this? vitest fails trying to run this file
+
 import { Atom, Action, atom, action, Rec } from '@reatom/core'
 import { parsePath, Path } from 'history'
 import { historyAtom } from '.'

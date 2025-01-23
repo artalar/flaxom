@@ -155,7 +155,7 @@ export function createActionHook(ctx: Context<Store | null> = context) {
  */
 export const useAction = createActionHook()
 
-// TODO: TS tests
+// TODO (agarkov): TS tests VITEST type testing?
 
 // const a = declareAction()
 // const ap = declareAction<0>()
