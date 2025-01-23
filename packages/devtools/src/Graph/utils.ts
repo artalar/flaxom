@@ -1,4 +1,4 @@
-import { __root, AtomCache, AtomProto } from '@reatom/framework'
+import { AtomCache, AtomProto } from '@reatom/framework'
 
 export const getColor = ({ proto }: AtomCache): string =>
   proto.isAction

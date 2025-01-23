@@ -1,5 +1,5 @@
-import { __root, action, atom, AtomCache, AtomProto, Ctx, parseAtoms, withReset } from '@reatom/framework'
-import { h, hf, JSX } from '@reatom/jsx'
+import { action, atom, AtomCache, AtomProto, Ctx, parseAtoms, withReset } from '@reatom/framework'
+import { JSX } from '@reatom/jsx'
 import { ObservableHQ, ObservableHQActionButton } from '../ObservableHQ'
 import { reatomFilters } from './reatomFilters'
 import { actionsStates, history } from './utils'

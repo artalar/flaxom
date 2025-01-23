@@ -1,7 +1,3 @@
-import { test, expect } from 'vitest'
-import { createTestCtx } from '@reatom/testing'
+import { test } from 'vitest'
 
-test('base API', async () => {
-  const ctx = createTestCtx()
-  // expect(false).toBeTruthy('You forgot test you code')
-})
+test('base API', async () => {})

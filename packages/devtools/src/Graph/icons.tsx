@@ -1,4 +1,4 @@
-import { h, hf, JSX, css } from '@reatom/jsx'
+import { JSX } from '@reatom/jsx'
 
 const toUrlString = (icon: JSX.Element) => `url(data:image/svg+xml;base64,${btoa((<div>{icon}</div>).innerHTML)})`
 

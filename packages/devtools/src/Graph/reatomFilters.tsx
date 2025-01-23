@@ -1,5 +1,5 @@
 import { parseAtoms, assign, LinkedListAtom, Action, atom, Fn, Ctx, noop, action, omit } from '@reatom/framework'
-import { h, hf, JSX, css } from '@reatom/jsx'
+import { JSX } from '@reatom/jsx'
 import { reatomZod, ZodAtomization } from '@reatom/npm-zod'
 import { z } from 'zod'
 
@@ -303,12 +303,14 @@ export const reatomFilters = (
   filters.size.onChange(trackSize)
 
   const FiltersComponent = () => (
-    <div css={`
-      & input::placeholder {
-        color: currentColor;
-        opacity: 0.8;
-      }
-    `}>
+    <div
+      css={`
+        & input::placeholder {
+          color: currentColor;
+          opacity: 0.8;
+        }
+      `}
+    >
       <fieldset
         on:click={(ctx, e) => {
           if (e.target === e.currentTarget && ctx.get(filters.folded)) {
