@@ -29,6 +29,9 @@ tester.run('unit-naming-rule', unitNamingRule, {
     {
       code: `function reatomSome() { const Atoms = { someAtom: atom(0, 'Some.Atoms.someAtom') } }`,
     },
+    { 
+      code: `function reatomSome({name}) { const Atoms = { someAtom: atom(0, \`\${name}.Atoms.someAtom\`) } }`
+    },
   ],
   invalid: [
     {

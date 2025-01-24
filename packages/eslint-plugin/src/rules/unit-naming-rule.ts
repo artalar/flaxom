@@ -162,7 +162,7 @@ export const unitNamingRule: Rule.RuleModule = {
             const afterDomain = nameNode.quasis[1]!.value.raw.slice(1)
             const [object, self] = afterDomain.includes('.') ? afterDomain.split('.') : [null, afterDomain]
             const local = self.startsWith('_')
-            const unit = afterDomain.slice(local ? 1 : 0)
+            const unit = afterDomain.slice(local ? 1 : 0).split('.').at(-1)
             parsedName = { domain: { is: 'dynamic', vary: domainVary }, object, local, unit }
           }
         }
