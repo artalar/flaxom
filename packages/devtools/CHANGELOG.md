@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.1](https://github.com/artalar/reatom/compare/devtools-v0.9.0...devtools-v0.9.1) (2025-01-24)
+
+
+### Bug Fixes
+
+* **devtools:** logs subscription ([78eefeb](https://github.com/artalar/reatom/commit/78eefeb53f92d46f809d2f12f4af2a871d994dae))
+
 ## [0.9.0](https://github.com/artalar/reatom/compare/devtools-v0.8.3...devtools-v0.9.0) (2025-01-22)
 
 
