@@ -35,6 +35,10 @@
     {
       "name": "pivaszbs",
       "url": "https://github.com/pivaszbs"
+    },
+    {
+      "name": "serikovlearning",
+      "url": "https://github.com/serikovlearning"
     }
   ],
   "license": "MIT",
