@@ -77,16 +77,16 @@ it('children updates', setup((ctx, h, hf, mount, parent) => {
 
   mount(parent, element)
 
-  assert.is(element.childNodes.length, 3)
-  assert.is(element.childNodes[1]?.textContent, 'foo')
-  assert.is(element.childNodes[2], a)
+  assert.is(element.childNodes.length, 5)
+  assert.is(element.childNodes[2]?.textContent, 'foo')
+  assert.is(element.childNodes[4], a)
 
   val(ctx, 'bar')
-  assert.is(element.childNodes[1]?.textContent, 'bar')
+  assert.is(element.childNodes[2]?.textContent, 'bar')
 
-  assert.is(element.childNodes[2], a)
+  assert.is(element.childNodes[4], a)
   route(ctx, 'b')
-  assert.is(element.childNodes[2], b)
+  assert.is(element.childNodes[4], b)
 }))
 
 it('dynamic children', setup((ctx, h, hf, mount, parent) => {
@@ -96,14 +96,14 @@ it('dynamic children', setup((ctx, h, hf, mount, parent) => {
 
   mount(parent, element)
 
-  assert.is(element.childNodes.length, 1)
+  assert.is(element.childNodes.length, 2)
 
   children(ctx, <div>Hello, world!</div>)
-  assert.is(element.childNodes[0]?.textContent, 'Hello, world!')
+  assert.is(element.childNodes[1]?.textContent, 'Hello, world!')
 
   const inner = <span>inner</span>
   children(ctx, <div>{inner}</div>)
-  assert.is(element.childNodes[0]?.childNodes[0], inner)
+  assert.is(element.childNodes[1]?.childNodes[0], inner)
 
   const before = atom('before', 'before')
   const after = atom('after', 'after')
@@ -159,25 +159,24 @@ it('fragment as child', setup((ctx, h, hf, mount, parent) => {
 
 it('array children', setup((ctx, h, hf, mount, parent) => {
   const n = atom(1)
-  const list = atom((ctx) => Array.from({ length: ctx.spy(n) }, (_, i) => <li>{i + 1}</li>))
+  const list = atom((ctx) => (<>
+    {...Array.from({ length: ctx.spy(n) }, (_, i) => <li>{i + 1}</li>)}
+  </>))
 
-  assert.throws(() => {
-    mount(
-      parent,
-      <ul>
-        {list /* expected TS error */ as any}
-        <br />
-      </ul>,
-    )
-  })
+  const element = (
+    <ul>
+      {list}
+      <br />
+    </ul>
+  )
 
-  const element = <ul>{list}</ul>
+  mount(parent, element)
 
-  assert.is(element.childNodes.length, 1)
+  assert.is(element.childNodes.length, 3)
   assert.is(element.textContent, '1')
 
   n(ctx, 2)
-  assert.is(element.childNodes.length, 2)
+  assert.is(element.childNodes.length, 4)
   assert.is(element.textContent, '12')
 }))
 
@@ -288,7 +287,7 @@ it('render HTMLElement atom', setup((ctx, h, hf, mount, parent) => {
 
   const element = <div>{htmlAtom}</div>
 
-  assert.is(element.innerHTML, '<div>div</div>')
+  assert.is(element.innerHTML, '<!--html--><div>div</div>')
 }))
 
 it('render SVGElement atom', setup((ctx, h, hf, mount, parent) => {
@@ -296,7 +295,7 @@ it('render SVGElement atom', setup((ctx, h, hf, mount, parent) => {
 
   const element = <div>{svgAtom}</div>
 
-  assert.is(element.innerHTML, '<svg>svg</svg>')
+  assert.is(element.innerHTML, '<!--svg--><svg>svg</svg>')
 }))
 
 it('custom component', setup((ctx, h, hf, mount, parent) => {
@@ -528,4 +527,84 @@ it('style object update', setup((ctx, h, hf, mount, parent) => {
   })
 
   assert.is(component.getAttribute('style'), 'left: 0px; bottom: 0px;')
+}))
+
+it('render different atom children', setup((ctx, h, hf, mount, parent) => {
+  const name = 'child'
+  const target = `<!--${name}-->`
+  const childAtom = atom<Node | string>(<>
+    <div>div</div>
+    <p>p</p>
+  </>, name)
+
+  const element = <div>{childAtom}</div>
+  assert.is(element.innerHTML, `<div>${target}div>div</div><p>p</p></div>`)
+
+  childAtom(ctx, <span>span</span>)
+  assert.is(element.innerHTML, `<div>${target}span>span</span></div>`)
+
+  childAtom(ctx, 'text')
+  assert.is(element.innerHTML, `<div>${target}text</div>`)
+}))
+
+it('render atom fragments', setup((ctx, h, hf, mount, parent) => {
+  const bool1Atom = atom(false)
+  const bool2Atom = atom(false)
+
+  const element = (
+    <div>
+      <p>0</p>
+      {atom(
+        (ctx) => ctx.spy(bool1Atom)
+          ? <>
+            <p>1</p>
+            {atom(
+              (ctx) => ctx.spy(bool2Atom)
+                ? <>
+                  <p>2</p>
+                  <p>3</p>
+                </>
+                : undefined,
+              '2'
+            )}
+            <p>4</p>
+          </>
+          : undefined,
+        '1',
+      )}
+      <p>5</p>
+    </div>
+  )
+
+  const expect1 = '<p>0</p><!--1--><p>5</p>'
+  const expect2 = '<p>0</p><!--1--><p>1</p><!--2--><p>4</p><p>5</p>'
+  const expect3 = '<p>0</p><!--1--><p>1</p><!--2--><p>2</p><p>3</p><p>4</p><p>5</p>'
+
+  bool1Atom(ctx, false)
+  bool2Atom(ctx, false)
+  assert.is(element.innerHTML, expect1)
+
+  bool1Atom(ctx, false)
+  bool2Atom(ctx, true)
+  assert.is(element.innerHTML, expect1)
+
+  bool1Atom(ctx, true)
+  bool2Atom(ctx, false)
+  assert.is(element.innerHTML, expect2)
+
+  bool1Atom(ctx, true)
+  bool2Atom(ctx, true)
+  assert.is(element.innerHTML, expect3)
+
+  bool1Atom(ctx, true)
+  bool2Atom(ctx, false)
+  assert.is(element.innerHTML, expect2)
+
+  bool1Atom(ctx, false)
+  bool2Atom(ctx, true)
+  assert.is(element.innerHTML, expect1)
+
+  bool1Atom(ctx, false)
+  bool2Atom(ctx, false)
+  assert.is(element.innerHTML, expect1)
 }))

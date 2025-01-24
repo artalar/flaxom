@@ -11,7 +11,7 @@ import {
   batch,
 } from '@reatom/framework'
 import { h, hf, JSX } from '@reatom/jsx'
-import { followingsMap, getId, getStartCause, highlighted } from './utils'
+import { followingsMap, getId, getStartCause, highlighted } from '../utils'
 import { reatomLinkedList } from '@reatom/primitives'
 
 interface Params {

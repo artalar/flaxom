@@ -1,4 +1,5 @@
 import { __root, AtomCache, AtomProto } from '@reatom/framework'
+import { css } from '@reatom/jsx'
 
 export const getColor = ({ proto }: AtomCache): string =>
   proto.isAction
@@ -51,3 +52,21 @@ export const history = new (class extends WeakMap<AtomProto, Array<AtomCache>> {
     list.unshift(patch)
   }
 })()
+
+export const buttonCss = css`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 30px;
+  padding: 2px 4px;
+  font-size: 12px;
+  background: none;
+  box-sizing: border-box;
+  border: 2px solid #151134;
+  border-radius: 2px;
+  outline: none;
+  &:focus,
+  &:not([disabled]):hover {
+    border: 4px solid #151134;
+  }
+`

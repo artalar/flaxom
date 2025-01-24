@@ -1,5 +1,31 @@
 # Changelog
 
+## [0.9.2](https://github.com/artalar/reatom/compare/devtools-v0.9.1...devtools-v0.9.2) (2025-01-24)
+
+
+### Bug Fixes
+
+* **devtools:** callback state ([12e2ea2](https://github.com/artalar/reatom/commit/12e2ea2b1aa01dc1ecf683a8fe3665b9aa2fb9a6))
+
+## [0.9.1](https://github.com/artalar/reatom/compare/devtools-v0.9.0...devtools-v0.9.1) (2025-01-24)
+
+
+### Bug Fixes
+
+* **devtools:** logs subscription ([78eefeb](https://github.com/artalar/reatom/commit/78eefeb53f92d46f809d2f12f4af2a871d994dae))
+
+## [0.9.0](https://github.com/artalar/reatom/compare/devtools-v0.8.3...devtools-v0.9.0) (2025-01-22)
+
+
+### Features
+
+* **devtools:** filters redesign [#1010](https://github.com/artalar/reatom/issues/1010) ([0e3c655](https://github.com/artalar/reatom/commit/0e3c6555f8d71bcbb7bfe9bbcbc3a2f9dcaea356))
+
+
+### Bug Fixes
+
+* **devtools:** actions handling ([f04397a](https://github.com/artalar/reatom/commit/f04397accfdffa8f227f291d484be5e64087191d))
+
 ## [0.8.3](https://github.com/artalar/reatom/compare/devtools-v0.8.2...devtools-v0.8.3) (2025-01-18)
 
 
