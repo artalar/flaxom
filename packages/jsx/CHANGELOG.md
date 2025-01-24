@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.16.2](https://github.com/artalar/reatom/compare/jsx-v3.16.1...jsx-v3.16.2) (2025-01-24)
+
+
+### Bug Fixes
+
+* **jsx:** render a factory returning an atom ([#874](https://github.com/artalar/reatom/issues/874)) ([c6d8ac9](https://github.com/artalar/reatom/commit/c6d8ac975dc16b6b1cb4c58cafb03a44c381d16e))
+
 ## [3.16.1](https://github.com/artalar/reatom/compare/jsx-v3.16.0...jsx-v3.16.1) (2025-01-17)
 
 
