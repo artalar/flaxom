@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.2](https://github.com/artalar/reatom/compare/devtools-v0.9.1...devtools-v0.9.2) (2025-01-24)
+
+
+### Bug Fixes
+
+* **devtools:** callback state ([12e2ea2](https://github.com/artalar/reatom/commit/12e2ea2b1aa01dc1ecf683a8fe3665b9aa2fb9a6))
+
 ## [0.9.1](https://github.com/artalar/reatom/compare/devtools-v0.9.0...devtools-v0.9.1) (2025-01-24)
 
 
