@@ -89,6 +89,7 @@ describe('optimistic update', () => {
     expect(effectTrack.calls.length).toBe(3)
     expect(dataTrack.calls.length).toBe(3)
 
+    // cleanup test
     dataTrack.unsubscribe()
   })
 })
@@ -99,7 +100,7 @@ describe('concurrent pooling', () => {
     every 5 seconds. We want to abort the previous pooling if the new one
     was started. The problem with the most tooling for async management is that no causes tracking
     and we can't abort some step of the previous pooling if the new one was started.
-    Reatom handle it perfectly, because ctx is immutable and could be traced when needed.
+    Reatom handle it perfectly, because `ctx` is immutable and could be traced when needed.
   */
 
   //#region BACKEND IMITATION
