@@ -1,5 +1,5 @@
 import { atom, Atom, AtomMaybe, CtxSpy, isAtom } from '@reatom/core'
-import { isObject} from '@reatom/utils'
+import { isObject } from '@reatom/utils'
 
 export type ClassNameValue = AtomMaybe<
   | string

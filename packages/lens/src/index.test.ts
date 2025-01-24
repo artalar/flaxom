@@ -62,10 +62,7 @@ test(`readonly and plain`, () => {
 })
 
 test(`mapPayload, mapPayloadAwaited, toAtom`, async () => {
-  const a = action(
-    (ctx, v: number) => ctx.schedule(() => sleep(10).then(() => v)),
-    'a',
-  )
+  const a = action((ctx, v: number) => ctx.schedule(() => sleep(10).then(() => v)), 'a')
   const aMaybeString = a.pipe(mapPayloadAwaited((ctx, v) => v.toString()))
   const aString = aMaybeString.pipe(toAtom('0'))
   const aNumber = aMaybeString.pipe(
@@ -368,10 +365,7 @@ test('withOnUpdate and sampleBuffer example', () => {
   const sampleBuffer =
     <T>(signal: Atom) =>
     (anAction: Action<[T], T>) => {
-      const bufferAtom = atom(
-        new Array<T>(),
-        `${anAction.__reatom.name}._sampleBuffer`,
-      )
+      const bufferAtom = atom(new Array<T>(), `${anAction.__reatom.name}._sampleBuffer`)
       return anAction.pipe(
         mapPayload((ctx, value) => bufferAtom(ctx, (v) => [...v, value])),
         sample(signal),

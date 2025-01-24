@@ -14,10 +14,7 @@ export type NumberAtom = PrimitiveAtomCreator<
 >
 
 let count = 0
-export function createNumberAtom(
-  initState = 0,
-  options: AtomOptions = `number${++count}`,
-): NumberAtom {
+export function createNumberAtom(initState = 0, options: AtomOptions = `number${++count}`): NumberAtom {
   return createPrimitiveAtom(
     initState,
     {

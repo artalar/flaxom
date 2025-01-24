@@ -11,12 +11,7 @@ test(`enum object`, async () => {
 })
 
 test(`camelCase`, async () => {
-  const sortFilterAtom = createEnumAtom([
-    'fullName',
-    'created',
-    'updated',
-    'pushed',
-  ])
+  const sortFilterAtom = createEnumAtom(['fullName', 'created', 'updated', 'pushed'])
 
   sortFilterAtom.setUpdated.dispatch()
 
@@ -25,10 +20,7 @@ test(`camelCase`, async () => {
 })
 
 test(`snake_case`, async () => {
-  const sortFilterAtom = createEnumAtom(
-    ['full_name', 'created', 'updated', 'pushed'],
-    { format: 'snake_case' },
-  )
+  const sortFilterAtom = createEnumAtom(['full_name', 'created', 'updated', 'pushed'], { format: 'snake_case' })
 
   sortFilterAtom.enum
 

@@ -1,23 +1,12 @@
 import * as v3 from '@reatom/core'
 import { Leaf, Tree, BaseAction } from './kernel'
-import {
-  TREE,
-  nameToId,
-  Unit,
-  getName,
-  getStoreByCtx,
-  __onConnect,
-  __onDisconnect,
-} from './shared'
+import { TREE, nameToId, Unit, getName, getStoreByCtx, __onConnect, __onDisconnect } from './shared'
 import { Store } from './createStore'
 
 export type ActionType = Leaf
 export type Reaction<T> = (payload: T, store: Store) => any
 
-export type Action<
-  Payload,
-  Type extends ActionType = string,
-> = BaseAction<Payload> & {
+export type Action<Payload, Type extends ActionType = string> = BaseAction<Payload> & {
   type: Type
   reactions?: Reaction<Payload>[]
 }
@@ -27,13 +16,10 @@ export type BaseActionCreator<Type extends string = string> = {
   v3action: v3.Action
 } & Unit
 
-export type ActionCreator<Type extends string = string> =
-  BaseActionCreator<Type> & (() => Action<undefined, Type>)
+export type ActionCreator<Type extends string = string> = BaseActionCreator<Type> & (() => Action<undefined, Type>)
 
-export type PayloadActionCreator<
-  Payload,
-  Type extends string = string,
-> = BaseActionCreator<Type> & ((payload: Payload) => Action<Payload, Type>)
+export type PayloadActionCreator<Payload, Type extends string = string> = BaseActionCreator<Type> &
+  ((payload: Payload) => Action<Payload, Type>)
 
 export const actions = new Map<Leaf, ActionCreator>()
 
@@ -57,10 +43,7 @@ export function declareAction<Payload, Type extends ActionType>(
   ...reactions: Reaction<Payload>[]
 ): PayloadActionCreator<Payload, Type>
 
-export function declareAction<
-  Payload = undefined,
-  Type extends ActionType = string,
->(
+export function declareAction<Payload = undefined, Type extends ActionType = string>(
   name: string | [Type] | Reaction<Payload> = 'action',
   ...reactions: Reaction<Payload>[]
 ): ActionCreator<Type> | PayloadActionCreator<Payload, Type> {
@@ -75,20 +58,13 @@ export function declareAction<
 
   const ACTree = new Tree(id, true)
 
-  const v3action = v3.action(
-    (ctx, payload, r: Array<Reaction<Payload>> = reactions) => {
-      r.forEach((cb) => ctx.schedule(() => cb(payload, getStoreByCtx(ctx)!)))
+  const v3action = v3.action((ctx, payload, r: Array<Reaction<Payload>> = reactions) => {
+    r.forEach((cb) => ctx.schedule(() => cb(payload, getStoreByCtx(ctx)!)))
 
-      return payload
-    },
-    getName(id),
-  )
-  ;(v3action.__reatom.connectHooks = new Set()).add((ctx) =>
-    __onConnect(ctx, v3action),
-  )
-  ;(v3action.__reatom.disconnectHooks = new Set()).add((ctx) =>
-    __onDisconnect(ctx, v3action),
-  )
+    return payload
+  }, getName(id))
+  ;(v3action.__reatom.connectHooks = new Set()).add((ctx) => __onConnect(ctx, v3action))
+  ;(v3action.__reatom.disconnectHooks = new Set()).add((ctx) => __onDisconnect(ctx, v3action))
 
   const actionCreator = function actionCreator(payload?: Payload) {
     return {

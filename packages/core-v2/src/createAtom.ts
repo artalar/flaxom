@@ -49,18 +49,12 @@ export type AtomOptions<State = any> =
       v3atom?: v3.Atom
     }
 
-export type AtomDecorator<State> = Fn<
-  [cacheReducer: CacheReducer<State>],
-  CacheReducer<State>
->
+export type AtomDecorator<State> = Fn<[cacheReducer: CacheReducer<State>], CacheReducer<State>>
 
 type PayloadMapper = Fn
 
 let atomsCount = 0
-export function createAtom<
-  State,
-  Deps extends Rec<PayloadMapper | Atom | ActionCreator>,
->(
+export function createAtom<State, Deps extends Rec<PayloadMapper | Atom | ActionCreator>>(
   dependencies: Deps,
   reducer: TrackReducer<State, Deps>,
   options: AtomOptions<State> = {},
@@ -70,9 +64,7 @@ export function createAtom<
     v3atom,
     id = v3atom?.__reatom.name ?? `atom${++atomsCount}`,
     store = defaultStore,
-  } = isString(options)
-    ? ({ id: options } as Exclude<AtomOptions<State>, string>)
-    : options
+  } = isString(options) ? ({ id: options } as Exclude<AtomOptions<State>, string>) : options
   const trackedTypes: Array<string> = []
   const types: Array<string> = []
   const actionCreators: Rec<ActionCreator> = {}
@@ -81,10 +73,7 @@ export function createAtom<
   throwReatomError(!isFunction(reducer) || !isString(id), 'atom arguments')
 
   Object.entries(dependencies).forEach(([name, dep]) => {
-    throwReatomError(
-      !isFunction(dep),
-      `Invalid atom dependencies (type ${typeof dep}) at ${name}`,
-    )
+    throwReatomError(!isFunction(dep), `Invalid atom dependencies (type ${typeof dep}) at ${name}`)
 
     if (isAtom(dep)) {
       dep.types.forEach((type) => pushUnique(types, type))
@@ -104,8 +93,7 @@ export function createAtom<
           v3action: actionCreator.v3action,
         })
         actionCreator.type = type
-        actionCreator.dispatch = (...a: any[]) =>
-          store.dispatch(actionCreator(...a))
+        actionCreator.dispatch = (...a: any[]) => store.dispatch(actionCreator(...a))
         actionCreator.v3action = v3.action(type)
 
         actionCreators[name] = actionCreator
@@ -167,10 +155,7 @@ export function createAtom<
 
 const ctxs = new WeakMap<v3.Ctx['cause'], WeakMap<Fn, Rec>>()
 
-function createDynamicallyTrackedCacheReducer<
-  State,
-  Deps extends Rec<PayloadMapper | Atom>,
->(
+function createDynamicallyTrackedCacheReducer<State, Deps extends Rec<PayloadMapper | Atom>>(
   reducer: TrackReducer<State, Deps>,
   dependencies: Deps,
   trackedTypes: Array<string>,
@@ -184,19 +169,15 @@ function createDynamicallyTrackedCacheReducer<
   return (v3ctx: v3.CtxSpy, state?: any): any => {
     const rootCause = getRootCause(v3ctx.cause)
     if (!ctxs.has(rootCause)) ctxs.set(rootCause, new WeakMap())
-    if (!ctxs.get(rootCause)!.has(reducer))
-      ctxs.get(rootCause)!.set(reducer, {})
+    if (!ctxs.get(rootCause)!.has(reducer)) ctxs.get(rootCause)!.set(reducer, {})
     const ctx = ctxs.get(rootCause)!.get(reducer)!
 
-    const get: Track<Deps>[`get`] = (name) =>
-      v3ctx.spy((dependencies[name as string] as Atom).v3atom)
+    const get: Track<Deps>[`get`] = (name) => v3ctx.spy((dependencies[name as string] as Atom).v3atom)
 
-    const getUnlistedState: Track<Deps>[`getUnlistedState`] = (targetAtom) =>
-      v3ctx.get(targetAtom.v3atom)
+    const getUnlistedState: Track<Deps>[`getUnlistedState`] = (targetAtom) => v3ctx.get(targetAtom.v3atom)
 
     const onAction: Track<Deps>[`onAction`] = (name, reaction) => {
-      const ac =
-        externalActions[name as string] ?? actionCreators[name as string]
+      const ac = externalActions[name as string] ?? actionCreators[name as string]
 
       throwReatomError(ac === undefined, `Unknown action`)
 

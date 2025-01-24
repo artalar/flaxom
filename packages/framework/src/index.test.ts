@@ -11,16 +11,7 @@ import * as primitives from '@reatom/primitives'
 import * as utils from '@reatom/utils'
 
 test(`base API`, async () => {
-  const packages = [
-    async,
-    core,
-    effects,
-    hooks,
-    lens,
-    logger,
-    primitives,
-    utils,
-  ]
+  const packages = [async, core, effects, hooks, lens, logger, primitives, utils]
 
   const allExports = packages
     .reduce((acc, v) => [...acc, ...Object.keys(v)], new Array<string>())

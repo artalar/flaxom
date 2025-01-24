@@ -1,14 +1,4 @@
-import {
-  Atom,
-  AtomState,
-  createCtx,
-  Ctx,
-  CtxParams,
-  Fn,
-  isAtom,
-  throwReatomError,
-  Unsubscribe,
-} from '@reatom/core'
+import { Atom, AtomState, createCtx, Ctx, CtxParams, Fn, isAtom, throwReatomError, Unsubscribe } from '@reatom/core'
 import { getContext, setContext } from 'svelte'
 
 const KEY = 'reatomCtx'

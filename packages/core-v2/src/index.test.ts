@@ -3,16 +3,7 @@ import * as assert from 'uvu/assert'
 
 import { atom } from '@reatom/core'
 
-import {
-  Atom,
-  createAtom,
-  createStore,
-  Fn,
-  getState,
-  Rec,
-  callSafety,
-  defaultStore,
-} from '../'
+import { Atom, createAtom, createStore, Fn, getState, Rec, callSafety, defaultStore } from '../'
 import { createNumberAtom, createPrimitiveAtom } from '../primitives'
 
 import { mockFn, parseCauses, sleep } from '../test_utils'
@@ -55,8 +46,7 @@ test(`displayName`, () => {
 
   const displayNameAtom = createAtom(
     { isFirstNameShortAtom, fullNameAtom, firstNameAtom },
-    ({ get }) =>
-      get(`isFirstNameShortAtom`) ? get(`fullNameAtom`) : get(`firstNameAtom`),
+    ({ get }) => (get(`isFirstNameShortAtom`) ? get(`fullNameAtom`) : get(`firstNameAtom`)),
     `displayName`,
   )
 
@@ -117,13 +107,10 @@ test(`combine`, () => {
 })
 
 test(`atom external action subscribe`, () => {
-  const a1 = createAtom(
-    { add: (value: number) => value },
-    (track, state = 0) => {
-      track.onAction('add', (value) => (state += value))
-      return state
-    },
-  )
+  const a1 = createAtom({ add: (value: number) => value }, (track, state = 0) => {
+    track.onAction('add', (value) => (state += value))
+    return state
+  })
   const a2 = createAtom({ add: a1.add }, (track, state = 0) => {
     track.onAction('add', (value) => (state += value))
     // @ts-expect-error
@@ -178,10 +165,7 @@ test(`atom filter`, () => {
   assert.equal(bCache4.state, 1)
   assert.not.equal(bCache3.state, bCache4.state)
 
-  const bCache5 = bAtom(
-    createTransaction([a1Atom.change((s) => s + 2)]),
-    bCache4,
-  )
+  const bCache5 = bAtom(createTransaction([a1Atom.change((s) => s + 2)]), bCache4)
   assert.equal(track.calls.length, 3)
   assert.not.equal(bCache4, bCache5)
   assert.equal(bCache5.state, 3)
@@ -190,10 +174,7 @@ test(`atom filter`, () => {
 })
 
 test(`in atom action effect`, async () => {
-  function createResource<I, O>(
-    fetcher: (params: I) => Promise<O>,
-    id: string,
-  ) {
+  function createResource<I, O>(fetcher: (params: I) => Promise<O>, id: string) {
     const resourceAtom = createAtom(
       {
         request: (payload: I) => payload,
@@ -204,11 +185,7 @@ test(`in atom action effect`, async () => {
           schedule((dispatch) =>
             fetcher(payload)
               .then((data) => dispatch(create('response', data)))
-              .catch((e) =>
-                dispatch(
-                  create('response', e instanceof Error ? e : new Error(e)),
-                ),
-              ),
+              .catch((e) => dispatch(create('response', e instanceof Error ? e : new Error(e)))),
           )
         })
 
@@ -316,16 +293,10 @@ test(`Manage dynamic dependencies`, () => {
   const a = createPrimitiveAtom(0)
   const b = createAtom(
     { add: (atom: Atom) => atom },
-    (
-      { onAction, getUnlistedState },
-      state = new Array<readonly [Atom, any]>(),
-    ) => {
+    ({ onAction, getUnlistedState }, state = new Array<readonly [Atom, any]>()) => {
       reducerCalls++
 
-      onAction(
-        `add`,
-        (atom) => (state = [...state, [atom, getUnlistedState(atom)]]),
-      )
+      onAction(`add`, (atom) => (state = [...state, [atom, getUnlistedState(atom)]]))
 
       return state
     },
@@ -457,16 +428,8 @@ test(`subscription call cause`, () => {
     },
     `counter`,
   )
-  const counterIsEvenAtom = createAtom(
-    { counterAtom },
-    ({ get }) => get(`counterAtom`) % 2 === 0,
-    `counterIsEven`,
-  )
-  const counterIsHugeAtom = createAtom(
-    { counterAtom },
-    ({ get }) => get(`counterAtom`) > 10_000,
-    `counterIsHuge`,
-  )
+  const counterIsEvenAtom = createAtom({ counterAtom }, ({ get }) => get(`counterAtom`) % 2 === 0, `counterIsEven`)
+  const counterIsHugeAtom = createAtom({ counterAtom }, ({ get }) => get(`counterAtom`) > 10_000, `counterIsHuge`)
   const titleAtom = createAtom(
     { counterIsEvenAtom, counterIsHugeAtom },
     ({ onChange }, title = 'counter') => {
@@ -483,16 +446,10 @@ test(`subscription call cause`, () => {
   store.subscribe(titleAtom, cb)
 
   store.dispatch(counterAtom.inc())
-  assert.equal(parseCauses(cb.lastInput(1)), [
-    'DISPATCH: inc_counter',
-    'counterIsEven atom',
-  ])
+  assert.equal(parseCauses(cb.lastInput(1)), ['DISPATCH: inc_counter', 'counterIsEven atom'])
 
   store.dispatch(counterAtom.add(100_000))
-  assert.equal(parseCauses(cb.lastInput(1)), [
-    'DISPATCH: add_counter',
-    'counterIsHuge atom',
-  ])
+  assert.equal(parseCauses(cb.lastInput(1)), ['DISPATCH: add_counter', 'counterIsHuge atom'])
   ;`👍` //?
 })
 
@@ -503,8 +460,7 @@ test(`createTemplateCache`, () => {
   const snapshot = { [atomWithSnapshot.id]: 42 }
 
   const store = createStore({
-    createTemplateCache: (atom) =>
-      Object.assign(createTemplateCache(atom), { state: snapshot[atom.id] }),
+    createTemplateCache: (atom) => Object.assign(createTemplateCache(atom), { state: snapshot[atom.id] }),
   })
 
   assert.is(store.getState(atomWithoutSnapshot), 0)
@@ -547,23 +503,20 @@ test(`onPatch / onError`, () => {
 })
 
 test('State updates order', async () => {
-  const a = createAtom(
-    { setB: () => null, _setC: () => null },
-    ({ onAction, schedule, create }, state = 'a') => {
-      onAction('setB', () => {
-        state = 'b'
-        schedule((dispatch) => {
-          dispatch(create('_setC'))
-        })
+  const a = createAtom({ setB: () => null, _setC: () => null }, ({ onAction, schedule, create }, state = 'a') => {
+    onAction('setB', () => {
+      state = 'b'
+      schedule((dispatch) => {
+        dispatch(create('_setC'))
       })
+    })
 
-      onAction('_setC', () => {
-        state = 'c'
-      })
+    onAction('_setC', () => {
+      state = 'c'
+    })
 
-      return state
-    },
-  )
+    return state
+  })
   const store = createStore()
   const listener = mockFn()
   store.subscribe(a, listener)

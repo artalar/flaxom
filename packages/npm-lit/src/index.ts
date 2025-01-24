@@ -5,8 +5,7 @@ import { LitElement, PropertyValues } from 'lit'
 
 type Constructor<T> = new (...args: any[]) => T
 
-const isShallowEqual = (a: unknown[], b: unknown[]) =>
-  a.length === b.length && a.every((el, i) => el === b[i])
+const isShallowEqual = (a: unknown[], b: unknown[]) => a.length === b.length && a.every((el, i) => el === b[i])
 
 let ctx: Ctx
 
@@ -29,9 +28,7 @@ export const setupCtx = (value: Ctx): void => {
  *
  * @returns class with ctx property
  */
-export const withReatom = <T extends Constructor<LitElement>>(
-  superClass: T,
-): T & Constructor<{ ctx: CtxSpy }> => {
+export const withReatom = <T extends Constructor<LitElement>>(superClass: T): T & Constructor<{ ctx: CtxSpy }> => {
   return class ReatomLit extends superClass {
     private unsub?: Unsubscribe
     private deps: Array<Atom> = []

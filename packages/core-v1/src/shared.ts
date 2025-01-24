@@ -18,11 +18,7 @@ export type NonUndefined<T> = Exclude<T, undefined>
  * type MyAtomType = InferType<typeof myAtom>
  * type MyActionType = InferType<typeof myAction>
  */
-export type InferType<T> = T extends
-  | Atom<infer R>
-  | PayloadActionCreator<infer R>
-  ? R
-  : never
+export type InferType<T> = T extends Atom<infer R> | PayloadActionCreator<infer R> ? R : never
 
 export function noop() {}
 
@@ -36,9 +32,7 @@ export function getTree(thing: Unit): Tree {
 }
 
 export function getName(treeId: TreeId): string {
-  return typeof treeId === 'symbol'
-    ? treeId.description || treeId.toString().replace(/Symbol\((.*)\)/, '$1')
-    : treeId
+  return typeof treeId === 'symbol' ? treeId.description || treeId.toString().replace(/Symbol\((.*)\)/, '$1') : treeId
 }
 
 export function getIsAtom(thing: any): thing is Atom<any> {
@@ -77,10 +71,7 @@ export function safetyStr(str: string, name: string): string {
   if (typeof str !== 'string' || str.length === 0) throwError(`Invalid ${name}`)
   return str
 }
-export function safetyFunc<T extends Function>(
-  func: T | undefined,
-  name: string,
-): T {
+export function safetyFunc<T extends Function>(func: T | undefined, name: string): T {
   if (typeof func !== 'function') throwError(`Invalid ${name}`)
   return func as T
 }

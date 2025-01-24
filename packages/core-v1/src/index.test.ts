@@ -73,12 +73,8 @@ test('main api, declareAtom, basics', () => {
 
 test('main api, declareAtom, strict uid', () => {
   const addUnderscore = declareAction()
-  const atom1 = declareAtom(['name1'], '1', (on) => [
-    on(addUnderscore, (state) => `_${state}`),
-  ])
-  const atom2 = declareAtom(['name2'], '2', (on) => [
-    on(addUnderscore, (state) => `_${state}`),
-  ])
+  const atom1 = declareAtom(['name1'], '1', (on) => [on(addUnderscore, (state) => `_${state}`)])
+  const atom2 = declareAtom(['name2'], '2', (on) => [on(addUnderscore, (state) => `_${state}`)])
   const atomRoot = combine([atom1, atom2])
 
   let state = atomRoot()
@@ -106,21 +102,17 @@ test('main api, declareAtom, throw error if atom produced undefined value', () =
   const action = declareAction()
 
   assert.throws(
-    () =>
-      declareAtom(['myAtom'], {}, (on) => on(action, () => undefined as any))(
-        {},
-        action(),
-      ),
+    () => declareAtom(['myAtom'], {}, (on) => on(action, () => undefined as any))({}, action()),
 
     '[reatom] Invalid state. Reducer number 1 in "myAtom" atom returns undefined',
   )
 
   assert.throws(
     () =>
-      declareAtom(['test'], 0, (on) => [
-        on(declareAction(), () => 0),
-        on(action, () => undefined as any),
-      ])({}, action()),
+      declareAtom(['test'], 0, (on) => [on(declareAction(), () => 0), on(action, () => undefined as any)])(
+        {},
+        action(),
+      ),
 
     '[reatom] Invalid state. Reducer number 2 in "test" atom returns undefined',
   )
@@ -150,13 +142,9 @@ test('main api, createStore', () => {
   const increment = declareAction('increment')
   const toggle = declareAction()
 
-  const count = declareAtom('count', 0, (on) => [
-    on(increment, (state) => state + 1),
-  ])
+  const count = declareAtom('count', 0, (on) => [on(increment, (state) => state + 1)])
   const countDoubled = map('count/map', count, (state) => state * 2)
-  const toggled = declareAtom('toggled', false, (on) =>
-    on(toggle, (state) => !state),
-  )
+  const toggled = declareAtom('toggled', false, (on) => on(toggle, (state) => !state))
 
   const root = combine('combine', {
     count,
@@ -179,10 +167,7 @@ test('main api, createStore', () => {
   assert.is(store.getState(countDoubled), 0)
   assert.is(store.getState(count), 0)
 
-  assert.ok(
-    store.getState(root) !==
-      (store.dispatch(increment()), store.getState(root)),
-  )
+  assert.ok(store.getState(root) !== (store.dispatch(increment()), store.getState(root)))
   assert.equal(store.getState(root), {
     count: 1,
     countDoubled: 2,
@@ -234,10 +219,7 @@ test('main api, createStore', () => {
   assert.is(subscriberToggled.calls.length, 1)
   assert.is(subscriberToggled.calls[0]!.i[0], true)
 
-  assert.ok(
-    store.getState(root) ===
-      (store.dispatch(declareAction()()), store.getState(root)),
-  )
+  assert.ok(store.getState(root) === (store.dispatch(declareAction()()), store.getState(root)))
   assert.is(storeSubscriber.calls.length, 3)
   assert.is(subscriberToggled.calls.length, 1)
 })
@@ -252,10 +234,7 @@ test('main api, createStore lazy selectors', () => {
 
   const count1 = declareAtom(0, (on) => on(increment, (state) => state + 1))
   const count2SetMap = mockFn((state, payload) => payload)
-  const count2 = declareAtom(0, (on) => [
-    on(increment, (state) => state + 1),
-    on(set, count2SetMap),
-  ])
+  const count2 = declareAtom(0, (on) => [on(increment, (state) => state + 1), on(set, count2SetMap)])
 
   const root = combine({ count1 })
 
@@ -344,9 +323,7 @@ test('main api, createStore lazy resubscribes', () => {
   const storeSubscriber = mockFn()
   const increment = declareAction()
 
-  const count = declareAtom('count', 0, (on) =>
-    on(increment, (state) => state + 1),
-  )
+  const count = declareAtom('count', 0, (on) => on(increment, (state) => state + 1))
   const countDoubled = map(['countDoubled'], count, (payload) => payload * 2)
   const root = combine({ count })
 
@@ -377,9 +354,7 @@ test('main api, createStore lazy resubscribes', () => {
 test('main api, createStore lazy derived resubscribes', () => {
   const increment = declareAction()
 
-  const count = declareAtom(['count'], 0, (on) =>
-    on(increment, (state) => state + 1),
-  )
+  const count = declareAtom(['count'], 0, (on) => on(increment, (state) => state + 1))
   const root = combine(['root'], { count })
 
   const store = createStore()
@@ -397,9 +372,7 @@ test('main api, createStore lazy derived resubscribes', () => {
 
 test('main api, createStore with undefined atom', () => {
   const increment = declareAction()
-  const countStatic = declareAtom(['countStatic'], 0, (on) =>
-    on(increment, (state) => state + 1),
-  )
+  const countStatic = declareAtom(['countStatic'], 0, (on) => on(increment, (state) => state + 1))
 
   const store = createStore({ countStatic: 10 })
   store.dispatch(increment())
@@ -420,12 +393,8 @@ test('main api, createStore with undefined atom and state', () => {
 test('main api, createStore preloaded state', () => {
   const increment = declareAction()
 
-  const staticCount = declareAtom(['staticCount'], 0, (on) =>
-    on(increment, (state) => state + 1),
-  )
-  const dynamicCount = declareAtom(['dynamicCount'], 0, (on) =>
-    on(increment, (state) => state + 1),
-  )
+  const staticCount = declareAtom(['staticCount'], 0, (on) => on(increment, (state) => state + 1))
+  const dynamicCount = declareAtom(['dynamicCount'], 0, (on) => on(increment, (state) => state + 1))
   const root = combine(['staticRoot'], { staticCount })
 
   const storeWithoutPreloadedState = createStore(root)
@@ -523,10 +492,7 @@ test('atom id as symbol', () => {
   assert.is(typeof getTree(atomMap).id, 'symbol')
   assert.is(getTree(atomMap).id.toString(), 'Symbol(my atom [map])')
   assert.is(typeof getTree(atomCombine).id, 'symbol')
-  assert.is(
-    getTree(atomCombine).id.toString(),
-    'Symbol([my atom,my atom [map]])',
-  )
+  assert.is(getTree(atomCombine).id.toString(), 'Symbol([my atom,my atom [map]])')
   assert.is(
     getTree(
       map(
@@ -557,9 +523,7 @@ test('IoC example', () => {
 
 test('createStore replace state', () => {
   const increment = declareAction()
-  const countAtom = declareAtom(0, (on) => [
-    on(increment, (state) => state + 1),
-  ])
+  const countAtom = declareAtom(0, (on) => [on(increment, (state) => state + 1)])
   const listener = mockFn()
   const store = createStore(countAtom)
 
@@ -605,9 +569,7 @@ test('declareAction reactions', async () => {
     await delay()
     if (incrementCallId === lastCallId) store.dispatch(setValue(payload))
   })
-  const valueAtom = declareAtom(0, (on) => [
-    on(setValue, (state, payload) => payload),
-  ])
+  const valueAtom = declareAtom(0, (on) => [on(setValue, (state, payload) => payload)])
   const store = createStore(valueAtom)
   const valueSubscriber = mockFn()
   store.subscribe(valueAtom, valueSubscriber)
@@ -641,9 +603,7 @@ test('declareAction reactions', async () => {
 test('derived state, map + combine', () => {
   const increment = declareAction()
 
-  const count = declareAtom('@count', 0, (on) =>
-    on(increment, (state) => state + 1),
-  )
+  const count = declareAtom('@count', 0, (on) => on(increment, (state) => state + 1))
   const countDoubled = map(count, (state) => state * 2)
 
   const root = combine({ count, countDoubled })
@@ -668,9 +628,7 @@ test('derived state, map + combine', () => {
 })
 test('derived state, combine array', () => {
   const increment = declareAction()
-  const count = declareAtom('@count', 0, (on) =>
-    on(increment, (state) => state + 1),
-  )
+  const count = declareAtom('@count', 0, (on) => on(increment, (state) => state + 1))
   const countDoubled = map(count, (state) => state * 2)
 
   const root = combine([count, countDoubled])
@@ -691,11 +649,7 @@ test('derived state, should checks atoms with equal ids', () => {
 
   assert.not.throws(() => combine([aAtom, cAtom, bAtom]))
   assert.throws(
-    () =>
-      combine([
-        map(['aAtom'], aAtom, (v) => v),
-        map(['aAtom'], aAtom, (v) => v),
-      ]),
+    () => combine([map(['aAtom'], aAtom, (v) => v), map(['aAtom'], aAtom, (v) => v)]),
     '[reatom] One of dependencies has the equal id',
   )
 })
@@ -730,10 +684,7 @@ test('subscriber should not be called if returns previous state from atom reduce
 
 test('subscriber should not be called if returns snapshot state from atom reducer', () => {
   const action = declareAction()
-  const rootAtom = declareAtom(0, (on) => [
-    on(action, (state) => state + 1),
-    on(action, (state) => state - 1),
-  ])
+  const rootAtom = declareAtom(0, (on) => [on(action, (state) => state + 1), on(action, (state) => state - 1)])
 
   const subReducerMock = mockFn((state) => state)
   const subAtom = map(rootAtom, subReducerMock)
@@ -772,9 +723,7 @@ test('state of initial atom with %s should not be cleared after unsubscribing', 
     ] as [string, string | symbol | [string]][]
   ).forEach((_, name) => {
     const action = declareAction()
-    const atom = declareAtom(name.toString(), 0, (on) => [
-      on(action, (state) => state + 1),
-    ])
+    const atom = declareAtom(name.toString(), 0, (on) => [on(action, (state) => state + 1)])
 
     const store = createStore(atom)
     store.dispatch(action())
@@ -807,14 +756,10 @@ function getInitialStoreState(rootAtom, state): Record<string, any> {
 
 test('getInitialStoreState init root atom with combine', () => {
   const setTitle = declareAction<string>()
-  const titleAtom = declareAtom('title', (on) => [
-    on(setTitle, (_, payload) => payload),
-  ])
+  const titleAtom = declareAtom('title', (on) => [on(setTitle, (_, payload) => payload)])
 
   const setMode = declareAction<string>()
-  const modeAtom = declareAtom('desktop', (on) => [
-    on(setMode, (_, payload) => payload),
-  ])
+  const modeAtom = declareAtom('desktop', (on) => [on(setMode, (_, payload) => payload)])
 
   const appAtom = combine(['app_store'], {
     title: titleAtom,
@@ -841,13 +786,9 @@ test('subscription', () => {
   const store = createStore()
 
   const addItem = declareAction<string>('addItem')
-  const aAtom = declareAtom<string[]>(['a'], [], (on) => [
-    on(addItem, (state, item) => [...state, item]),
-  ])
+  const aAtom = declareAtom<string[]>(['a'], [], (on) => [on(addItem, (state, item) => [...state, item])])
 
-  const rootAtom = declareAtom<string[]>(['root'], [], (on) =>
-    on(aAtom, (state, payload) => payload),
-  )
+  const rootAtom = declareAtom<string[]>(['root'], [], (on) => on(aAtom, (state, payload) => payload))
 
   assert.equal(store.getState(), {})
 
@@ -876,9 +817,7 @@ test('direct and wia combine subscription', () => {
   const store = createStore()
 
   const addItem = declareAction<string>('addItem')
-  const aAtom = declareAtom<string[]>(['a'], [], (on) => [
-    on(addItem, (state, item) => [...state, item]),
-  ])
+  const aAtom = declareAtom<string[]>(['a'], [], (on) => [on(addItem, (state, item) => [...state, item])])
 
   const rootAtom = combine({ a: aAtom })
 
@@ -912,9 +851,7 @@ test('direct and wia combine subscription', () => {
 
 test('dynamic initialState, unsubscribed atom should recalculate on each `getState`', async () => {
   const sleep = (ms = 50) => new Promise((r) => setTimeout(r, ms))
-  const dateAtom = declareAtom(Date.now(), (on) => [
-    on(declareAction([initAction.type]), () => Date.now()),
-  ])
+  const dateAtom = declareAtom(Date.now(), (on) => [on(declareAction([initAction.type]), () => Date.now())])
   const store = createStore()
 
   const date1 = store.getState(dateAtom)
@@ -925,9 +862,7 @@ test('dynamic initialState, unsubscribed atom should recalculate on each `getSta
 
 test('dynamic initialState, reducer of `initAction.type` should calling on each mount', async () => {
   const sleep = (ms = 50) => new Promise((r) => setTimeout(r, ms))
-  const dateAtom = declareAtom(Date.now(), (on) => [
-    on(declareAction([initAction.type]), () => Date.now()),
-  ])
+  const dateAtom = declareAtom(Date.now(), (on) => [on(declareAction([initAction.type]), () => Date.now())])
   const store = createStore()
 
   const un = store.subscribe(dateAtom, () => {})
@@ -966,13 +901,8 @@ test('unsubscribe from atom should not cancel the subscription from the action',
 test(`v3`, () => {
   const store = createStore()
   const increment = declareAction(['increment'])
-  const counter = declareAtom(['counter'], 0, (on) => [
-    on(increment, (state) => state + 1),
-  ])
-  const counterDoubled = v3.atom(
-    (ctx) => ctx.spy(counter.v3atom) * 2,
-    'counterDoubled',
-  )
+  const counter = declareAtom(['counter'], 0, (on) => [on(increment, (state) => state + 1)])
+  const counterDoubled = v3.atom((ctx) => ctx.spy(counter.v3atom) * 2, 'counterDoubled')
 
   const cbV1 = mockFn()
   const cbV3 = mockFn()
@@ -994,19 +924,11 @@ test(`v3`, () => {
 test(`v3 computed`, () => {
   const store = createStore()
   const increment = declareAction()
-  const counterV1 = declareAtom('counterV1', 0, (on) => [
-    on(increment, (state) => state + 1),
-  ])
-  const counterDoubledV3 = v3.atom(
-    (ctx) => ctx.spy(counterV1.v3atom) + 1,
-    'counterDoubledV3',
-  )
+  const counterV1 = declareAtom('counterV1', 0, (on) => [on(increment, (state) => state + 1)])
+  const counterDoubledV3 = v3.atom((ctx) => ctx.spy(counterV1.v3atom) + 1, 'counterDoubledV3')
   const counterDoubledV1 = v3toV1(counterDoubledV3)
   const counterTripleV1 = map('counterTripleV1', counterDoubledV1, (v) => v + 1)
-  const counterQuadV3 = v3.atom(
-    (ctx) => ctx.spy(counterTripleV1.v3atom) + 1,
-    'counterQuadV3',
-  )
+  const counterQuadV3 = v3.atom((ctx) => ctx.spy(counterTripleV1.v3atom) + 1, 'counterQuadV3')
 
   const cb = mockFn()
 
@@ -1024,9 +946,7 @@ test('stale unconnected atom', () => {
   const createEntityAtom = <T>(name: string, initState: T) => {
     const set = declareAction<T>(`${name}.set`)
 
-    const entityAtom = declareAtom<T>([name], initState, (on) => [
-      on(set, (_, n) => n),
-    ])
+    const entityAtom = declareAtom<T>([name], initState, (on) => [on(set, (_, n) => n)])
 
     return Object.assign(entityAtom, { set })
   }

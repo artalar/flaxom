@@ -14,12 +14,7 @@ test(`reatomEnum. static enum property`, async () => {
 })
 
 test(`reatomEnum. camelCase`, async () => {
-  const sortFilterAtom = reatomEnum([
-    'fullName',
-    'created',
-    'updated',
-    'pushed',
-  ])
+  const sortFilterAtom = reatomEnum(['fullName', 'created', 'updated', 'pushed'])
   const ctx = createCtx()
 
   sortFilterAtom.setUpdated(ctx)

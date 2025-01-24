@@ -9,31 +9,16 @@ const test = suite('match')
 test('is method', () => {
   const ctx = createTestCtx()
 
-  const expressions = [
-    'a',
-    () => 'a',
-    atom('a'),
-    (ctx: CtxSpy) => ctx.spy(atom('a')),
-  ]
-  const statements = [
-    true,
-    (ctx: Ctx, value: any) => value === 'a',
-    (ctx: Ctx) => ctx.get(atom(true)),
-  ]
+  const expressions = ['a', () => 'a', atom('a'), (ctx: CtxSpy) => ctx.spy(atom('a'))]
+  const statements = [true, (ctx: Ctx, value: any) => value === 'a', (ctx: Ctx) => ctx.get(atom(true))]
 
   for (const expression of expressions) {
     for (const statement of statements) {
       assert.is(ctx.get(match(expression)), undefined)
       assert.is(ctx.get(match(expression).is('b', statement)), undefined)
       assert.is(ctx.get(match(expression).is('a', statement)), true)
-      assert.is(
-        ctx.get(match(expression).is('a', statement).is('b', true)),
-        true,
-      )
-      assert.is(
-        ctx.get(match(expression).is('b', statement).is('a', true)),
-        true,
-      )
+      assert.is(ctx.get(match(expression).is('a', statement).is('b', true)), true)
+      assert.is(ctx.get(match(expression).is('b', statement).is('a', true)), true)
       assert.is(ctx.get(match(expression).default(statement)), true)
     }
   }
@@ -54,10 +39,7 @@ test('with', () => {
 
   type Data = { type: 'text' } | { type: 'img' }
 
-  type Result =
-    | { type: 'ok'; data: Data }
-    | { type: 'error' }
-    | { type: 'unknown' }
+  type Result = { type: 'ok'; data: Data } | { type: 'error' } | { type: 'unknown' }
 
   const result = atom(null! as Result)
 

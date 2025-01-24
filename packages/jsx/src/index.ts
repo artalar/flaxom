@@ -174,7 +174,7 @@ export const reatomJsx = (ctx: Ctx, DOM: DomApis = globalThis.window) => {
 
     if (tag === hf) {
       const fragment = DOM.document.createDocumentFragment()
-      children = children.map((child) => isAtom(child) ? walkAtom(ctx, child) : child)
+      children = children.map((child) => (isAtom(child) ? walkAtom(ctx, child) : child))
       fragment.append(...children)
       return fragment
     }
