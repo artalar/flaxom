@@ -31,7 +31,10 @@ tester.run('unit-naming-rule', unitNamingRule, {
     },
     { 
       code: `function reatomSome({name}) { const Atoms = { someAtom: atom(0, \`\${name}.Atoms.someAtom\`) } }`
-    },
+    }, 
+    {
+      code: `const someFactory = reatomSome({ name: 'someFactory' })`
+    }
   ],
   invalid: [
     {
@@ -60,6 +63,11 @@ tester.run('unit-naming-rule', unitNamingRule, {
       options: [{ atomPostfix: 'Atom' }],
       errors: [{ message: /name must end with/ }],
       output: `const someAtom = atom(0, 'someAtom')`,
+    },
+    {
+      code: `const someFactory = reatomSome({})`,
+      errors: [{ message: /missing/ }],
+      output: `const someFactory = reatomSome({ name: 'someFactory' })`,
     },
     {
       code: `function reatomSome() { const field = atom(0, 'Some._unrelated'); }`,

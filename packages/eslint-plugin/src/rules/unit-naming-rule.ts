@@ -80,12 +80,21 @@ export const unitNamingRule: Rule.RuleModule = {
       },
       [`CallExpression[callee.name=${reatomFactoryPattern}]`](node: estree.CallExpression) {
         const args = node.arguments
-        const nameNode =
-          args.length === 2
-            ? args[1]
-            : args.length === 1 && args[0]!.type === 'ObjectExpression'
-            ? args[0].properties.find(({ key }) => key.type === 'Identifier' && key.name === 'name')
-            : undefined
+
+        const resolveNameNode = () => {
+          if(args.length === 2)
+            return args[1]
+
+          if(args.length === 1 && args[0]?.type === 'ObjectExpression') {
+            const nameProp = args[0]!.properties.find(({ key }) => key.type === 'Identifier' && key.name === 'name')
+            if(nameProp?.type === 'Property')
+              return nameProp.value;
+          }
+
+          return undefined;
+        }
+
+        const nameNode = resolveNameNode();
 
         const expectedUnit = idScopes.at(-1)
         if (!expectedUnit) return
@@ -124,19 +133,21 @@ export const unitNamingRule: Rule.RuleModule = {
           return
         }
 
-        const replaceNameFix = (fixer: Rule.RuleFixer, local = false) =>
-          fixer.replaceText(
-            nameNode,
-            printName({
-              domain: expectedDomain,
-              object: expectedObject,
-              local,
-              unit: expectedUnit.name,
-            }),
-          )
+        const replaceNameFix = (fixer: Rule.RuleFixer, local = false) => {
+          const fixedCode = printName({
+            domain: expectedDomain,
+            object: expectedObject,
+            local,
+            unit: expectedUnit.name,
+          })
+
+          return fixer.replaceText(nameNode, nameNode.type === 'Property' ? `name: ${fixedCode}` : fixedCode)
+        }
 
         let parsedName: Name | undefined
         parseName: {
+          const targetNameNode = nameNode.type === 'Property' ? nameNode.value : nameNode
+
           if (nameNode.type === 'Literal' && typeof nameNode.value === 'string') {
             const matches = nameNode.value.match(/^(?:([\w$]+)\.)?(?:([\w$]+)\.)?(_)?([\w$]+)$/)
             if (!matches) break parseName
