@@ -16,6 +16,25 @@ type DomApis = Pick<
   'document' | 'Node' | 'Text' | 'Element' | 'MutationObserver' | 'HTMLElement' | 'DocumentFragment'
 >
 
+/**
+ * @see https://github.com/preactjs/preact/blob/d16a34e275e31afd6738a9f82b5ba2fb9dbf032b/src/diff/props.js#L107
+ * @see https://www.measurethat.net/Benchmarks/Show/7818
+ */
+const propertiesAsAttribute = new Set([
+  'width',
+  'height',
+  'href',
+  'list',
+  'form',
+  /** Default value in browsers is `-1` and an empty string is cast to `0` instead */
+  'tabIndex',
+  'download',
+  'rowSpan',
+  'colSpan',
+  'role',
+  'popover',
+])
+
 const isSkipped = (value: unknown): value is boolean | '' | null | undefined =>
   typeof value === 'boolean' || value === '' || value == null
 
@@ -83,11 +102,20 @@ const walkLinkedList = (ctx: Ctx, el: JSX.Element, list: Atom<LinkedList<LLNode<
   )
 }
 
-export const reatomJsx = (ctx: Ctx, DOM: DomApis = globalThis.window) => {
-  const StylesheetId = 'reatom-jsx-styles'
-  let styles: Rec<string> = {}
-  let stylesheet: HTMLStyleElement | undefined
+export const reatomJsx = (ctx: Ctx, DOM: DomApis = globalThis.window, options?: {
+  /**
+   * Adds a style element containing styles from the `css` property to the document.
+   * @default true
+   */
+  appendStylesheet?: boolean
+}) => {
   let name = ''
+
+  /** @see https://www.measurethat.net/Benchmarks/Show/33272 */
+  let styles: Rec<string> = {}
+  let stylesheet: HTMLStyleElement = DOM.document.createElement('style')
+  stylesheet.id = 'reatom-jsx-styles'
+  if (options?.appendStylesheet !== false) DOM.document.head.appendChild(stylesheet)
 
   let set = (element: JSX.Element, key: string, val: any) => {
     if (key.startsWith('on:')) {
@@ -100,13 +128,6 @@ export const reatomJsx = (ctx: Ctx, DOM: DomApis = globalThis.window) => {
       if (val == null) element.style.removeProperty(key)
       else element.style.setProperty(key, String(val))
     } else if (key === 'css') {
-      stylesheet ??= DOM.document.getElementById(StylesheetId) as any
-      if (!stylesheet) {
-        stylesheet = DOM.document.createElement('style')
-        stylesheet.id = StylesheetId
-        DOM.document.head.appendChild(stylesheet)
-      }
-
       let styleId = styles[val]
       if (!styleId) {
         styleId = styles[val] = `${name ? name + '_' : ''}${random(0, 1e6).toString()}`
@@ -119,24 +140,28 @@ export const reatomJsx = (ctx: Ctx, DOM: DomApis = globalThis.window) => {
         if (val[key] == null) element.style.removeProperty(key)
         else element.style.setProperty(key, val[key])
       }
-    } else if (key.startsWith('prop:')) {
-      // @ts-expect-error
-      element[key.slice(5)] = val
+    } else if (
+      !propertiesAsAttribute.has(key)
+      && element instanceof DOM.HTMLElement
+      && (key in element || key === 'class')
+    ) {
+      if (key === 'class') key = 'className'
+      // @ts-ignore
+      element[key] = val == null ? '' : val
     } else {
-      if (key.startsWith('attr:')) {
-        key = key.slice(5)
-      }
       if (key === 'className') key = 'class'
-      if (val == null || val === false) element.removeAttribute(key)
-      else {
-        val = val === true ? '' : String(val)
-        /**
-         * @see https://measurethat.net/Benchmarks/Show/54
-         * @see https://measurethat.net/Benchmarks/Show/31249
-         */
-        if (key === 'class' && element instanceof HTMLElement) element.className = val
-        else element.setAttribute(key, val)
-      }
+      if (key.startsWith('attr:')) key = key.slice(5)
+
+      /**
+       * @note aria- and data- attributes have no boolean representation.
+		   * A `false` value is different from the attribute not being
+		   * present, so we can't remove it. For non-boolean aria
+		   * attributes we could treat false as a removal, but the
+		   * amount of exceptions would cost too many bytes. On top of
+		   * that other frameworks generally stringify `false`.
+       */
+      if (val == null || (val === false && key[4] !== '-')) element.removeAttribute(key)
+      else element.setAttribute(key, key == 'popover' && val == true ? '' : val)
     }
   }
 
