@@ -302,6 +302,13 @@ const someRequest = reatomRequest<{ data: Data } | { error: string }>()
 const { data } = await take(ctx, someRequest, (ctx, payload, skip) => ('error' in payload ? skip : payload))
 ```
 
+Note that you can increase your debug experience by passing debug name in the four parameter.
+
+```ts
+const a = await take(ctx, someAtom, (ctx, data) => data.a, 'a')
+const b = await take(ctx, bAtom, undefined, 'b')
+```
+
 ### takeNested
 
 Allow you to wait all dependent effects, event if they was called in the nested async effect or by [spawn](#spawn).

@@ -85,16 +85,16 @@ it(
 
     mount(parent, element)
 
-    expect(element.childNodes.length).toEqual(3)
-    expect(element.childNodes[1]?.textContent).toEqual('foo')
-    expect(element.childNodes[2]).toEqual(a)
+    expect(element.childNodes.length).toEqual(5)
+    expect(element.childNodes[2]?.textContent).toEqual('foo')
+    expect(element.childNodes[4]).toEqual(a)
 
     val(ctx, 'bar')
-    expect(element.childNodes[1]?.textContent).toEqual('bar')
+    expect(element.childNodes[2]?.textContent).toEqual('bar')
 
-    expect(element.childNodes[2]).toEqual(a)
+    expect(element.childNodes[4]).toEqual(a)
     route(ctx, 'b')
-    expect(element.childNodes[2]).toEqual(b)
+    expect(element.childNodes[4]).toEqual(b)
   }),
 )
 
@@ -107,14 +107,14 @@ it(
 
     mount(parent, element)
 
-    expect(element.childNodes.length).toEqual(1)
+    expect(element.childNodes.length).toEqual(2)
 
     children(ctx, <div>Hello, world!</div>)
-    expect(element.childNodes[0]?.textContent).toEqual('Hello, world!')
+    expect(element.childNodes[1]?.textContent).toEqual('Hello, world!')
 
     const inner = <span>inner</span>
     children(ctx, <div>{inner}</div>)
-    expect(element.childNodes[0]?.childNodes[0]).toEqual(inner)
+    expect(element.childNodes[1]?.childNodes[0]).toEqual(inner)
 
     const before = atom('before', 'before')
     const after = atom('after', 'after')
@@ -179,25 +179,25 @@ it(
   'array children',
   setup((ctx, h, hf, mount, parent) => {
     const n = atom(1)
-    const list = atom((ctx) => Array.from({ length: ctx.spy(n) }, (_, i) => <li>{i + 1}</li>))
+    const list = atom((ctx) => (<>
+    {...Array.from({ length: ctx.spy(n) }, (_, i) => <li>{i + 1}</li>)}
+  </>))
 
-    assert.throws(() => {
-      mount(
-        parent,
+    const element = (
         <ul>
-          {list /* expected TS error */ as any}
+          {list }
           <br />
-        </ul>,
+        </ul>
       )
-    })
 
-    const element = <ul>{list}</ul>
 
-    expect(element.childNodes.length).toEqual(1)
+    mount(parent, element)
+
+    expect(element.childNodes.length).toEqual(3)
     expect(element.textContent).toEqual('1')
 
     n(ctx, 2)
-    expect(element.childNodes.length).toEqual(2)
+    expect(element.childNodes.length).toEqual(4)
     expect(element.textContent).toEqual('12')
   }),
 )
@@ -329,7 +329,7 @@ it(
 
     const element = <div>{htmlAtom}</div>
 
-    expect(element.innerHTML).toEqual('<div>div</div>')
+    expect(element.innerHTML).toEqual('<!--html--><div>div</div>')
   }),
 )
 
@@ -340,7 +340,7 @@ it(
 
     const element = <div>{svgAtom}</div>
 
-    expect(element.innerHTML).toEqual('<svg>svg</svg>')
+    expect(element.innerHTML).toEqual('<!--svg--><svg>svg</svg>')
   }),
 )
 
@@ -593,3 +593,83 @@ it(
     expect(component.getAttribute('style')).toEqual('left: 0px; bottom: 0px;')
   }),
 )
+
+it('render different atom children', setup((ctx, h, hf, mount, parent) => {
+  const name = 'child'
+  const target = `<!--${name}-->`
+  const childAtom = atom<Node | string>(<>
+    <div>div</div>
+    <p>p</p>
+  </>, name)
+
+  const element = <div>{childAtom}</div>
+  assert.is(element.innerHTML, `<div>${target}div>div</div><p>p</p></div>`)
+
+  childAtom(ctx, <span>span</span>)
+  assert.is(element.innerHTML, `<div>${target}span>span</span></div>`)
+
+  childAtom(ctx, 'text')
+  assert.is(element.innerHTML, `<div>${target}text</div>`)
+}))
+
+it('render atom fragments', setup((ctx, h, hf, mount, parent) => {
+  const bool1Atom = atom(false)
+  const bool2Atom = atom(false)
+
+  const element = (
+    <div>
+      <p>0</p>
+      {atom(
+        (ctx) => ctx.spy(bool1Atom)
+          ? <>
+            <p>1</p>
+            {atom(
+              (ctx) => ctx.spy(bool2Atom)
+                ? <>
+                  <p>2</p>
+                  <p>3</p>
+                </>
+                : undefined,
+              '2'
+            )}
+            <p>4</p>
+          </>
+          : undefined,
+        '1',
+      )}
+      <p>5</p>
+    </div>
+  )
+
+  const expect1 = '<p>0</p><!--1--><p>5</p>'
+  const expect2 = '<p>0</p><!--1--><p>1</p><!--2--><p>4</p><p>5</p>'
+  const expect3 = '<p>0</p><!--1--><p>1</p><!--2--><p>2</p><p>3</p><p>4</p><p>5</p>'
+
+  bool1Atom(ctx, false)
+  bool2Atom(ctx, false)
+  assert.is(element.innerHTML, expect1)
+
+  bool1Atom(ctx, false)
+  bool2Atom(ctx, true)
+  assert.is(element.innerHTML, expect1)
+
+  bool1Atom(ctx, true)
+  bool2Atom(ctx, false)
+  assert.is(element.innerHTML, expect2)
+
+  bool1Atom(ctx, true)
+  bool2Atom(ctx, true)
+  assert.is(element.innerHTML, expect3)
+
+  bool1Atom(ctx, true)
+  bool2Atom(ctx, false)
+  assert.is(element.innerHTML, expect2)
+
+  bool1Atom(ctx, false)
+  bool2Atom(ctx, true)
+  assert.is(element.innerHTML, expect1)
+
+  bool1Atom(ctx, false)
+  bool2Atom(ctx, false)
+  assert.is(element.innerHTML, expect1)
+}))

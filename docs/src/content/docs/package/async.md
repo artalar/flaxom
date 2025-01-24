@@ -24,11 +24,11 @@ You could utilize extra features by piping additional operators: [withDataAtom](
 
 ## reatomAsync
 
-`reatomAsync` accepts an effect function that returns a promise (it can simply be an `async` function) and queues it in the effects queue. The `ctx` object already includes a `controller` which is a native [AbortController](https://developer.mozilla.org/en-US/docs/Web/API/AbortController). The standout feature of this package—a true game changer for developer experience (DX) and code reliability—is its automatic handling of nested abort controllers. This means that for concurrent ([abortable](#withabort)) processes, like an input search that triggers multiple sequential requests, starting a new search will automatically cancel the previous one and all associated effects.
+`reatomAsync` accepts effect function which returns a promise (it could be just `async` function) and call it in effects queue. `ctx` already includes `controller` which is a native [AbortController](https://developer.mozilla.org/en-US/docs/Web/API/AbortController). The most cool feature of this package and game changer for your DX and your code reliability is automatic linking of nested abort controllers. It means that if you have concurrent ([abortable](#withabort)) process, like on input search with a few serial requests, when a new search starts, previous search and all generated effects cancel automatically.
 
-The core `reatomAsync` package is lightweight, at just [1.2KB](https://bundlejs.com/?q=%40reatom%2Fasync&treeshake=%5B%7B+reatomAsync+%7D%5D), while the entire package is only [2.6KB](https://bundlejs.com/?q=%40reatom%2Fasync)!
+Base `reatomAsync` weight is just [1.2KB](https://bundlejs.com/?q=%40reatom%2Fasync&treeshake=%5B%7B+reatomAsync+%7D%5D) and the whole package is only [2.6KB](https://bundlejs.com/?q=%40reatom%2Fasync)!
 
-Since the package is designed for general asynchronous function management, it doesn’t include a built-in solution for data requests in specific environments, such as the web. You’re free to integrate any library you prefer, like the minimalist [redaxios](https://www.npmjs.com/package/redaxios) or the feature-rich [axios](https://www.npmjs.com/package/axios).
+As the main point of this package is general management of async functions, there is no built in solution for data requests in the web or other environment. Fill free to use any existing library, like tiny [redaxios](https://www.npmjs.com/package/redaxios) or feature-rich [axios](https://www.npmjs.com/package/axios).
 
 ### Default request helper
 

@@ -11,11 +11,12 @@ import {
   Atom,
   parseAtoms,
   action,
+  AtomProto,
+  reatomBoolean,
 } from '@reatom/framework'
 import { h, hf, ctx } from '@reatom/jsx'
-import { actionsStates, followingsMap, getColor, getId, history } from './Graph/utils'
+import { actionsStates, followingsMap, getColor, getId, history } from './utils'
 import { Filter, reatomFilters } from './Graph/reatomFilters'
-import { reatomInspector } from './Graph/reatomInspector'
 import { reatomLines } from './Graph/reatomLines'
 import { ObservableHQ } from './ObservableHQ'
 
@@ -26,6 +27,15 @@ type Props = {
   height: Atom<string>
   initSize: number
 }
+
+// separate action for naming purpose, CALL ONLY WITH `clientCtx`
+export const update = action((ctx, proto: AtomProto, value: string) => {
+  ctx.get((read, actualize) => {
+    actualize!(ctx, proto, (patchCtx: Ctx, patch: AtomCache) => {
+      patch.state = JSON.parse(value)
+    })
+  })
+}, 'ReatomDevtools.update')
 
 export const Graph = ({ clientCtx, getColor, width, height, initSize }: Props) => {
   const name = '_ReatomDevtools.Graph'
@@ -40,6 +50,7 @@ export const Graph = ({ clientCtx, getColor, width, height, initSize }: Props) =
 
           return (
             <li
+              data-timestamp
               css={`
                 display: flex;
                 justify-content: center;
@@ -79,19 +90,25 @@ export const Graph = ({ clientCtx, getColor, width, height, initSize }: Props) =
           let display = 'list-item'
           let background = 'none'
 
-          const applyFilter = ({ search, type, color }: Filter) => {
-            const _type = ctx.spy(type)
+          const exclude = ctx.spy(filters.exclude)
 
-            if (_type === 'off') return
+          if (exclude && new RegExp(`.*${exclude}.*`, 'i').test(name!)) {
+            display = 'none'
+          }
+
+          const applyFilter = ({ search, active, type, color }: Filter) => {
+            if (!ctx.spy(active)) return
+
+            const _type = ctx.spy(type)
 
             try {
               const searchValue = ctx.spy(search)
               const result = !searchValue || new RegExp(`.*${searchValue}.*`, 'i').test(name!)
 
-              if (_type === 'match' && !result) {
+              if (_type === 'filter' && !result) {
                 display = 'none'
               }
-              if ((_type === 'mismatch' || _type === 'exclude') && result) {
+              if (_type === 'hide' && result) {
                 display = 'none'
               }
 
@@ -104,6 +121,7 @@ export const Graph = ({ clientCtx, getColor, width, height, initSize }: Props) =
           applyFilter(filters.search)
           const filtersList = ctx.spy(filters.list.array)
           for (let i = 0; i < filtersList.length; i++) {
+            if (display === 'none') break
             applyFilter(filtersList[i]!)
           }
 
@@ -122,19 +140,17 @@ export const Graph = ({ clientCtx, getColor, width, height, initSize }: Props) =
             display,
             background,
           }
-        }, `${name}._style`)
+        }, `${name}._Log.style`)
 
-        const handleClick = (ctx: Ctx) => {
+        const handleChain = (ctx: Ctx) => {
           lines.highlight(ctx, { svg, patch })
         }
+
+        const preview = reatomBoolean(false, `${name}._Log.preview`)
 
         return (
           <li
             id={id}
-            data-name={name}
-            on:mouseleave={(ctx, e) => {
-              inspector.hide(ctx, e.relatedTarget)
-            }}
             style={style}
             css={`
               padding: 5px;
@@ -147,15 +163,16 @@ export const Graph = ({ clientCtx, getColor, width, height, initSize }: Props) =
             <button
               title="Cause lines"
               aria-label="Draw a cause lines"
-              on:click={handleClick}
+              on:click={handleChain}
               css:type={color}
               css={`
                 border: none;
                 background: none;
-                font-size: 20px;
-                padding: 5px;
+                font-size: 18px;
+                padding: 0;
                 color: var(--type);
                 margin-left: 10px;
+                margin-right: 5px;
               `}
             >
               ⛓
@@ -163,39 +180,33 @@ export const Graph = ({ clientCtx, getColor, width, height, initSize }: Props) =
             <button
               title="Inspector"
               aria-label="Open inspector"
-              on:mouseenter={(ctx: Ctx) => {
-                if (ctx.get(filters.hoverPreview)) {
-                  inspector.open(ctx, patch)
-                }
-              }}
-              on:click={(ctx, e) => {
-                inspector.fix(ctx, patch, e.currentTarget)
-              }}
+              on:click={preview.toggle}
               css:type={color}
+              // css:display={atom((ctx) => (ctx.spy(filters.preview) ? 'none' : 'inline'))}
               css={`
+                /* display: var(--display); */
                 border: none;
                 background: none;
-                font-size: 20px;
-                padding: 5px;
+                font-size: 16px;
+                padding: 0px;
+                margin-right: 5px;
                 color: var(--type);
-
-                &:after {
-                  position: absolute;
-                  left: 40px;
-                  width: 100px;
-                  height: 70px;
-                  margin-top: -20px;
-                  clip-path: polygon(0 30%, 100% 0, 100% 100%, 0 70%);
-                }
-                &:hover&:after {
-                  content: '';
-                }
               `}
             >
               🗐
             </button>
             {name}
-            {atom((ctx) => (ctx.spy(filters.inlinePreview) ? <ObservableHQ snapshot={state} /> : <span />))}
+            {atom((ctx) =>
+              ctx.spy(filters.preview) || ctx.spy(preview) ? (
+                <ObservableHQ
+                  snapshot={state}
+                  update={isAction ? undefined : update.bind(null, clientCtx, patch.proto)}
+                  patch={isAction ? undefined : patch}
+                />
+              ) : (
+                <span />
+              ),
+            )}
           </li>
         )
       },
@@ -221,8 +232,6 @@ export const Graph = ({ clientCtx, getColor, width, height, initSize }: Props) =
     return search.length < 2 ? '' : search.toLocaleLowerCase()
   })
 
-  const inspector = reatomInspector({ clientCtx, filters }, `${name}.inspector`)
-
   const listHeight = reatomResource(async (ctx) => {
     ctx.spy(list)
     ctx.spy(width)
@@ -246,26 +255,25 @@ export const Graph = ({ clientCtx, getColor, width, height, initSize }: Props) =
 
     await null
 
-    let isTimeStampWritten = !ctx.get(filters.timestamps)
+    let isTimeStampWritten = !ctx.get(filters.time)
 
-    const excludes = ctx
-      .get(filters.list.array)
-      .filter(({ type }) => ctx.get(type) === 'exclude')
-      .map(({ search }) => ctx.get(search))
     const isPass = (patch: AtomCache) => {
       const historyState = history.get(patch.proto)
       const [prev] = historyState ?? []
 
       const isConnection =
-        (patch.proto.isAction && patch.state.length === 0) || (!historyState && patch.cause!.proto.name === 'root')
+        (patch.proto.isAction && !actionsStates.get(patch)?.length) ||
+        (!historyState && patch.cause!.proto.name === 'root')
 
       if (!historyState) history.set(patch.proto, [])
+
+      const exclude = ctx.get(filters.exclude)
 
       const result =
         !isConnection &&
         prev !== patch &&
         (!prev || !Object.is(patch.state, prev.state)) &&
-        excludes.every((search) => !new RegExp(`.*${search}.*`, 'i').test(patch.proto.name!))
+        (!exclude || !new RegExp(`.*${exclude}.*`, 'i').test(patch.proto.name!))
 
       if (result && !isTimeStampWritten) {
         isTimeStampWritten = true
@@ -328,6 +336,10 @@ export const Graph = ({ clientCtx, getColor, width, height, initSize }: Props) =
       css={`
         padding: 0;
         content-visibility: auto;
+
+        & [data-timestamp] + [data-timestamp] {
+          display: none;
+        }
       `}
     >
       {list}
@@ -347,7 +359,6 @@ export const Graph = ({ clientCtx, getColor, width, height, initSize }: Props) =
       `}
     >
       {filters.element}
-      {inspector.element}
       <div
         css={`
           overflow: auto;

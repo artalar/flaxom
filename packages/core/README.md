@@ -374,7 +374,7 @@ A context creation function accepts a few optional parameters that you probably 
 
 The call effect handlers by default wrap all effects with a `catch` handler that converts the thrown value to `Error` instance to save the callstack for better debugging, and it does `setTimeout(() => { throw err })` to trigger a global handler of an uncaught error. The `setTimeout` behavior is modified in `createTestCtx` from [testing package](https://www.reatom.dev/package/testing/).
 
-The `restrictMultipleContexts` option, which is `true` by default, will log a "multiple contexts detected" warning to the console when a few `createCtx` occur in a browser environment. We highly recommend deduping all your packages and using only one instance of each reatom package to archive the stability of all features.
+The `restrictMultipleContexts` option, which is `true` by default, will log a "multiple contexts detected" warning to the console when a few `createCtx` occur in a browser environment. We highly recommend [deduping all your packages](https://www.reatom.dev/recipes/faq) and using only one instance of each reatom package to archive the stability of all features.
 
 ## ctx API
 

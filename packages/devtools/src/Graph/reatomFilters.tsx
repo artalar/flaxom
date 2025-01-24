@@ -1,17 +1,18 @@
-import { parseAtoms, assign, LinkedListAtom, Action, atom, Fn, Ctx, noop, action, omit } from '@reatom/framework'
+import { parseAtoms, assign, LinkedListAtom, Action, atom, Fn, Ctx, action, AtomMut } from '@reatom/framework'
 import { JSX } from '@reatom/jsx'
 import { reatomZod, ZodAtomization } from '@reatom/npm-zod'
 import { z } from 'zod'
 
 import * as icons from './icons'
 import { Lines } from './reatomLines'
+import { buttonCss } from '../utils'
+import { check } from 'prettier'
 
 export const Filter = z.object({
-  name: z.string().readonly(),
   search: z.string(),
-  type: z.enum(['match', 'mismatch', 'exclude', 'highlight', 'off']),
+  type: z.enum(['filter', 'hide', 'highlight']),
   color: z.string(),
-  default: z.boolean().readonly(),
+  active: z.boolean(),
 })
 export type Filter = ZodAtomization<typeof Filter>
 export type FilterJSON = z.infer<typeof Filter>
@@ -19,9 +20,9 @@ export type FilterJSON = z.infer<typeof Filter>
 export const Filters = z.object({
   search: Filter,
   valuesSearch: z.string(),
-  hoverPreview: z.boolean(),
-  inlinePreview: z.boolean(),
-  timestamps: z.boolean(),
+  exclude: z.string(),
+  preview: z.boolean(),
+  time: z.boolean(),
   folded: z.boolean(),
   size: z.number(),
   list: z.array(Filter),
@@ -34,29 +35,19 @@ const DEFAULT_COLOR = '#BABACF'
 const HIGHLIGHT_COLOR = '#e82020'
 
 const initState: FiltersJSON = {
-  search: { name: '', search: '', type: 'match', color: HIGHLIGHT_COLOR, default: true },
-  hoverPreview: false,
-  inlinePreview: true,
-  timestamps: true,
+  search: { search: '', type: 'filter', color: HIGHLIGHT_COLOR, active: true },
+  preview: true,
+  time: true,
   folded: true,
   valuesSearch: '',
+  exclude: '',
   size: 1000,
-  list: [{ name: 'private', search: `(^_)|(\._)`, type: 'mismatch', color: DEFAULT_COLOR, default: true }],
+  list: [{ search: `(^_)|(\._)`, type: 'hide', color: DEFAULT_COLOR, active: true }],
 }
-const version = 'v24'
+const version = 'v25'
 
-const FilterView = ({ id, filter, remove }: { id: string; filter: Filter; remove: Fn<[Ctx]> }) => (
+const FilterView = ({ filter, remove }: { filter: Filter; remove?: Fn<[Ctx]> }) => (
   <tr>
-    {/* <th
-      scope="row"
-      css={`
-        font-weight: normal;
-        text-align: start;
-        padding-right: 10px;
-      `}
-    >
-      {filter.name}
-    </th> */}
     <td
       css={`
         display: flex;
@@ -64,18 +55,46 @@ const FilterView = ({ id, filter, remove }: { id: string; filter: Filter; remove
         align-items: center;
       `}
     >
+      <Checkbox
+        aria-label="is filter active"
+        model:checked={filter.active}
+        css={`
+          width: 30px;
+          margin-right: 5px;
+          padding: 0;
+          border: none;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          outline: none;
+
+          &[type='checkbox']:before {
+            width: 16px;
+            height: 16px;
+          }
+          &[type='checkbox']:after {
+            width: 14px;
+            height: 14px;
+          }
+
+          &[type='checkbox']:focus:before,
+          &[type='checkbox']:hover:before {
+            border-width: 2px;
+          }
+        `}
+      />
       <FilterButton
-        title="match"
-        aria-label="match"
-        disabled={atom((ctx) => ctx.spy(filter.type) === 'match')}
-        on:click={filter.type.setMatch}
+        title="filter"
+        aria-label="filter"
+        disabled={atom((ctx) => ctx.spy(filter.type) === 'filter')}
+        on:click={filter.type.setFilter}
         css:background={icons.matchIcon}
       />
       <FilterButton
-        title="not match"
-        aria-label="not match"
-        disabled={atom((ctx) => ctx.spy(filter.type) === 'mismatch')}
-        on:click={filter.type.setMismatch}
+        title="hide"
+        aria-label="hide"
+        disabled={atom((ctx) => ctx.spy(filter.type) === 'hide')}
+        on:click={filter.type.setHide}
         css:background={icons.notMatchIcon}
       />
       <span
@@ -89,11 +108,33 @@ const FilterView = ({ id, filter, remove }: { id: string; filter: Filter; remove
           border-radius: 2px;
           box-sizing: border-box;
           overflow: hidden;
+          outline: none;
+          &:has(input:focus),
           &:hover {
             border: 4px solid #151134;
           }
+          &:before {
+            position: absolute;
+            content: '';
+            width: 100%;
+            height: 100%;
+            background: ${icons.paintIconBucket};
+            background-size: 80%;
+            background-repeat: no-repeat;
+            background-position: center;
+            z-index: 1;
+            pointer-events: none;
+          }
+
+          & input {
+            opacity: 0;
+          }
+
           &[data-highlight] {
             border: 4px double #151134;
+            & input {
+              opacity: 1;
+            }
           }
         `}
       >
@@ -119,22 +160,6 @@ const FilterView = ({ id, filter, remove }: { id: string; filter: Filter; remove
           `}
         />
       </span>
-      {!(filter.default && filter.name === '') && (
-        <FilterButton
-          title="exclude"
-          aria-label="exclude"
-          disabled={atom((ctx) => ctx.spy(filter.type) === 'exclude')}
-          on:click={filter.type.setExclude}
-          css:background={icons.excludeIcon}
-        />
-      )}
-      <FilterButton
-        title={atom((ctx) => (ctx.spy(filter.type) === 'off' ? 'enable' : 'disable'))}
-        aria-label={atom((ctx) => (ctx.spy(filter.type) === 'off' ? 'enable' : 'disable'))}
-        disabled={atom((ctx) => ctx.spy(filter.type) === 'off')}
-        on:click={filter.type.setOff}
-        css:background={icons.stopIcon}
-      />
     </td>
     <td>
       <div
@@ -146,10 +171,8 @@ const FilterView = ({ id, filter, remove }: { id: string; filter: Filter; remove
         `}
       >
         <input
-          id={id}
           placeholder="RegExp"
           model:value={filter.search}
-          readonly={filter.default && filter.name === 'private'}
           css={`
             border: 1px solid #151134;
             height: 30px;
@@ -158,7 +181,7 @@ const FilterView = ({ id, filter, remove }: { id: string; filter: Filter; remove
             background: none;
           `}
         />
-        {!filter.default && (
+        {remove && (
           <FilterButton
             css={`
               margin-left: 5px;
@@ -195,6 +218,9 @@ const FilterButton = (props: JSX.IntrinsicElements['button'] & { 'css:background
       border: 2px solid #151134;
       border-radius: 2px;
 
+      &:outline: none;
+
+      &:focus,
       &:hover {
         border: 4px solid #151134;
       }
@@ -210,44 +236,67 @@ const ActionButton = (props: JSX.IntrinsicElements['button']) => (
   <button
     {...props}
     css={`
-      background: none;
-      border: none;
+      ${buttonCss}
       flex-shrink: 0;
       width: 80px;
-      height: 30px;
-      border: 2px solid #151134;
-      border-radius: 2px;
-      padding: 2px 4px;
-      &:hover {
-        border: 4px solid #151134;
+      ${props.css || ''}
+    `}
+  />
+)
+
+const Checkbox = (props: JSX.IntrinsicElements['input']) => (
+  <input
+    {...props}
+    css={`
+      position: relative;
+      margin-right: 5px;
+      &:before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 14px;
+        height: 14px;
+        border-radius: 2px;
+        background: #e1e0eb;
+        border: 1px solid #151134;
+      }
+      &:checked:after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 12px;
+        height: 12px;
+        background: #151134;
+        clip-path: polygon(14% 44%, 0 65%, 50% 90%, 90% 16%, 70% 0%, 43% 62%);
       }
       ${props.css || ''}
     `}
   />
 )
 
-const ActionLabel = (props: JSX.IntrinsicElements['label']) => (
+const ActionLabel = ({ model, children, ...props }: JSX.IntrinsicElements['label'] & { model: AtomMut<boolean> }) => (
   <label
     {...props}
     css={`
+      ${buttonCss}
       flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 30px;
-      width: 150px;
-      padding: 2px 4px;
-      box-sizing: border-box;
-      border: 2px solid #151134;
-      border-radius: 2px;
-      &:hover {
-        border: 4px solid #151134;
+      width: 90px;
+      padding: 2px 6px 2px 2px;
+      /* TODO : fix this */
+      &:has(input:focus) {
+        border: 2px solid #151134;
       }
       ${props.css || ''}
     `}
-  />
+  >
+    <Checkbox model:checked={model} />
+    {children as any}
+  </label>
 )
-
 export const reatomFilters = (
   {
     list,
@@ -347,14 +396,9 @@ export const reatomFilters = (
         <form
           on:submit={(ctx, e) => {
             e.preventDefault()
-            const name = ctx.get(filters.search.search)
+            const search = ctx.get(filters.search.search)
             const type = ctx.get(filters.search.type)
-            filters.list.create(ctx, {
-              name,
-              search: name.toLocaleLowerCase(),
-              type,
-              default: false,
-            })
+            filters.list.create(ctx, { search, type })
             filters.search.search(ctx, '')
             filters.search.type.reset(ctx)
             filters.search.color(ctx, HIGHLIGHT_COLOR)
@@ -367,10 +411,9 @@ export const reatomFilters = (
           <table
             css={`
               width: fit-content;
-              /* margin-left: -15px; */
             `}
           >
-            <FilterView id={filters.search.search.__reatom.name!} filter={filters.search} remove={noop} />
+            <FilterView filter={filters.search} />
           </table>
           <button
             css={`
@@ -379,6 +422,7 @@ export const reatomFilters = (
               padding-bottom: 2px;
               background: none;
               border: 2px solid #151134;
+              margin-left: 2px;
             `}
           >
             save
@@ -397,11 +441,7 @@ export const reatomFilters = (
           `}
         >
           {filters.list.reatomMap((ctx, filter) => (
-            <FilterView
-              id={`${filters.list.__reatom.name}-${filter.name}`}
-              filter={filter}
-              remove={(ctx) => filters.list.remove(ctx, filter)}
-            />
+            <FilterView filter={filter} remove={(ctx) => filters.list.remove(ctx, filter)} />
           ))}
         </table>
         <hr
@@ -411,22 +451,39 @@ export const reatomFilters = (
             border-bottom: none;
           `}
         />
-        <input
-          title="Search in states"
-          aria-label="Search in states"
-          model:value={filters.valuesSearch}
-          placeholder="Search in states"
-          type="search"
-          css={`
-            width: 200px;
-            height: 30px;
-            /* margin: 14px 0; */
-            padding: 0 4px;
-            border: 1px solid #151134;
-            border-radius: 2px;
-            background: none;
-          `}
-        />
+        <span>
+          <input
+            title="Search in states"
+            aria-label="Search in states"
+            model:value={filters.valuesSearch}
+            placeholder="Search in states"
+            type="search"
+            css={`
+              width: 200px;
+              height: 30px;
+              padding: 0 4px;
+              border: 1px solid #151134;
+              border-radius: 2px;
+              background: none;
+              margin-right: 5px;
+            `}
+          />
+          <input
+            title="Exclude"
+            aria-label="Exclude"
+            model:value={filters.exclude}
+            placeholder="Exclude"
+            type="search"
+            css={`
+              width: 200px;
+              height: 30px;
+              padding: 0 4px;
+              border: 1px solid #151134;
+              border-radius: 2px;
+              background: none;
+            `}
+          />
+        </span>
         <hr
           css={`
             width: 100%;
@@ -439,7 +496,7 @@ export const reatomFilters = (
             width: 100%;
             display: flex;
             align-items: center;
-            gap: 14px;
+            gap: 10px;
             flex-wrap: wrap;
           `}
         >
@@ -447,18 +504,8 @@ export const reatomFilters = (
           <ActionButton disabled={atom((ctx) => ctx.spy(lines).size === 0)} on:click={lines.clear}>
             clear lines
           </ActionButton>
-          <ActionLabel>
-            <input model:checked={filters.inlinePreview} />
-            inline preview
-          </ActionLabel>
-          <ActionLabel>
-            <input model:checked={filters.hoverPreview} />
-            hover preview
-          </ActionLabel>
-          <ActionLabel>
-            <input model:checked={filters.timestamps} />
-            timestamps
-          </ActionLabel>
+          <ActionLabel model={filters.preview}>preview</ActionLabel>
+          <ActionLabel model={filters.time}>time</ActionLabel>
           <label
             css={`
               flex-shrink: 0;

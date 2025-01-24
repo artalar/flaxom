@@ -138,7 +138,7 @@ export const States = ({
           <div ref={subscribe}>
             {reloadEl}
             {logEl}
-            <ObservableHQ snapshot={snapshot} />
+            <ObservableHQ snapshot={snapshot} subscribe />
           </div>
         ),
       )}

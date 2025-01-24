@@ -19,8 +19,8 @@ type DomApis = Pick<
 const isSkipped = (value: unknown): value is boolean | '' | null | undefined =>
   typeof value === 'boolean' || value === '' || value == null
 
-let unsubscribesMap = new WeakMap<Element, Array<Fn>>()
-let unlink = (parent: JSX.Element, un: Unsubscribe) => {
+let unsubscribesMap = new WeakMap<Node, Array<Fn>>()
+let unlink = (parent: Node, un: Unsubscribe) => {
   // check the connection in the next tick
   // to give the user (programmer) an ability
   // to put the created element in the dom
@@ -140,8 +140,44 @@ export const reatomJsx = (ctx: Ctx, DOM: DomApis = globalThis.window) => {
     }
   }
 
+  const walkAtom = (ctx: Ctx, anAtom: Atom<JSX.ElementPrimitiveChildren>): DocumentFragment => {
+    const fragment = DOM.document.createDocumentFragment()
+    const target = DOM.document.createComment(anAtom.__reatom.name ?? '')
+    fragment.append(target)
+
+    let childNodes: ChildNode[] = []
+    const un = ctx.subscribe(anAtom, (v): void => {
+      childNodes.forEach((node) => node.remove())
+
+      if (v instanceof DOM.Node) {
+        childNodes = v instanceof DOM.DocumentFragment ? [...v.childNodes] : [v as ChildNode]
+        target.after(v)
+      } else if (isSkipped(v)) {
+        childNodes = []
+      } else {
+        const node = DOM.document.createTextNode(String(v))
+        childNodes = [node]
+        target.after(node)
+      }
+    })
+
+    if (!unsubscribesMap.get(target)) unsubscribesMap.set(target, [])
+    unlink(target, un)
+
+    return fragment
+  }
+
   let h = (tag: any, props: Rec, ...children: any[]) => {
-    if (tag === hf) return children
+    if (isAtom(tag)) {
+      return walkAtom(ctx, tag)
+    }
+
+    if (tag === hf) {
+      const fragment = DOM.document.createDocumentFragment()
+      children = children.map((child) => isAtom(child) ? walkAtom(ctx, child) : child)
+      fragment.append(...children)
+      return fragment
+    }
 
     props ??= {}
 
@@ -209,6 +245,10 @@ export const reatomJsx = (ctx: Ctx, DOM: DomApis = globalThis.window) => {
       }
     }
 
+    /**
+     * @todo Explore adding elements to a DocumentFragment before adding them to a Document.
+     * @see https://www.measurethat.net/Benchmarks/Show/13274
+     */
     let walk = (child: JSX.DOMAttributes<JSX.Element>['children']) => {
       if (Array.isArray(child)) {
         for (let i = 0; i < child.length; i++) walk(child[i])
@@ -216,49 +256,10 @@ export const reatomJsx = (ctx: Ctx, DOM: DomApis = globalThis.window) => {
         if (isLinkedListAtom(child)) {
           walkLinkedList(ctx, element, child)
         } else if (isAtom(child)) {
-          let innerChild = DOM.document.createTextNode('') as ChildNode | DocumentFragment
-          let error: any
-          var un: undefined | Unsubscribe = ctx.subscribe(child, (v): void => {
-            try {
-              if (un && !innerChild.isConnected && innerChild instanceof DOM.DocumentFragment === false) {
-                un()
-              } else {
-                throwReatomError(
-                  Array.isArray(v) && children.length > 1,
-                  'array children with other children are not supported',
-                )
-
-                if (v instanceof DOM.Element) {
-                  let list = unsubscribesMap.get(v)
-                  if (!list) unsubscribesMap.set(v, (list = []))
-
-                  if (un) element.replaceChild(v, innerChild)
-                  innerChild = v
-                } else if (Array.isArray(v)) {
-                  if (un) element.replaceChildren(...v)
-                  else {
-                    const fragment = new DOM.DocumentFragment()
-                    v.forEach((el) => fragment.append(el))
-                    innerChild = fragment
-                  }
-                } else {
-                  // TODO more tests
-                  innerChild.textContent = isSkipped(v) ? '' : String(v)
-                }
-              }
-            } catch (e) {
-              error = e
-            }
-          })
-          if (error) throw error
-          unlink(element, un)
-          element.appendChild(innerChild)
+          const fragment = walkAtom(ctx, child)
+          element.append(fragment)
         } else if (!isSkipped(child)) {
-          element.appendChild(
-            isObject(child) && 'nodeType' in child
-              ? (child as JSX.Element)
-              : DOM.document.createTextNode(String(child)),
-          )
+          element.append(child as Node | string)
         }
       }
     }
@@ -270,7 +271,10 @@ export const reatomJsx = (ctx: Ctx, DOM: DomApis = globalThis.window) => {
     return element
   }
 
-  /** Fragment */
+  /**
+   * Fragment.
+   * @todo Describe a function as a component.
+   */
   let hf = () => {}
 
   let mount = (target: Element, child: Element) => {
@@ -283,7 +287,7 @@ export const reatomJsx = (ctx: Ctx, DOM: DomApis = globalThis.window) => {
            * @see https://stackoverflow.com/a/64551276
            * @note A custom NodeFilter function slows down performance by 1.5 times.
            */
-          const walker = DOM.document.createTreeWalker(removedNode, 1)
+          const walker = DOM.document.createTreeWalker(removedNode, 1 | 128)
 
           do {
             const node = walker.currentNode as Element

@@ -19,6 +19,7 @@ type ElementsAttributesAtomMaybe<T extends Record<keyof any, any>> = {
 export namespace JSX {
   type Element = HTMLElement | SVGElement
 
+  /** @todo Try replacing `Node | Element` with `ChildNode`. */
   type ElementPrimitiveChildren = Node | Element | (string & {}) | number | boolean | null | undefined
 
   type ElementChildren =
