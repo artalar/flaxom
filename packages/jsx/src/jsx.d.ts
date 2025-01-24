@@ -262,11 +262,6 @@ export namespace JSX {
     'on:wheel'?: EventHandler<T, WheelEvent>
   }
 
-  interface CSSProperties extends csstype.PropertiesHyphen {
-    // Override
-    [key: `-${string}`]: string | number | undefined
-  }
-
   /** Controls automatic capitalization in inputted text. */
   type HTMLAutocapitalize = 'off' | 'none' | 'on' | 'sentences' | 'words' | 'characters'
   // TODO add combinations
@@ -655,16 +650,25 @@ export namespace JSX {
 
   // TODO: Should we allow this?
   // type ClassKeys = `class:${string}`;
-  // type CSSKeys = Exclude<keyof csstype.PropertiesHyphen, `-${string}`>;
+  type StylePropertiesKeys = Exclude<keyof csstype.PropertiesHyphen, `-${string}`>
+  /** @todo Should we use `csstype.PropertiesHyphenFallback`? */
+  type StyleProperties = {
+    [key in StylePropertiesKeys]?: csstype.PropertiesHyphen[key] | null
+  }
+  type StylePropertyAttributes = {
+    [key in StylePropertiesKeys as `style:${key}`]?: StyleProperties[key]
+  }
 
-  // type CSSAttributes = {
-  //   [key in CSSKeys as `style:${key}`]: csstype.PropertiesHyphen[key];
-  // };
+  interface CSSProperties extends StyleProperties {
+    // Override
+    [key: `-${string}`]: string | number | null | undefined
+  }
 
   interface HTMLAttributes<T = HTMLElement>
     extends AriaAttributes,
       DOMAttributes<T>,
       CssAttributes,
+      StylePropertyAttributes,
       ElementAttributes<T>,
       ElementProperties<T>,
       $Spread<T> {
@@ -1175,7 +1179,7 @@ export namespace JSX {
     | 'defer xMidYMax slice'
     | 'defer xMaxYMax slice'
   type SVGUnits = 'userSpaceOnUse' | 'objectBoundingBox'
-  interface CoreSVGAttributes<T> extends AriaAttributes, DOMAttributes<T> {
+  interface CoreSVGAttributes<T> extends AriaAttributes, DOMAttributes<T>, StylePropertyAttributes {
     id?: string
     lang?: string
     tabindex?: number | string
