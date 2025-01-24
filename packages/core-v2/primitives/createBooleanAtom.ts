@@ -13,10 +13,7 @@ export type BooleanAtomCreator = PrimitiveAtomCreator<
 >
 
 let count = 0
-export function createBooleanAtom(
-  initState = false,
-  options: AtomOptions = `boolean${++count}`,
-): BooleanAtomCreator {
+export function createBooleanAtom(initState = false, options: AtomOptions = `boolean${++count}`): BooleanAtomCreator {
   return createPrimitiveAtom<
     boolean,
     {

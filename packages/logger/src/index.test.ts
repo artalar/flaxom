@@ -55,13 +55,8 @@ test.skip(`base`, async () => {
 
 test.skip(`cause`, async () => {
   // should correct calculate cause for complex async transactions
-  const doAsync = action(
-    (ctx, v: number) => ctx.schedule(() => Promise.resolve(v)),
-    `doAsync`,
-  )
-  const asyncResAtom = doAsync.pipe(
-    mapPayloadAwaited((ctx, v) => v, `asyncResAtom`),
-  )
+  const doAsync = action((ctx, v: number) => ctx.schedule(() => Promise.resolve(v)), `doAsync`)
+  const asyncResAtom = doAsync.pipe(mapPayloadAwaited((ctx, v) => v, `asyncResAtom`))
   const resMapAtom = atom((ctx) => ctx.spy(asyncResAtom), 'resMapAtom')
 
   const ctx = createCtx()

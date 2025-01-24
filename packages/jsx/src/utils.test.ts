@@ -18,39 +18,41 @@ describe('parseClasses', () => {
   })
 
   it('handles falsy object correctly', () => {
-    assert.is(ctx.get(cn({
-      a: '',
-      b: 0,
-      c: NaN,
-      d: false,
-      e: null,
-      f: undefined,
-      g: atom(undefined),
-    })), '')
+    assert.is(
+      ctx.get(
+        cn({
+          a: '',
+          b: 0,
+          c: NaN,
+          d: false,
+          e: null,
+          f: undefined,
+          g: atom(undefined),
+        }),
+      ),
+      '',
+    )
   })
 
   it('handles falsy array correctly', () => {
-    assert.is(ctx.get(cn([
-      '',
-      null,
-      undefined,
-      {},
-      [],
-      atom(undefined),
-      () => undefined,
-    ])), '')
+    assert.is(ctx.get(cn(['', null, undefined, {}, [], atom(undefined), () => undefined])), '')
   })
 
   it('handles object correctly', () => {
-    assert.is(ctx.get(cn({
-      a: 'a',
-      b: 1,
-      c: true,
-      d: {},
-      e: [],
-      f: atom(true),
-      g: () => undefined,
-    })), 'a b c d e f g')
+    assert.is(
+      ctx.get(
+        cn({
+          a: 'a',
+          b: 1,
+          c: true,
+          d: {},
+          e: [],
+          f: atom(true),
+          g: () => undefined,
+        }),
+      ),
+      'a b c d e f g',
+    )
   })
 
   it('handles deep array correctly', () => {
@@ -68,13 +70,7 @@ describe('parseClasses', () => {
   it('handles complex correctly', () => {
     const isBAtom = atom(true)
     const stringAtom = atom('d')
-    const classNameAtom = cn(() => atom(() => [
-      'a',
-      {b: isBAtom},
-      ['c'],
-      stringAtom,
-      () => 'e',
-    ]))
+    const classNameAtom = cn(() => atom(() => ['a', { b: isBAtom }, ['c'], stringAtom, () => 'e']))
 
     assert.is(ctx.get(classNameAtom), 'a b c d e')
 

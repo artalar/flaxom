@@ -151,10 +151,7 @@ test('reatomDynamicUndo', () => {
   const elementAtom = atom(3)
   listAtom.set(ctx, 3, elementAtom)
   assert.is(track.calls.length, 4)
-  assert.equal(
-    parseAtoms(ctx, listAtom),
-    new Map().set(1, 100).set(2, 200).set(3, 3),
-  )
+  assert.equal(parseAtoms(ctx, listAtom), new Map().set(1, 100).set(2, 200).set(3, 3))
 
   listUndoAtom.undo(ctx)
   assert.is(ctx.get(listAtom).size, 2)
@@ -165,18 +162,13 @@ test('reatomDynamicUndo', () => {
 
   listUndoAtom.redo(ctx)
   listUndoAtom.redo(ctx)
-  assert.equal(
-    parseAtoms(ctx, listAtom),
-    new Map().set(1, 100).set(2, 200).set(3, 3),
-  )
+  assert.equal(parseAtoms(ctx, listAtom), new Map().set(1, 100).set(2, 200).set(3, 3))
   assert.is(listAtom.get(ctx, 3), elementAtom)
   ;('👍') //?
 })
 
 test('"shouldReplace"', () => {
-  const inputAtom = atom('').pipe(
-    withUndo({ shouldReplace: (ctx, state) => !state.endsWith(' ') }),
-  )
+  const inputAtom = atom('').pipe(withUndo({ shouldReplace: (ctx, state) => !state.endsWith(' ') }))
   const ctx = createTestCtx()
 
   for (const letter of 'This is a test') {

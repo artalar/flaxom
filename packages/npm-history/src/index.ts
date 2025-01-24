@@ -1,13 +1,6 @@
 import { History, Location, To, Blocker } from 'history'
 
-import {
-  action,
-  atom,
-  Atom,
-  AtomMut,
-  Action,
-  throwReatomError,
-} from '@reatom/core'
+import { action, atom, Atom, AtomMut, Action, throwReatomError } from '@reatom/core'
 import { onUpdate } from '@reatom/hooks'
 import { isShallowEqual } from '@reatom/utils'
 
@@ -36,8 +29,7 @@ onUpdate(historyAtom, (ctx, history) => {
 
 // @ts-expect-error
 const locationAtom: HistoryAtom['location'] = atom(null, 'historyAtom.location')
-locationAtom.__reatom.computer = (ctx) =>
-  Object.assign({}, ctx.spy(historyAtom).location)
+locationAtom.__reatom.computer = (ctx) => Object.assign({}, ctx.spy(historyAtom).location)
 
 const push: HistoryAtom['push'] = action((ctx, to: To, state?: any) => {
   const history = ctx.get(historyAtom)

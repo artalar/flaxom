@@ -1,13 +1,4 @@
-import {
-  createContext,
-  useEffect,
-  useRef,
-  useReducer,
-  useContext,
-  useCallback,
-  Reducer,
-  Context,
-} from 'react'
+import { createContext, useEffect, useRef, useReducer, useContext, useCallback, Reducer, Context } from 'react'
 
 import { Store, Atom, Action } from '@reatom/core-v1'
 
@@ -36,16 +27,8 @@ const defaultMapper = (atomValue: any) => atomValue
  */
 export function createAtomHook(ctx: Context<Store | null> = context) {
   function useAtom<T>(atom: Atom<T>): T
-  function useAtom<TI, TO = TI>(
-    atom: Atom<TI>,
-    selector: (atomValue: TI) => TO,
-    deps: any[],
-  ): TO
-  function useAtom<TI, TO = TI>(
-    atom: Atom<TI>,
-    selector: (atomValue: TI) => TO = defaultMapper,
-    deps: any[] = [],
-  ): TO {
+  function useAtom<TI, TO = TI>(atom: Atom<TI>, selector: (atomValue: TI) => TO, deps: any[]): TO
+  function useAtom<TI, TO = TI>(atom: Atom<TI>, selector: (atomValue: TI) => TO = defaultMapper, deps: any[] = []): TO {
     const forceUpdate = useForceUpdate()
     const store = useContext(ctx)
     if (!store) throw new Error('[reatom] The provider is not defined')
@@ -133,19 +116,10 @@ export const setupBatch = (newBatch: typeof batch) => {
  * @returns A `useAction` hook bound to the context.
  */
 export function createActionHook(ctx: Context<Store | null> = context) {
-  function useAction<AC extends AnyActionCreator>(
-    cb: AC,
-    deps?: any[],
-  ): (...args: Parameters<AC>) => void
+  function useAction<AC extends AnyActionCreator>(cb: AC, deps?: any[]): (...args: Parameters<AC>) => void
   function useAction(cb: () => Action<any> | void, deps?: any[]): () => void
-  function useAction<T>(
-    cb: (a: T) => Action<any> | void,
-    deps?: any[],
-  ): (payload: T) => void
-  function useAction(
-    cb: AnyActionCreator,
-    deps: any[] = [],
-  ): (...args: any[]) => void {
+  function useAction<T>(cb: (a: T) => Action<any> | void, deps?: any[]): (payload: T) => void
+  function useAction(cb: AnyActionCreator, deps: any[] = []): (...args: any[]) => void {
     const store = useContext(ctx)
     if (!store) throw new Error('[reatom] The provider is not defined')
     if (typeof cb !== 'function') {

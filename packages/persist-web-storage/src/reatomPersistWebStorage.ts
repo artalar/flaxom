@@ -2,14 +2,8 @@ import { atom } from '@reatom/core'
 import { PersistRecord, createMemStorage, reatomPersist } from '@reatom/persist'
 import { WithPersistWebStorage } from './types'
 
-export const reatomPersistWebStorage = (
-  name: string,
-  storage: Storage,
-): WithPersistWebStorage => {
-  const memCacheAtom = atom(
-    (ctx, state = new Map<string, PersistRecord>()) => state,
-    `${name}._memCacheAtom`,
-  )
+export const reatomPersistWebStorage = (name: string, storage: Storage): WithPersistWebStorage => {
+  const memCacheAtom = atom((ctx, state = new Map<string, PersistRecord>()) => state, `${name}._memCacheAtom`)
 
   return reatomPersist({
     name,
@@ -80,15 +74,9 @@ try {
 }
 
 export const withLocalStorage: WithPersistWebStorage = isWebStorageAvailable
-  ? /*#__PURE__*/ reatomPersistWebStorage(
-      'withLocalStorage',
-      globalThis.localStorage,
-    )
+  ? /*#__PURE__*/ reatomPersistWebStorage('withLocalStorage', globalThis.localStorage)
   : /*#__PURE__*/ reatomPersist(createMemStorage({ name: 'withLocalStorage' }))
 
 export const withSessionStorage: WithPersistWebStorage = isWebStorageAvailable
-  ? /*#__PURE__*/ reatomPersistWebStorage(
-      'withSessionStorage',
-      globalThis.sessionStorage,
-    )
+  ? /*#__PURE__*/ reatomPersistWebStorage('withSessionStorage', globalThis.sessionStorage)
   : /*#__PURE__*/ reatomPersist(createMemStorage({ name: 'withSessionStorage' }))

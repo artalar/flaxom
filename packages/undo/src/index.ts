@@ -38,19 +38,11 @@ interface AggregateHistory<T> {
 
 export interface WithUndoOptions<T = any> {
   length?: number
-  shouldUpdate?: Fn<
-    [ctx: Ctx, state: T, history: Array<T>, currentPosition: number],
-    boolean
-  >
-  shouldReplace?: Fn<
-    [ctx: Ctx, state: T, history: Array<T>, currentPosition: number],
-    boolean
-  >
+  shouldUpdate?: Fn<[ctx: Ctx, state: T, history: Array<T>, currentPosition: number], boolean>
+  shouldReplace?: Fn<[ctx: Ctx, state: T, history: Array<T>, currentPosition: number], boolean>
   withPersist?: (
     options: WithPersistOptions<AggregateHistory<T>>,
-  ) => (
-    historyAggregateAtom: Atom<AggregateHistory<T>>,
-  ) => Atom<AggregateHistory<T>>
+  ) => (historyAggregateAtom: Atom<AggregateHistory<T>>) => Atom<AggregateHistory<T>>
 }
 
 const update = (ctx: Ctx, anAtom: AtomMut | Atom, state: any) =>
@@ -65,8 +57,7 @@ const update = (ctx: Ctx, anAtom: AtomMut | Atom, state: any) =>
 export const withUndo =
   <T extends AtomMut & Partial<WithUndo<AtomState<T>>>>({
     length = 30,
-    shouldUpdate = (ctx, state, history) =>
-      history[history.length - 1] !== state,
+    shouldUpdate = (ctx, state, history) => history[history.length - 1] !== state,
     shouldReplace = () => false,
     withPersist,
   }: WithUndoOptions<AtomState<T>> = {}): Fn<[T], T & WithUndo<AtomState<T>>> =>
@@ -84,10 +75,9 @@ export const withUndo =
         `${name}.Undo._aggregateHistoryAtom`,
       )
 
-      const historyAtom = (anAtom.historyAtom = atom<Array<AtomState<T>>>(
-        [],
-        `${name}.Undo._historyAtom`,
-      )).pipe(withInit((ctx) => ctx.get(aggregateHistoryAtom).history))
+      const historyAtom = (anAtom.historyAtom = atom<Array<AtomState<T>>>([], `${name}.Undo._historyAtom`)).pipe(
+        withInit((ctx) => ctx.get(aggregateHistoryAtom).history),
+      )
 
       anAtom.pipe(
         withInit((ctx, init) => {
@@ -101,15 +91,11 @@ export const withUndo =
         }),
       )
 
-      const positionAtom = (anAtom.positionAtom = atom(
-        0,
-        `${name}._position`,
-      )).pipe(withInit((ctx) => ctx.get(aggregateHistoryAtom).position))
-
-      anAtom.isUndoAtom = atom(
-        (ctx) => ctx.spy(positionAtom) > 0,
-        `${name}.Undo._isUndoAtom`,
+      const positionAtom = (anAtom.positionAtom = atom(0, `${name}._position`)).pipe(
+        withInit((ctx) => ctx.get(aggregateHistoryAtom).position),
       )
+
+      anAtom.isUndoAtom = atom((ctx) => ctx.spy(positionAtom) > 0, `${name}.Undo._isUndoAtom`)
 
       anAtom.isRedoAtom = atom(
         (ctx) => ctx.spy(positionAtom) < ctx.spy(historyAtom).length - 1,
@@ -137,15 +123,9 @@ export const withUndo =
       anAtom.onChange((ctx, state) => {
         let position = ctx.get(positionAtom)
 
-        if (
-          !isCausedBy(ctx.cause, jump.__reatom) &&
-          shouldUpdate(ctx, state, ctx.get(historyAtom), position)
-        ) {
+        if (!isCausedBy(ctx.cause, jump.__reatom) && shouldUpdate(ctx, state, ctx.get(historyAtom), position)) {
           historyAtom(ctx, (history) => {
-            history = history.slice(
-              Math.max(0, position - (length - 2)),
-              position + 1,
-            )
+            history = history.slice(Math.max(0, position - (length - 2)), position + 1)
             if (!shouldReplace(ctx, state, history, position)) {
               position++
             }
@@ -170,9 +150,7 @@ export const withUndo =
             const position = ctx.get(positionAtom)
 
             aggregateHistoryAtom(ctx, (state) =>
-              state.history === history && state.position === position
-                ? state
-                : { history, position },
+              state.history === history && state.position === position ? state : { history, position },
             )
           })
         }
@@ -197,9 +175,7 @@ export const reatomUndo = <T extends Array<AtomMut> | Rec<AtomMut>>(
     length,
     shouldUpdate,
     shouldReplace,
-  }: Exclude<typeof options, string> = typeof options === 'string'
-    ? { name: options }
-    : options
+  }: Exclude<typeof options, string> = typeof options === 'string' ? { name: options } : options
 
   const theAtom = Object.assign(
     (ctx: Ctx, newShape: AtomsStates<T>): AtomsStates<T> => {
@@ -231,9 +207,7 @@ export const reatomDynamicUndo = (
     length,
     shouldUpdate,
     shouldReplace,
-  }: Exclude<typeof options, string> = typeof options === 'string'
-    ? { name: options }
-    : options
+  }: Exclude<typeof options, string> = typeof options === 'string' ? { name: options } : options
 
   const theAtom = Object.assign(
     (ctx: Ctx, newState: AtomCache): AtomCache => {

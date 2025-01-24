@@ -12,9 +12,7 @@ test(`base API`, async () => {
   timerAtom.intervalAtom.setSeconds(ctx, 0.001)
 
   var target = 50
-  var duration = await getDuration(() =>
-    timerAtom.startTimer(ctx, target / 1000),
-  )
+  var duration = await getDuration(() => timerAtom.startTimer(ctx, target / 1000))
 
   assert.ok(duration >= target)
 
@@ -99,7 +97,7 @@ test('allow start from passed time', async () => {
   const start = Date.now()
   const promise = timerAtom.startTimer(ctx, delay, passed)
   assert.is(ctx.get(timerAtom.progressAtom), passed / delay)
-  
+
   await promise
 
   const duration = Date.now() - start

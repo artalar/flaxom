@@ -11,8 +11,7 @@ export const withReset =
               actualize!(
                 ctx,
                 anAtom.__reatom,
-                (patchCtx: Ctx, patch: AtomCache) =>
-                  (patch.state = patch.proto.initState(ctx)),
+                (patchCtx: Ctx, patch: AtomCache) => (patch.state = patch.proto.initState(ctx)),
               ).state,
           ),
         `${anAtom.__reatom.name}._reset`,

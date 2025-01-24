@@ -14,9 +14,7 @@ test('configuration', async () => {
 
   const reatomFetch = createReatomFetch({ transport })
 
-  async function configure(
-    input: ReatomFetchConfig<any> | (() => ReatomFetchConfig<any>),
-  ) {
+  async function configure(input: ReatomFetchConfig<any> | (() => ReatomFetchConfig<any>)) {
     const fetcher = reatomFetch(input)
     await fetcher(ctx)
     assert.is(transport.lastInput(0), `${API}/`)
@@ -49,11 +47,7 @@ test('merges URLs', async () => {
 test('merges headers', async () => {
   const ctx = createTestCtx()
 
-  async function mergeHeaders(
-    headersBase: HeadersInit,
-    headers: HeadersInit,
-    result: HeadersInit,
-  ) {
+  async function mergeHeaders(headersBase: HeadersInit, headers: HeadersInit, result: HeadersInit) {
     const fetcher = reatomFetch({
       transport,
       url: API,
@@ -62,11 +56,7 @@ test('merges headers', async () => {
     })
     await fetcher(ctx)
     assert.equal(
-      Object.fromEntries([
-        ...(
-          (transport.lastInput(1) as RequestInit).headers as Headers
-        ).entries(),
-      ]),
+      Object.fromEntries([...((transport.lastInput(1) as RequestInit).headers as Headers).entries()]),
       result,
     )
   }
@@ -89,12 +79,9 @@ test('content parsing', async () => {
 
   const fetcher = reatomFetch({
     transport: (url, init) => {
-      return new Response(
-        JSON.stringify({ got: JSON.parse(init.body as string) }),
-        {
-          headers: { 'content-type': 'application/json' },
-        },
-      )
+      return new Response(JSON.stringify({ got: JSON.parse(init.body as string) }), {
+        headers: { 'content-type': 'application/json' },
+      })
     },
     url: API,
     body: 'Hello world!',

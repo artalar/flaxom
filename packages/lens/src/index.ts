@@ -34,8 +34,7 @@ export * from './withReset'
 export interface LensAtom<State = any> extends Atom<State> {
   deps: Array<Atom>
 }
-export interface LensAction<Params extends any[] = any[], Payload = any>
-  extends Action<Params, Payload> {
+export interface LensAction<Params extends any[] = any[], Payload = any> extends Action<Params, Payload> {
   deps: Array<Atom>
 }
 
@@ -114,8 +113,7 @@ export const mapState =
   ): Fn<[T], LensAtom<Res>> =>
   (anAtom: Atom) => {
     const theAtom = atom(
-      (ctx, state?: any) =>
-        mapper(ctx, ctx.spy(anAtom), ctx.cause!.pubs.at(0)?.state, state),
+      (ctx, state?: any) => mapper(ctx, ctx.spy(anAtom), ctx.cause!.pubs.at(0)?.state, state),
       mapName(anAtom, 'mapState', name),
     ) as LensAtom<Res>
     theAtom.deps = [anAtom]
@@ -129,14 +127,8 @@ export const mapPayload: {
     map: Fn<[Ctx, Payload, Params], T>,
     name?: string,
   ): Fn<[Action<Params, Payload>], LensAction<[], T>>
-  <T extends Action>(
-    fallback: ActionPayload<T>,
-    name?: string,
-  ): Fn<[T], LensAtom<ActionPayload<T>>>
-  <T, State>(
-    fallback: State,
-    name?: string,
-  ): Fn<[Action<any[], T>], LensAtom<State | T>>
+  <T extends Action>(fallback: ActionPayload<T>, name?: string): Fn<[T], LensAtom<ActionPayload<T>>>
+  <T, State>(fallback: State, name?: string): Fn<[Action<any[], T>], LensAtom<State | T>>
   <Payload, State, Params extends any[] = any[]>(
     fallback: State,
     map: Fn<[Ctx, Payload, Params, State], State>,
@@ -168,9 +160,7 @@ export const mapPayload: {
                 ((ctx.spy = undefined),
                 depState.reduce((acc: any, v) => {
                   const payload = map(ctx, v.payload, v.params)
-                  return payload === SKIP
-                    ? acc
-                    : [...acc, { params: [v], payload }]
+                  return payload === SKIP ? acc : [...acc, { params: [v], payload }]
                 }, prevState))
               : depState.reduce((acc, { payload, params }) => {
                   const state = map(ctx, payload, params, acc)
@@ -192,42 +182,24 @@ export const mapPayloadAwaited: {
     mapper?: Fn<[Ctx, Awaited<T>], Payload>,
     name?: string,
   ): Fn<[Action<any[], T>], LensAction<[], Payload>>
-  <T extends Action>(
-    fallback: Awaited<ActionPayload<T>>,
-    name?: string,
-  ): Fn<[T], LensAtom<Awaited<ActionPayload<T>>>>
-  <T, State>(
-    fallback: State,
-    name?: string,
-  ): Fn<[Action<any[], T>], LensAtom<State | Awaited<T>>>
-  <T, State>(
-    fallback: State,
-    map: Fn<[Ctx, Awaited<T>], State>,
-    name?: string,
-  ): Fn<[Action<any[], T>], LensAtom<State>>
+  <T extends Action>(fallback: Awaited<ActionPayload<T>>, name?: string): Fn<[T], LensAtom<Awaited<ActionPayload<T>>>>
+  <T, State>(fallback: State, name?: string): Fn<[Action<any[], T>], LensAtom<State | Awaited<T>>>
+  <T, State>(fallback: State, map: Fn<[Ctx, Awaited<T>], State>, name?: string): Fn<[Action<any[], T>], LensAtom<State>>
 } =
   (...a: [any?, any?, any?]) =>
   (anAction: Action): any => {
     const isAction = a.length === 0 || typeof a[0] === 'function'
-    const [fallback, map = (ctx: Ctx, v: any) => v, name] = isAction
-      ? [[], a[0], a[1]]
-      : a
+    const [fallback, map = (ctx: Ctx, v: any) => v, name] = isAction ? [[], a[0], a[1]] : a
     const params = isAction ? [] : [fallback]
     params.push(
       (ctx: Ctx, promise: any) => {
         if (promise instanceof Promise) {
           __thenReatomed(ctx, promise, (v, read, actualize) =>
-            actualize!(
-              ctx,
-              ctx.cause!.proto,
-              (patchCtx: Ctx, patch: AtomCache) => {
-                patch.cause = ctx.cause.cause
-                const payload = map(ctx, v)
-                patch.state = isAction
-                  ? [...patch.state, { params: [v], payload }]
-                  : payload
-              },
-            ),
+            actualize!(ctx, ctx.cause!.proto, (patchCtx: Ctx, patch: AtomCache) => {
+              patch.cause = ctx.cause.cause
+              const payload = map(ctx, v)
+              patch.state = isAction ? [...patch.state, { params: [v], payload }] : payload
+            }),
           )
 
           return SKIP
@@ -267,38 +239,19 @@ export const mapInput =
 /** Convert action to atom with optional fallback state */
 // @ts-expect-error
 export const toAtom: {
-  <T extends Action>(
-    fallback: ReturnType<T>,
-    name?: string,
-  ): Fn<[T], LensAtom<ReturnType<T>>>
-  <T extends Action>(
-    fallback?: undefined,
-    name?: string,
-  ): Fn<[T], LensAtom<undefined | ReturnType<T>>>
-  <T extends Action, State>(
-    fallback: State,
-    name?: string,
-  ): Fn<[T], LensAtom<State | ReturnType<T>>>
+  <T extends Action>(fallback: ReturnType<T>, name?: string): Fn<[T], LensAtom<ReturnType<T>>>
+  <T extends Action>(fallback?: undefined, name?: string): Fn<[T], LensAtom<undefined | ReturnType<T>>>
+  <T extends Action, State>(fallback: State, name?: string): Fn<[T], LensAtom<State | ReturnType<T>>>
 } =
   (fallback?: any, name?: string): Fn<[Action], Atom> =>
   (anAction) =>
-    mapPayload(
-      fallback,
-      (ctx, v: any) => v,
-      mapName(anAction, 'toAtom', name),
-    )(anAction)
+    mapPayload(fallback, (ctx, v: any) => v, mapName(anAction, 'toAtom', name))(anAction)
 
 // https://rxjs.dev/api/operators/tap
 export const withOnUpdate =
   <T extends Atom>(
     cb: T extends Action<infer Params, infer Payload>
-      ? Fn<
-          [
-            Ctx,
-            Payload,
-            AtomCache<AtomState<Action<Params, Payload>>> & { params: Params },
-          ]
-        >
+      ? Fn<[Ctx, Payload, AtomCache<AtomState<Action<Params, Payload>>> & { params: Params }]>
       : Fn<[Ctx, AtomState<T>, AtomCache<AtomState<T>>]>,
   ) =>
   (anAtom: T): T => {
@@ -309,10 +262,7 @@ export const withOnUpdate =
 
 /** Convert an atom to action */
 export const toAction: {
-  <State, T>(
-    map: Fn<[ctx: Ctx, state: State], T>,
-    name?: string,
-  ): Fn<[Atom<State>], LensAction<[State], T>>
+  <State, T>(map: Fn<[ctx: Ctx, state: State], T>, name?: string): Fn<[Atom<State>], LensAction<[State], T>>
   <T>(name?: string): Fn<[Atom<T>], LensAction<[T], T>>
 } = (map?: string | Fn, name?: string) => (anAtom: Atom) => {
   throwReatomError(anAtom.__reatom.isAction, 'atom expected')
@@ -329,9 +279,7 @@ export const toAction: {
       // TODO handle atom mutation in the same transaction
       const isInit = ctx.cause.pubs.length === 0
       const state = ctx.spy(anAtom)
-      return isInit
-        ? []
-        : [{ params: [state], payload: (map as Fn)(ctx, state) }]
+      return isInit ? [] : [{ params: [state], payload: (map as Fn)(ctx, state) }]
     },
     mapName(anAtom, 'toAction', name),
   )

@@ -2,9 +2,7 @@ import { atom } from '@reatom/core'
 import { createMemStorage, PersistRecord, reatomPersist } from '@reatom/persist'
 import { BroadcastMessage, WithPersistWebStorage } from './types'
 
-export const reatomPersistBroadcastChannel = (
-  channel: BroadcastChannel,
-): WithPersistWebStorage => {
+export const reatomPersistBroadcastChannel = (channel: BroadcastChannel): WithPersistWebStorage => {
   const postMessage = (msg: BroadcastMessage) => channel.postMessage(msg)
 
   const memCacheAtom = atom(
@@ -75,9 +73,5 @@ try {
 }
 
 export const withBroadcastChannel: WithPersistWebStorage = isBroadcastChannelAvailable
-  ? /*#__PURE__*/ reatomPersistBroadcastChannel(
-      new BroadcastChannel('reatom_withBroadcastChannel_default'),
-    )
-  : /*#__PURE__*/ reatomPersist(
-      createMemStorage({ name: 'withBroadcastChannel' }),
-    )
+  ? /*#__PURE__*/ reatomPersistBroadcastChannel(new BroadcastChannel('reatom_withBroadcastChannel_default'))
+  : /*#__PURE__*/ reatomPersist(createMemStorage({ name: 'withBroadcastChannel' }))

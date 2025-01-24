@@ -1,12 +1,4 @@
-import {
-  atom,
-  action,
-  AtomMut,
-  LLNode,
-  reatomLinkedList,
-  LL_NEXT,
-  LL_PREV,
-} from '@reatom/framework'
+import { atom, action, AtomMut, LLNode, reatomLinkedList, LL_NEXT, LL_PREV } from '@reatom/framework'
 
 export type ListElement = LLNode<AtomMut<string>>
 
