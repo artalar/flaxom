@@ -14,3 +14,5 @@ jobs:
         run: npm ci --ignore-scripts
       - name: Run tests
         run: npm test
+      - name: Echo
+        run: echo "hello world"
