@@ -133,16 +133,17 @@ export const unitNamingRule: Rule.RuleModule = {
           return
         }
 
-        const replaceNameFix = (fixer: Rule.RuleFixer, local = false) => {
-          const fixedCode = printName({
-            domain: expectedDomain,
-            object: expectedObject,
-            local,
-            unit: expectedUnit.name,
-          })
-
-          return fixer.replaceText(nameNode, nameNode.type === 'Property' ? `name: ${fixedCode}` : fixedCode)
-        }
+        const replaceNameFix = (fixer: Rule.RuleFixer, local = false) => (
+          fixer.replaceText(
+            nameNode, 
+            printName({
+              domain: expectedDomain,
+              object: expectedObject,
+              local,
+              unit: expectedUnit.name,
+            })
+          )
+        )
 
         let parsedName: Name | undefined
         parseName: {
