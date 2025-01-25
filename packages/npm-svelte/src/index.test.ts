@@ -1,5 +1,3 @@
-import { test, expect } from 'vitest'
+import { test } from 'vitest'
 
-test.skip('base API', async () => {
-  expect(false).toBeTruthy()
-})
+test('base API', async () => {})

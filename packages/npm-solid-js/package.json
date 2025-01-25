@@ -22,7 +22,9 @@
   "scripts": {
     "sandbox": "vite",
     "prepublishOnly": "npm run build && npm run test",
-    "build": "microbundle"
+    "build": "microbundle",
+    "test": "vitest run src/*",
+    "test:watch": "vitest src/*"
   },
   "dependencies": {
     "@reatom/core": ">=3.5.0",
@@ -56,6 +58,7 @@
     "/package.json"
   ],
   "devDependencies": {
-    "vite-plugin-solid": "^2.11.0"
+    "vite-plugin-solid": "^2.11.0",
+    "jsdom": "^19.0.0"
   }
 }
