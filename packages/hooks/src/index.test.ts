@@ -9,7 +9,6 @@ test('withInit', () => {
   const a = atom(0).pipe(withInit(() => 123))
   const ctx = createTestCtx()
   expect(ctx.get(a)).toBe(123)
-  ;`👍` //?
 })
 
 test('controlledConnection', () => {
@@ -31,7 +30,6 @@ test('controlledConnection', () => {
   aAtom(ctx, (s) => (s += 1))
   expect(track.calls.length).toBe(2)
   expect(isConnected(ctx, bAtom)).toBe(false)
-  ;`👍` //?
 })
 
 test('onConnect ctx.isConnect', async () => {
@@ -56,7 +54,6 @@ test('onConnect ctx.isConnect', async () => {
   track.unsubscribe()
   await sleep(delay)
   expect(i).toBe(2)
-  ;`👍` //?
 })
 
 test('onConnect ctx.controller', async () => {
@@ -79,7 +76,6 @@ test('onConnect ctx.controller', async () => {
       })
   })
 
-
   const track = ctx.subscribeTrack(a)
   await sleep()
   expect(aborted).toBe(false)
@@ -93,7 +89,6 @@ test('onConnect ctx.controller', async () => {
   expect(aborted!).toBe(true)
   expect(connected!).toBe(false)
   expect(throwed).toBe(true)
-  ;`👍` //?
 })
 
 test('isInit', () => {

@@ -46,7 +46,6 @@ it('withCache dataAtom mapper', async () => {
 
   await fetchData(ctx)
   expect(ctx.get(fetchData.dataAtom)).toBe(2)
-  ;`👍` //?
 })
 
 it('withCache swr true (default)', async () => {
@@ -68,7 +67,6 @@ it('withCache swr true (default)', async () => {
   fetchData(ctx)
   expect(track.calls.length).toBe(2)
   expect(ctx.get(fetchData.dataAtom)).toBe(2)
-  ;`👍` //?
 })
 
 it('withCache swr false', async () => {
@@ -98,7 +96,6 @@ it('withCache swr false', async () => {
   expect(i).toBe(2)
   expect(track.calls.length).toBe(3)
   expect(ctx.get(fetchData.dataAtom)).toBe(1)
-  ;`👍` //?
 })
 
 it('withCache parallel', async () => {
@@ -121,7 +118,6 @@ it('withCache parallel', async () => {
   expect(effect.calls.length).toBe(2)
   expect(await p2).toEqual([2, 2])
   expect(track.inputs()).toEqual([1, 2])
-  ;`👍` //?
 })
 
 it('withCache withAbort vary params', async () => {
@@ -152,7 +148,6 @@ it('withCache withAbort vary params', async () => {
   fetchData(ctx, 2)
   expect(track.calls.length).toBe(3)
   expect(ctx.get(fetchData.dataAtom)).toBe(2)
-  ;`👍` //?
 })
 
 it('withCache withAbort same params', async () => {
@@ -180,7 +175,6 @@ it('withCache withAbort same params', async () => {
 
   await fetchData(ctx, 2)
   expect(ctx.get(fetchData.dataAtom)).toBe(2)
-  ;`👍` //?
 })
 
 it('withCache and action mocking', async () => {
@@ -199,7 +193,6 @@ it('withCache and action mocking', async () => {
   fetchData(ctx, 1)
   expect(ctx.get(fetchData.pendingAtom)).toBe(0)
   expect(ctx.get(fetchData.dataAtom)).toBe(10)
-  ;`👍` //?
 })
 
 it('withPersist', async () => {
@@ -228,7 +221,6 @@ it('withPersist', async () => {
   await fetchData2(ctx, 1, 2)
   expect(effect.calls.length).toBe(effectCalls)
   expect(data2Track.lastInput()).toBe(3)
-  ;`👍` //?
 })
 
 it('do not cache aborted promise', async () => {
@@ -253,7 +245,6 @@ it('do not cache aborted promise', async () => {
   await sleep()
   expect(effect.calls.length).toBe(4)
   expect(ctx.get(fetchData.dataAtom)).toBe(1)
-  ;`👍` //?
 })
 
 it('should be able to manage cache manually', async () => {

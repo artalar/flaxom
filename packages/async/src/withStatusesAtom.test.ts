@@ -109,7 +109,6 @@ it('withStatusesAtom', async () => {
   await promise2.catch(() => {})
 
   expect(ctx.get(fetchData.statusesAtom)).toEqual(rejected)
-  ;`👍` //?
 })
 
 it('withCache and withStatusesAtom', async () => {
@@ -143,7 +142,6 @@ it('withCache and withStatusesAtom', async () => {
   await promise2.catch(() => {})
 
   expect(track.lastInput()).toEqual(rejected)
-  ;`👍` //?
 })
 
 it('withStatusesAtom parallel requests', async () => {
@@ -169,7 +167,6 @@ it('withStatusesAtom parallel requests', async () => {
   await p2
 
   expect(track.lastInput()).toEqual(fulfilled)
-  ;`👍` //?
 })
 
 it('reset during pending', async () => {
@@ -185,7 +182,6 @@ it('reset during pending', async () => {
   expect(ctx.get(fetchData.statusesAtom).isEverPending).toBe(false)
   await sleep()
   expect(ctx.get(fetchData.statusesAtom).isEverPending).toBe(false)
-  ;`👍` //?
 })
 
 it('do not reject on abort', async () => {
@@ -207,7 +203,6 @@ it('do not reject on abort', async () => {
     isEverPending: true,
     isEverSettled: false,
   } satisfies AsyncStatusesAbortedPending)
-  ;`👍` //?
 })
 
 it('isEverSettled after abort', async () => {
@@ -260,7 +255,6 @@ it('do not reject on resource abort', async () => {
     isEverPending: true,
     isEverSettled: false,
   } satisfies AsyncStatusesAbortedPending)
-  ;`👍` //?
 })
 
 it('restore isFulfilled after abort', async () => {
@@ -292,5 +286,4 @@ it('restore isFulfilled after abort', async () => {
     isEverPending: true,
     isEverSettled: true,
   } satisfies AsyncStatusesAbortedFulfill)
-  ;`👍` //?
 })

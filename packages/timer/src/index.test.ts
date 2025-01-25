@@ -24,7 +24,6 @@ describe(
       ])
       expect(duration).toBeGreaterThanOrEqual(target / 2)
       expect(duration).lessThan(target)
-      ;`👍` //?
     })
 
     it('progressAtom', async () => {

@@ -150,6 +150,5 @@ describe('concurrent pooling', () => {
 
     // TODO time flickering
     // expect(track.inputs()).toEqual(expectedProgress)
-    ;`👍` //?
   })
 })

@@ -69,7 +69,6 @@ test(`action`, () => {
 
   a1(ctx, (s) => s + 1)
   expect(fn.calls.length).toBe(3)
-  ;`👍` //?
 })
 
 test(`linking`, () => {
@@ -100,7 +99,6 @@ test(`linking`, () => {
   expect(a2Cache).toBe(ctx.get((read) => read(a2.__reatom))!)
 
   expect(ctx.get((read) => read(a1.__reatom))!.subs.size).toBe(0)
-  ;`👍` //?
 })
 
 test(`nested deps`, () => {
@@ -145,8 +143,6 @@ test(`nested deps`, () => {
     expect(isConnected(ctx, a)).toBe(false)
     if (isConnected(ctx, a)) throw new Error(`"${a.__reatom.name}" should be stale`)
   }
-
-  ;`👍` //?
 })
 
 test(`transaction batch`, () => {
@@ -184,7 +180,6 @@ test(`transaction batch`, () => {
   expect(track).toHaveBeenCalledTimes(5)
   expect(track).lastCalledWith(5)
   expect(track.mock.calls.map((call) => call[0])).toEqual([1, 2, 3, 4, 5])
-  ;`👍` //?
 })
 
 test(`late effects batch`, async () => {
@@ -210,7 +205,6 @@ test(`late effects batch`, async () => {
 
   expect(fn).toHaveBeenCalledTimes(2)
   expect(fn).toHaveBeenLastCalledWith(3)
-  ;`👍` //?
 })
 
 test(`display name`, () => {
@@ -256,7 +250,6 @@ test(`display name`, () => {
     'fullNameAtom cleanup',
     'firstNameAtom cleanup',
   ])
-  ;`👍` //?
 })
 
 test(// this test written is more just for example purposes
@@ -283,7 +276,6 @@ test(// this test written is more just for example purposes
 
   expect(sumListener).toHaveBeenCalledTimes(5)
   expect(sumListener).toHaveBeenLastCalledWith(4)
-  ;`👍` //?
 })
 test('no uncaught errors from schedule promise', () => {
   const doTest = action((ctx) => {
@@ -293,7 +285,6 @@ test('no uncaught errors from schedule promise', () => {
   const ctx = createCtx()
 
   expect(() => doTest(ctx)).toThrow()
-  ;`👍` //?
 })
 
 test('async cause track', () => {
@@ -323,7 +314,6 @@ test('async cause track', () => {
 
     expect(patch?.cause.proto.name).toBe('act2')
   }
-  ;`👍` //?
 })
 
 test('disconnect tail deps', () => {
@@ -342,7 +332,6 @@ test('disconnect tail deps', () => {
   aAtom(ctx, (s) => (s += 1))
   expect(track).toHaveBeenCalledTimes(1)
   expect(isConnected(ctx, bAtom)).toBe(false)
-  ;`👍` //?
 })
 
 test('deps shift', () => {
@@ -362,7 +351,6 @@ test('deps shift', () => {
 
   deps.shift()!(ctx, (s) => s + 1)
   expect(track).toHaveBeenCalledTimes(1)
-  ;`👍` //?
 })
 test('subscribe to cached atom', () => {
   const a1 = atom(0)
@@ -373,7 +361,6 @@ test('subscribe to cached atom', () => {
   ctx.subscribe(a2, () => {})
 
   expect(ctx.get((r) => r(a1.__reatom)?.subs.size)).toBe(1)
-  ;`👍` //?
 })
 
 test('update propagation for atom with listener', () => {
@@ -406,7 +393,6 @@ test('update propagation for atom with listener', () => {
 
   ctx.subscribe(a3, cb3)
   expect(ctx.get((r) => r(a2.__reatom))!.subs.size).toBe(1)
-  ;`👍` //?
 })
 
 test('update queue', () => {
@@ -430,7 +416,6 @@ test('update queue', () => {
 
   iterations = 5
   expect(() => a1(ctx, 0)).toThrow()
-  ;`👍` //?
 })
 
 test('do not create extra patch', () => {
@@ -442,7 +427,6 @@ test('do not create extra patch', () => {
   ctx.subscribe(track)
   ctx.get(() => ctx.get(a))
   expect(track.calls.length).toBe(0)
-  ;`👍` //?
 })
 
 test('should catch', async () => {
@@ -467,7 +451,6 @@ test('should catch', async () => {
       () => 'catch',
     )
   expect(res2).toBe('catch')
-  ;`👍` //?
 })
 
 test('no extra tick by schedule', async () => {
@@ -501,7 +484,6 @@ test('no extra tick by schedule', async () => {
   await null
 
   expect(isDoneAsyncInTr).toBe(true)
-  ;`👍` //?
 })
 
 test('update callback should accept the fresh state', () => {
@@ -523,7 +505,6 @@ test('update callback should accept the fresh state', () => {
   })
   expect(ctx.get(b)).toBe(2)
   expect(state).toBe(2)
-  ;`👍` //?
 })
 
 test('updateHooks should be called only for computers', () => {
@@ -545,7 +526,6 @@ test('updateHooks should be called only for computers', () => {
   expect(ctx.get(b)).toBe(2)
   expect(ctx.get(c)).toBe(3)
   expect(track.inputs()).toEqual(['c'])
-  ;`👍` //?
 })
 
 test('hooks', () => {
@@ -574,7 +554,6 @@ test('hooks', () => {
   expect(actionHook.lastInput(0).subscribe).toBe(ctx.subscribe)
   expect(actionHook.lastInput(1)).toBe('param:1')
   expect(actionHook.lastInput(2)).toEqual([1])
-  ;`👍` //?
 })
 
 test('update hook for atom without cache', () => {
@@ -585,7 +564,6 @@ test('update hook for atom without cache', () => {
 
   a(ctx, 1)
   expect(hook.calls.length).toBe(1)
-  ;`👍` //?
 })
 
 test('cause available inside a computation', () => {
@@ -601,7 +579,6 @@ test('cause available inside a computation', () => {
   a(ctx, 123)
   test = true
   ctx.get(b)
-  ;`👍` //?
 })
 
 test('ctx collision', () => {
@@ -610,7 +587,6 @@ test('ctx collision', () => {
   const ctx2 = createCtx()
 
   expect(() => ctx1.get(() => ctx2.get(a))).toThrow()
-  ;`👍` //?
 })
 
 test('conditional deps duplication', () => {
@@ -642,7 +618,6 @@ test('conditional deps duplication', () => {
 
   filterAtom(ctx, 'even')
   expect(track.lastInput()).toEqual([2])
-  ;`👍` //?
 })
 
 test('nested schedule', async () => {
@@ -654,7 +629,6 @@ test('nested schedule', async () => {
 
   const ctx = createCtx()
   await act(ctx)
-  ;`👍` //?
 })
 
 test('dynamic spy callback prevValue', () => {
@@ -673,7 +647,6 @@ test('dynamic spy callback prevValue', () => {
 
   a(ctx, 1)
   expect(testPrev).toBe(undefined)
-  ;`👍` //?
 })
 
 test('should drop actualization of stale atom during few updates in one transaction', () => {
@@ -707,7 +680,6 @@ test('nested condition branches', () => {
   a(ctx, false)
   expect(isConnected(ctx, b)).toBeFalsy()
   expect(isConnected(ctx, c)).toBeTruthy()
-  ;`👍` //?
 })
 
 test('disconnect of the last version of pubs', async () => {
@@ -784,5 +756,5 @@ test('computed deps change during disconnection', () => {
 //     /Maximum call stack/,
 //     '',
 //   )
-//   ;`👍` //?
+//
 // })
