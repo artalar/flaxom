@@ -1,16 +1,11 @@
-import React, { createContext } from 'react'
+import React from 'react'
 import { renderHook, act as actHooks } from '@testing-library/react-hooks'
 import { render, act as actReact } from '@testing-library/react'
 import { createAtom, createStore, Store } from '@reatom/core-v2'
 import { createPrimitiveAtom } from '@reatom/core-v2/primitives'
-import {
-  reatomContext,
-  useAtom,
-  useAction,
-  // createActionHook,
-  // createAtomHook,
-  setBatchedUpdates,
-} from '../src/index'
+import { reatomContext, useAtom, useAction, setBatchedUpdates } from '../src'
+import { describe, test, expect, vi } from 'vitest'
+import { noop } from '@reatom/utils'
 
 setBatchedUpdates(actReact)
 
@@ -243,7 +238,7 @@ describe('@reatom/react-v2', () => {
       const store = createStore()
 
       let rerenders = 0
-      let datas = []
+      let datas: any[] = []
 
       function Component() {
         datas = [useAtom(atom1)[0], useAtom(atom2)[0]]

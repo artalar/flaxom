@@ -1,5 +1,5 @@
 import { createTestCtx } from '@reatom/testing'
-import { it, describe, test, expect, vi } from 'vitest'
+import { it, describe, expect } from 'vitest'
 import { atom, AtomMut } from '@reatom/core'
 import { select } from './select'
 
