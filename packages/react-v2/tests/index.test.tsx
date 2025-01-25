@@ -71,8 +71,7 @@ describe('@reatom/react-v2', () => {
       const store = createStore()
       store.subscribe(countAtom, noop)
       const { result, rerender } = renderHook(
-        ({ multiplier }) =>
-          useAtom(countAtom, (count) => count * multiplier, [multiplier]),
+        ({ multiplier }) => useAtom(countAtom, (count) => count * multiplier, [multiplier]),
         {
           initialProps: { multiplier: 2 },
           wrapper: (props) => <Provider {...props} store={store} />,
@@ -93,8 +92,7 @@ describe('@reatom/react-v2', () => {
       store.subscribe = (atom) => _subscribe(atom, subscriber)
 
       const { rerender } = renderHook(
-        ({ multiplier }) =>
-          useAtom(countAtom, (count) => count * multiplier, [multiplier]),
+        ({ multiplier }) => useAtom(countAtom, (count) => count * multiplier, [multiplier]),
         {
           initialProps: { multiplier: 2 },
           wrapper: (props) => <Provider {...props} store={store} />,
@@ -136,7 +134,7 @@ describe('@reatom/react-v2', () => {
     test('does not recalculate selector on rerender if deps is not changing', () => {
       const store = createStore()
       store.subscribe(countAtom, noop)
-      const selector = jest.fn((v) => v)
+      const selector = vi.fn((v) => v)
       const { rerender } = renderHook(() => useAtom(countAtom, selector, []), {
         wrapper: (props) => <Provider {...props} store={store} />,
       })
@@ -208,10 +206,8 @@ describe('@reatom/react-v2', () => {
       const store1 = createStore()
       const store2 = createStore()
 
-      const { subscribeMock: subscribe1, unsubscribeMock: unsubscribe1 } =
-        getMocks(store1)
-      const { subscribeMock: subscribe2, unsubscribeMock: unsubscribe2 } =
-        getMocks(store2)
+      const { subscribeMock: subscribe1, unsubscribeMock: unsubscribe1 } = getMocks(store1)
+      const { subscribeMock: subscribe2, unsubscribeMock: unsubscribe2 } = getMocks(store2)
 
       let store = store1
       const { rerender } = renderHook(() => useAtom(countAtom), {
@@ -290,12 +286,9 @@ describe('@reatom/react-v2', () => {
     test('returns binded action wrapper to dispatch', () => {
       const store = createStore()
       store.subscribe(countAtom, noop)
-      const { result } = renderHook(
-        () => useAction((p: number) => countAtom.add(p * 2)),
-        {
-          wrapper: (props) => <Provider {...props} store={store} />,
-        },
-      )
+      const { result } = renderHook(() => useAction((p: number) => countAtom.add(p * 2)), {
+        wrapper: (props) => <Provider {...props} store={store} />,
+      })
 
       expect(store.getState(countAtom)).toBe(1)
 
@@ -309,11 +302,7 @@ describe('@reatom/react-v2', () => {
       store.dispatch = dispatch
 
       const { rerender, result } = renderHook(
-        ({ multiplier }) =>
-          useAction(
-            (count: number) => countAtom.add(count * multiplier),
-            [multiplier],
-          ),
+        ({ multiplier }) => useAction((count: number) => countAtom.add(count * multiplier), [multiplier]),
         {
           wrapper: (props) => <Provider {...props} store={store} />,
           initialProps: { multiplier: 2 },

@@ -23,8 +23,8 @@
     "sandbox": "vite",
     "prepublishOnly": "npm run build && npm run test",
     "build": "microbundle -f esm,cjs",
-    "test": "vitest run src/*.test.ts",
-    "test:watch": "vitest src/*.test.ts"
+    "test": "vitest run src/*",
+    "test:watch": "vitest src/*"
   },
   "author": "pivaszbs",
   "maintainers": [

@@ -179,17 +179,14 @@ it(
   'array children',
   setup((ctx, h, hf, mount, parent) => {
     const n = atom(1)
-    const list = atom((ctx) => (<>
-    {...Array.from({ length: ctx.spy(n) }, (_, i) => <li>{i + 1}</li>)}
-  </>))
+    const list = atom((ctx) => <>{...Array.from({ length: ctx.spy(n) }, (_, i) => <li>{i + 1}</li>)}</>)
 
     const element = (
-        <ul>
-          {list }
-          <br />
-        </ul>
-      )
-
+      <ul>
+        {list}
+        <br />
+      </ul>
+    )
 
     mount(parent, element)
 
@@ -223,7 +220,7 @@ it(
     expect(parent.innerText).toEqual('1')
     await sleep()
     expect(isConnected(ctx, one))
-    assert.not.ok(isConnected(ctx, two))
+    expect(isConnected(ctx, two)).toBe(false)
   }),
 )
 
@@ -432,7 +429,7 @@ it(
     )
 
     mount(parent, component)
-    assert.instance(ref, window.HTMLElement)
+    expect(ref).instanceOf(window.HTMLElement)
     await sleep()
 
     ref!.remove()
@@ -464,8 +461,8 @@ it(
     )
 
     mount(parent, component)
-    assert.instance(ref1, window.HTMLElement)
-    assert.instance(ref2, window.HTMLElement)
+    expect(ref1).instanceOf(window.HTMLElement)
+    expect(ref2).instanceOf(window.HTMLElement)
     await sleep()
 
     expect(ref1.className).toEqual(cls)
@@ -594,82 +591,93 @@ it(
   }),
 )
 
-it('render different atom children', setup((ctx, h, hf, mount, parent) => {
-  const name = 'child'
-  const target = `<!--${name}-->`
-  const childAtom = atom<Node | string>(<>
-    <div>div</div>
-    <p>p</p>
-  </>, name)
+it(
+  'render different atom children',
+  setup((ctx, h, hf, mount, parent) => {
+    const name = 'child'
+    const target = `<!--${name}-->`
+    const childAtom = atom<Node | string>(
+      <>
+        <div>div</div>
+        <p>p</p>
+      </>,
+      name,
+    )
 
-  const element = <div>{childAtom}</div>
-  assert.is(element.innerHTML, `<div>${target}div>div</div><p>p</p></div>`)
+    const element = <div>{childAtom}</div>
+    expect(element.innerHTML).toEqual(`<div>${target}div>div</div><p>p</p></div>`)
 
-  childAtom(ctx, <span>span</span>)
-  assert.is(element.innerHTML, `<div>${target}span>span</span></div>`)
+    childAtom(ctx, <span>span</span>)
+    expect(element.innerHTML).toEqual(`<div>${target}span>span</span></div>`)
 
-  childAtom(ctx, 'text')
-  assert.is(element.innerHTML, `<div>${target}text</div>`)
-}))
+    childAtom(ctx, 'text')
+    expect(element.innerHTML).toEqual(`<div>${target}text</div>`)
+  }),
+)
 
-it('render atom fragments', setup((ctx, h, hf, mount, parent) => {
-  const bool1Atom = atom(false)
-  const bool2Atom = atom(false)
+it(
+  'render atom fragments',
+  setup((ctx, h, hf, mount, parent) => {
+    const bool1Atom = atom(false)
+    const bool2Atom = atom(false)
 
-  const element = (
-    <div>
-      <p>0</p>
-      {atom(
-        (ctx) => ctx.spy(bool1Atom)
-          ? <>
-            <p>1</p>
-            {atom(
-              (ctx) => ctx.spy(bool2Atom)
-                ? <>
-                  <p>2</p>
-                  <p>3</p>
-                </>
-                : undefined,
-              '2'
-            )}
-            <p>4</p>
-          </>
-          : undefined,
-        '1',
-      )}
-      <p>5</p>
-    </div>
-  )
+    const element = (
+      <div>
+        <p>0</p>
+        {atom(
+          (ctx) =>
+            ctx.spy(bool1Atom) ? (
+              <>
+                <p>1</p>
+                {atom(
+                  (ctx) =>
+                    ctx.spy(bool2Atom) ? (
+                      <>
+                        <p>2</p>
+                        <p>3</p>
+                      </>
+                    ) : undefined,
+                  '2',
+                )}
+                <p>4</p>
+              </>
+            ) : undefined,
+          '1',
+        )}
+        <p>5</p>
+      </div>
+    )
 
-  const expect1 = '<p>0</p><!--1--><p>5</p>'
-  const expect2 = '<p>0</p><!--1--><p>1</p><!--2--><p>4</p><p>5</p>'
-  const expect3 = '<p>0</p><!--1--><p>1</p><!--2--><p>2</p><p>3</p><p>4</p><p>5</p>'
+    const expect1 = '<p>0</p><!--1--><p>5</p>'
+    const expect2 = '<p>0</p><!--1--><p>1</p><!--2--><p>4</p><p>5</p>'
+    const expect3 = '<p>0</p><!--1--><p>1</p><!--2--><p>2</p><p>3</p><p>4</p><p>5</p>'
 
-  bool1Atom(ctx, false)
-  bool2Atom(ctx, false)
-  assert.is(element.innerHTML, expect1)
+    bool1Atom(ctx, false)
+    bool2Atom(ctx, false)
+    expect(element.innerHTML).toEqual(expect1)
 
-  bool1Atom(ctx, false)
-  bool2Atom(ctx, true)
-  assert.is(element.innerHTML, expect1)
+    bool1Atom(ctx, false)
+    bool2Atom(ctx, true)
+    expect(element.innerHTML).toEqual(expect1)
 
-  bool1Atom(ctx, true)
-  bool2Atom(ctx, false)
-  assert.is(element.innerHTML, expect2)
+    bool1Atom(ctx, true)
+    bool2Atom(ctx, false)
+    expect(element.innerHTML).toEqual(expect2)
 
-  bool1Atom(ctx, true)
-  bool2Atom(ctx, true)
-  assert.is(element.innerHTML, expect3)
+    bool1Atom(ctx, true)
+    bool2Atom(ctx, true)
+    expect(element.innerHTML).toEqual(expect3)
 
-  bool1Atom(ctx, true)
-  bool2Atom(ctx, false)
-  assert.is(element.innerHTML, expect2)
+    bool1Atom(ctx, true)
+    bool2Atom(ctx, false)
+    expect(element.innerHTML).toEqual(expect2)
 
-  bool1Atom(ctx, false)
-  bool2Atom(ctx, true)
-  assert.is(element.innerHTML, expect1)
+    bool1Atom(ctx, false)
+    bool2Atom(ctx, true)
+    expect(element.innerHTML).toEqual(expect1)
 
-  bool1Atom(ctx, false)
-  bool2Atom(ctx, false)
-  assert.is(element.innerHTML, expect1)
-}))
+    bool1Atom(ctx, false)
+    bool2Atom(ctx, false)
+    expect(element.innerHTML).toEqual(expect1)
+  }),
+)

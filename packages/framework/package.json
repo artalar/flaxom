@@ -22,8 +22,8 @@
   "scripts": {
     "prepublishOnly": "npm run build",
     "build": "microbundle -f esm,cjs",
-    "test": "vitest run src/*.test.ts",
-    "test:watch": "vitest src/*.test.ts"
+    "test": "vitest run src/*",
+    "test:watch": "vitest src/*"
   },
   "dependencies": {
     "@reatom/async": "^3.16.5",

@@ -2,19 +2,13 @@ import React, { createContext } from 'react'
 import { renderHook, act as actHooks } from '@testing-library/react-hooks'
 import { render } from '@testing-library/react'
 import { declareAction, declareAtom, createStore, Store } from '@reatom/core-v1'
-import {expect, describe, test} from 'vitest'
-import {
-  Provider as StoreProvider,
-  useAtom,
-  useAction,
-  createActionHook,
-  createAtomHook,
-} from '../src/index'
+import { expect, describe, test, vi } from 'vitest'
+import { Provider as StoreProvider, useAtom, useAction, createActionHook, createAtomHook } from '../src/index'
 
 const increment = declareAction()
 const add = declareAction<number>()
-const countAtom = declareAtom(['count'], 0, on => [
-  on(increment, state => state + 1),
+const countAtom = declareAtom(['count'], 0, (on) => [
+  on(increment, (state) => state + 1),
   on(add, (state, payload) => state + payload),
 ])
 
@@ -22,20 +16,18 @@ function Provider(props: { store: Store; children?: any }) {
   return <StoreProvider value={props.store}>{props.children}</StoreProvider>
 }
 
-describe('@reatom/react', () => {
+describe('@reatom/react-v1', () => {
   describe('useAtom', () => {
     test('throw Error if provider is not set', () => {
       const { result } = renderHook(() => useAtom(countAtom))
-      expect(result.error).toEqual(
-        Error('[reatom] The provider is not defined'),
-      )
+      expect(result.error).toEqual(Error('[reatom] The provider is not defined'))
     })
 
     test('returns atom state', () => {
       const store = createStore(countAtom)
 
       const { result } = renderHook(() => useAtom(countAtom), {
-        wrapper: props => <Provider {...props} store={store} />,
+        wrapper: (props) => <Provider {...props} store={store} />,
       })
       expect(result.current).toBe(0)
     })
@@ -45,7 +37,7 @@ describe('@reatom/react', () => {
       const subscriber = vi.fn()
       store.subscribe = subscriber
       const { rerender } = renderHook(() => useAtom(countAtom), {
-        wrapper: props => <Provider {...props} store={store} />,
+        wrapper: (props) => <Provider {...props} store={store} />,
       })
 
       expect(subscriber).toBeCalledTimes(1)
@@ -57,7 +49,7 @@ describe('@reatom/react', () => {
     test('updates state after store change', async () => {
       const store = createStore(countAtom, { count: 10 })
       const { result } = renderHook(() => useAtom(countAtom), {
-        wrapper: props => <Provider {...props} store={store} />,
+        wrapper: (props) => <Provider {...props} store={store} />,
       })
 
       expect(result.current).toBe(10)
@@ -72,11 +64,10 @@ describe('@reatom/react', () => {
     test('updates dynamic atom state after props change', () => {
       const store = createStore(countAtom, { count: 10 })
       const { result, rerender } = renderHook(
-        ({ multiplier }) =>
-          useAtom(countAtom, count => count * multiplier, [multiplier]),
+        ({ multiplier }) => useAtom(countAtom, (count) => count * multiplier, [multiplier]),
         {
           initialProps: { multiplier: 2 },
-          wrapper: props => <Provider {...props} store={store} />,
+          wrapper: (props) => <Provider {...props} store={store} />,
         },
       )
 
@@ -90,14 +81,13 @@ describe('@reatom/react', () => {
       const store = createStore(countAtom, { count: 10 })
       const subscriber = vi.fn()
       const _subscribe = store.subscribe
-      store.subscribe = atom => _subscribe(atom, subscriber)
+      store.subscribe = (atom) => _subscribe(atom, subscriber)
 
       const { rerender } = renderHook(
-        ({ multiplier }) =>
-          useAtom(countAtom, count => count * multiplier, [multiplier]),
+        ({ multiplier }) => useAtom(countAtom, (count) => count * multiplier, [multiplier]),
         {
           initialProps: { multiplier: 2 },
-          wrapper: props => <Provider {...props} store={store} />,
+          wrapper: (props) => <Provider {...props} store={store} />,
         },
       )
 
@@ -118,7 +108,7 @@ describe('@reatom/react', () => {
         useAtom(countAtom, () => null, [])
       }
       renderHook(() => useTest(), {
-        wrapper: props => <Provider {...props} store={store} />,
+        wrapper: (props) => <Provider {...props} store={store} />,
       })
 
       expect(render).toBeCalledTimes(1)
@@ -128,9 +118,9 @@ describe('@reatom/react', () => {
 
     test('does not recalculate selector on rerender if deps is not changing', () => {
       const store = createStore(countAtom, { count: 10 })
-      const selector = jest.fn(v => v)
+      const selector = vi.fn((v) => v)
       const { rerender } = renderHook(() => useAtom(countAtom, selector, []), {
-        wrapper: props => <Provider {...props} store={store} />,
+        wrapper: (props) => <Provider {...props} store={store} />,
       })
 
       expect(selector).toBeCalledTimes(1)
@@ -143,10 +133,10 @@ describe('@reatom/react', () => {
       const store = createStore(null)
       const _subscribe = store.subscribe
       const subscriber = vi.fn()
-      store.subscribe = atom => _subscribe(atom, subscriber)
+      store.subscribe = (atom) => _subscribe(atom, subscriber)
 
       const { unmount } = renderHook(() => useAtom(countAtom, () => null, []), {
-        wrapper: props => <Provider {...props} store={store} />,
+        wrapper: (props) => <Provider {...props} store={store} />,
       })
 
       actHooks(() => store.dispatch(increment()))
@@ -164,7 +154,7 @@ describe('@reatom/react', () => {
 
       let store = store1
       const { result, rerender } = renderHook(() => useAtom(countAtom), {
-        wrapper: props => {
+        wrapper: (props) => {
           return <Provider {...props} store={store} />
         },
       })
@@ -200,18 +190,12 @@ describe('@reatom/react', () => {
       const store1 = createStore(null)
       const store2 = createStore(null)
 
-      const {
-        subscribeMock: subscribe1,
-        unsubscribeMock: unsubscribe1,
-      } = getMocks(store1)
-      const {
-        subscribeMock: subscribe2,
-        unsubscribeMock: unsubscribe2,
-      } = getMocks(store2)
+      const { subscribeMock: subscribe1, unsubscribeMock: unsubscribe1 } = getMocks(store1)
+      const { subscribeMock: subscribe2, unsubscribeMock: unsubscribe2 } = getMocks(store2)
 
       let store = store1
       const { rerender } = renderHook(() => useAtom(countAtom), {
-        wrapper: props => {
+        wrapper: (props) => {
           return <Provider {...props} store={store} />
         },
       })
@@ -235,8 +219,8 @@ describe('@reatom/react', () => {
     /** github.com/facebook/react/issues/14259#issuecomment-439632622 */
     test('filter unnecessary updates', () => {
       const action = declareAction()
-      const atom1 = declareAtom(0, on => [on(action, s => s + 1)])
-      const atom2 = declareAtom(0, on => [on(action, s => s + 1)])
+      const atom1 = declareAtom(0, (on) => [on(action, (s) => s + 1)])
+      const atom2 = declareAtom(0, (on) => [on(action, (s) => s + 1)])
 
       const store = createStore()
 
@@ -273,15 +257,13 @@ describe('@reatom/react', () => {
       // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
       // @ts-ignore
       const { result } = renderHook(() => useAtom())
-      expect(result.error).toEqual(
-        Error('[reatom] The provider is not defined'),
-      )
+      expect(result.error).toEqual(Error('[reatom] The provider is not defined'))
     })
 
     test('returns binded action to dispatch', () => {
       const store = createStore(countAtom)
       const { result } = renderHook(() => useAction(increment), {
-        wrapper: props => <Provider {...props} store={store} />,
+        wrapper: (props) => <Provider {...props} store={store} />,
       })
 
       expect(store.getState(countAtom)).toBe(0)
@@ -291,12 +273,9 @@ describe('@reatom/react', () => {
 
     test('returns binded action wrapper to dispatch', () => {
       const store = createStore(countAtom)
-      const { result } = renderHook(
-        () => useAction((p: number) => add(p * 2)),
-        {
-          wrapper: props => <Provider {...props} store={store} />,
-        },
-      )
+      const { result } = renderHook(() => useAction((p: number) => add(p * 2)), {
+        wrapper: (props) => <Provider {...props} store={store} />,
+      })
 
       expect(store.getState(countAtom)).toBe(0)
 
@@ -310,10 +289,9 @@ describe('@reatom/react', () => {
       store.dispatch = dispatch
 
       const { rerender, result } = renderHook(
-        ({ multiplier }) =>
-          useAction((count: number) => add(count * multiplier), [multiplier]),
+        ({ multiplier }) => useAction((count: number) => add(count * multiplier), [multiplier]),
         {
-          wrapper: props => <Provider {...props} store={store} />,
+          wrapper: (props) => <Provider {...props} store={store} />,
           initialProps: { multiplier: 2 },
         },
       )
@@ -339,7 +317,7 @@ describe('@reatom/react', () => {
 
       let store = store1
       const { rerender, result } = renderHook(() => useAction(increment), {
-        wrapper: props => <Provider {...props} store={store} />,
+        wrapper: (props) => <Provider {...props} store={store} />,
       })
 
       expect(dispatch1).toBeCalledTimes(0)
@@ -379,7 +357,7 @@ describe('@reatom/react', () => {
           act2: useCustomAction(increment),
         }),
         {
-          wrapper: props => (
+          wrapper: (props) => (
             <Provider store={store1}>
               <NestedContext.Provider {...props} value={store2} />
             </Provider>
@@ -413,7 +391,7 @@ describe('@reatom/react', () => {
           atom2: useCustomAtom(countAtom),
         }),
         {
-          wrapper: props => (
+          wrapper: (props) => (
             <Provider store={store1}>
               <NestedContext.Provider {...props} value={store2} />
             </Provider>
