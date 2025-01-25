@@ -126,10 +126,10 @@ it(
         {after}
       </div>,
     )
-    expect((element as HTMLDivElement).innerText).toEqual('beforeinnerafter')
+    expect((element as HTMLDivElement).textContent).toEqual('beforeinnerafter')
 
     before(ctx, 'before...')
-    expect((element as HTMLDivElement).innerText).toEqual('before...innerafter')
+    expect((element as HTMLDivElement).textContent).toEqual('before...innerafter')
   }),
 )
 
@@ -169,9 +169,9 @@ it(
     )
     mount(parent, child)
 
-    expect(parent.childNodes.length, 2)
-    expect(parent.childNodes[0]?.textContent, 'foo')
-    expect(parent.childNodes[1]?.textContent, 'bar')
+    expect(parent.childNodes.length).toBe(2)
+    expect(parent.childNodes[0]?.textContent).toBe('foo')
+    expect(parent.childNodes[1]?.textContent).toBe('bar')
   }),
 )
 
@@ -209,15 +209,15 @@ it(
 
     mount(parent, <div>{jsxList}</div>)
 
-    expect(parent.innerText).toEqual('12')
+    expect(parent.textContent).toEqual('12')
     expect(isConnected(ctx, one))
     expect(isConnected(ctx, two))
 
     list.swap(ctx, one, two)
-    expect(parent.innerText).toEqual('21')
+    expect(parent.textContent).toEqual('21')
 
     list.remove(ctx, two)
-    expect(parent.innerText).toEqual('1')
+    expect(parent.textContent).toEqual('1')
     await sleep()
     expect(isConnected(ctx, one))
     expect(isConnected(ctx, two)).toBe(false)
@@ -348,7 +348,7 @@ it(
 
     expect(<Component />).instanceOf(window.HTMLElement)
     expect(((<Component draggable="true" />) as HTMLElement).draggable).toEqual(true)
-    expect(((<Component>123</Component>) as HTMLElement).innerText).toEqual('123')
+    expect(((<Component>123</Component>) as HTMLElement).textContent).toEqual('123')
   }),
 )
 
@@ -605,13 +605,13 @@ it(
     )
 
     const element = <div>{childAtom}</div>
-    expect(element.innerHTML).toEqual(`<div>${target}div>div</div><p>p</p></div>`)
+    expect(element.innerHTML).toEqual(`${target}<div>div</div><p>p</p>`)
 
     childAtom(ctx, <span>span</span>)
-    expect(element.innerHTML).toEqual(`<div>${target}span>span</span></div>`)
+    expect(element.innerHTML).toEqual(`${target}<span>span</span>`)
 
     childAtom(ctx, 'text')
-    expect(element.innerHTML).toEqual(`<div>${target}text</div>`)
+    expect(element.innerHTML).toEqual(`${target}text`)
   }),
 )
 

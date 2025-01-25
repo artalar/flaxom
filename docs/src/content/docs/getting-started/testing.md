@@ -25,7 +25,7 @@ export const add = action((ctx, payload) => {
 
 ```js
 // main.test.js
-import { assert, expect, test } from 'vitest'
+import { expect, test } from 'vitest'
 import { createTestCtx } from '@reatom/testing'
 
 import { add, countAtom } from './main'

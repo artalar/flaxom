@@ -300,11 +300,7 @@ test('async cause track', () => {
 
   act1(ctx)
 
-  // assert.is(
-  //   track.lastInput().find((patch: AtomCache) => patch.proto.name === 'a1')
-  //     ?.cause.proto.name,
-  //   'act2',
-  // )
+  // expect(track.lastInput().find((patch: AtomCache) => patch.proto.name === 'a1')?.cause.proto.name).toBe('act2')
   const lastCallArgs = track.mock.calls[track.mock.calls.length - 1]
 
   expect(lastCallArgs).toBeDefined()
@@ -736,25 +732,19 @@ test('computed deps change during disconnection', () => {
 //   let i = 0
 //   const reducer = (ctx: CtxSpy): any => {
 //     let dep = atoms.get(ctx.cause!.proto)
-//     if (!dep)
-//       atoms.set(ctx.cause!.proto, (dep = ++i > 10_000 ? atom(0) : atom(reducer)))
+//     if (!dep) atoms.set(ctx.cause!.proto, (dep = ++i > 10_000 ? atom(0) : atom(reducer)))
 //     return ctx.spy(dep)
 //   }
 //   const testAtom = atom(reducer)
 //   const ctx = createCtx()
-
-//   assert.throws(
-//     () => {
-//       try {
-//         ctx.get(testAtom)
-//       } catch (error) {
-//         i //?
-//         error.message //?
-//         throw error
-//       }
-//     },
-//     /Maximum call stack/,
-//     '',
-//   )
 //
+//   expect(() => {
+//     try {
+//       ctx.get(testAtom)
+//     } catch (error) {
+//       i //?
+//       error.message //?
+//       throw error
+//     }
+//   }).toThrow(/Maximum call stack/)
 // })

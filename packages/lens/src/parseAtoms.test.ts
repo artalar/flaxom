@@ -104,7 +104,7 @@ describe('parseAtoms', () => {
     expect(parsed.has(keyObj)).toBe(false)
     expect(values.some((a: any) => a?.__id__ === symbol)).toBe(true)
 
-    // assert.is(parsed.size, 3)
+    // expect(parsed.size).toBe(3)
   })
 
   it('should parse mixed values', () => {
