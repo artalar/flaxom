@@ -3,8 +3,9 @@ import { createTestCtx, mockFn, type TestCtx } from '@reatom/testing'
 import { type Fn, type Rec, atom } from '@reatom/core'
 import { reatomLinkedList } from '@reatom/primitives'
 import { isConnected } from '@reatom/hooks'
-import { reatomJsx, type JSX } from '.'
 import { sleep } from '@reatom/utils'
+
+import { Bind, reatomJsx, type JSX } from '.'
 
 type SetupFn = (
   ctx: TestCtx,
@@ -26,6 +27,14 @@ const setup = (fn: SetupFn) => async () => {
   if (window.document.body.contains(parent)) {
     window.document.body.removeChild(parent)
   }
+}
+
+/** Only for highlight */
+const html = (arr: TemplateStringsArray, ...args: any[]) => {
+  const html = arr.reduce((acc, str, i) => {
+    return acc + str + (args[i] || '')
+  }, '')
+  return html
 }
 
 it(
@@ -216,13 +225,14 @@ it(
     list.swap(ctx, one, two)
     expect(parent.textContent).toEqual('21')
 
-    list.remove(ctx, two)
-    expect(parent.textContent).toEqual('1')
-    await sleep()
-    expect(isConnected(ctx, one))
-    expect(isConnected(ctx, two)).toBe(false)
+  list.remove(ctx, two)
+    expect(parent.innerText).toEqual('1')
+  await sleep()
+    expect(isConnected(ctx, one)).toBe(true)
+  expect(isConnected(ctx, two)).toBe(false)
   }),
 )
+
 
 it(
   'boolean as child',
@@ -243,8 +253,7 @@ it(
 
     expect(element.childNodes.length).toEqual(2)
     expect(element.textContent).toEqual('')
-  }),
-)
+}))
 
 it(
   'null as child',
@@ -261,8 +270,7 @@ it(
 
     expect(element.childNodes.length).toEqual(1)
     expect(element.textContent).toEqual('')
-  }),
-)
+}))
 
 it(
   'undefined as child',
@@ -279,8 +287,7 @@ it(
 
     expect(element.childNodes.length).toEqual(1)
     expect(element.textContent).toEqual('')
-  }),
-)
+}))
 
 it(
   'empty string as child',
@@ -297,8 +304,7 @@ it(
 
     expect(element.childNodes.length).toEqual(1)
     expect(element.textContent).toEqual('')
-  }),
-)
+}))
 
 it(
   'update skipped atom',
@@ -527,13 +533,12 @@ it(
     expect(ref1.hasAttribute('class')).toBeTruthy()
     expect(ref2.hasAttribute('class')).toBeTruthy()
 
-    classAtom(ctx, undefined)
+  classAtom(ctx, undefined)
     expect(ref1.className).toEqual('')
     expect(ref2.className).toEqual('')
     expect(!ref1.hasAttribute('class')).toBeTruthy()
     expect(!ref2.hasAttribute('class')).toBeTruthy()
-  }),
-)
+}))
 
 it(
   'ref mount and unmount callbacks order',
@@ -562,37 +567,53 @@ it(
     parent.remove()
     await sleep()
 
-    expect(order).toEqual([2, 1, 0, 0, 1, 2])
+    expect(order).toStrictEqual([2, 1, 0, 0, 1, 2])
   }),
 )
 
 it(
   'style object update',
   setup((ctx, h, hf, mount, parent) => {
-    const styleAtom = atom({
-      top: '0',
-      right: undefined,
-      bottom: null as unknown as undefined,
-      left: '0',
-    } as JSX.CSSProperties)
+    const styleTopAtom = atom<JSX.StyleProperties['top']>('0')
+    const styleRightAtom = atom<JSX.StyleProperties['right']>(undefined)
+    const styleBottomAtom = atom<JSX.StyleProperties['bottom']>(null)
+    const styleLeftAtom = atom<JSX.StyleProperties['left']>('0')
+    const styleAtom = atom<JSX.StyleProperties>((ctx) => ({
+      top: ctx.spy(styleTopAtom),
+      right: ctx.spy(styleRightAtom),
+      bottom: ctx.spy(styleBottomAtom),
+      left: ctx.spy(styleLeftAtom),
+    }))
 
-    const component = <div style={styleAtom}></div>
+    const firstEl = <div style={styleAtom}></div>
+    const secondEl = (
+      <div
+      style:top={styleTopAtom}
+      style:right={styleRightAtom}
+      style:bottom={styleBottomAtom}
+      style:left={styleLeftAtom}
+    ></div>
+    )
+
+    const component = <div >
+        {firstEl}
+        {secondEl}</div>
 
     mount(parent, component)
 
-    expect(component.getAttribute('style')).toEqual('top: 0px; left: 0px;')
+    assert.is(firstEl.getAttribute('style'), 'top: 0px; left: 0px;')
+    assert.is(secondEl.getAttribute('style'), 'top: 0px; left: 0px;')
 
-    styleAtom(ctx, {
-      top: undefined,
-      bottom: '0',
-    })
+    styleTopAtom(ctx, undefined)
+    styleBottomAtom(ctx, 0)
 
-    expect(component.getAttribute('style')).toEqual('left: 0px; bottom: 0px;')
-  }),
-)
+    assert.is(firstEl.getAttribute('style'), 'left: 0px; bottom: 0px;')
+    assert.is(secondEl.getAttribute('style'), 'left: 0px; bottom: 0px;')
+      }),
+    )
 
 it(
-  'render different atom children 2',
+  'render different atom children',
   setup((ctx, h, hf, mount, parent) => {
     const aChild = atom(<span>a</span>, 'aChild')
     const a = atom(
@@ -706,5 +727,48 @@ it(
     bool1Atom(ctx, false)
     bool2Atom(ctx, false)
     expect(element.innerHTML).toEqual(expect1)
+  }),
+)
+
+it(
+  'Bind',
+  setup(async (ctx, h, hf, mount, parent) => {
+    const div = (<div />) as HTMLDivElement
+    const input = (<input />) as HTMLInputElement
+    const svg = (<svg:svg />) as SVGSVGElement
+
+    const inputState = atom('42')
+
+    const testDiv = (
+      <Bind
+        element={div}
+        // @ts-expect-error there should be an error here
+        value={inputState}
+      />
+    )
+    const testInput = (
+      <Bind element={input} value={inputState} on:input={(ctx, e) => inputState(ctx, e.currentTarget.value)} />
+    )
+    const testSvg = (
+      <Bind element={svg}>
+        <svg:path d="M 10 10 H 100" />
+      </Bind>
+    )
+
+    mount(
+      parent,
+      <main>
+        {testDiv}
+        {testInput}
+        {testSvg}
+      </main>,
+    )
+
+    await sleep()
+
+    inputState(ctx, '43')
+
+    assert.is(input.value, '43')
+    assert.is(testSvg.innerHTML, '<path d="M 10 10 H 100"></path>')
   }),
 )

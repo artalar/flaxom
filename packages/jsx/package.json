@@ -30,7 +30,7 @@
   },
   "scripts": {
     "prepublishOnly": "npm run build && npm run test",
-    "build": "microbundle -f esm,cjs && cp src/jsx.d.ts build/ && cp -r build/ jsx-runtime/build && cp -r build/ jsx-dev-runtime/build",
+    "build": "microbundle -f esm,cjs && cp src/jsx.d.ts build/ && cp -r build jsx-runtime/ && cp -r build jsx-dev-runtime/",
     "test": "vitest run src/*",
     "test:watch": "vitest src/*"
   },
