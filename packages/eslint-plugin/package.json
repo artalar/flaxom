@@ -35,6 +35,10 @@
     {
       "name": "pivaszbs",
       "url": "https://github.com/pivaszbs"
+    },
+    {
+      "name": "serikovlearning",
+      "url": "https://github.com/serikovlearning"
     }
   ],
   "license": "MIT",
@@ -53,6 +57,9 @@
   "devDependencies": {
     "@types/eslint": "^8.0.0",
     "eslint": "^8.0.0"
+  },
+  "peerDependencies": {
+    "eslint": "^8.0.0 || ^9.0.0"
   },
   "dependencies": {
     "@types/estree": "^1.0.6"

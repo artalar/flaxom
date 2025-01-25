@@ -131,20 +131,30 @@ Object-valued `style` prop applies styles granularly: `style={{top: 0, display: 
 `false`, `null` and `undefined` style values remove the property. Non-string style values are stringified (we don't add `px` to numeric values automatically).
 
 Incorrect:
+
 ```tsx
-<div
-  style={atom((ctx) => ctx.spy(bool)
-    ? ({top: 0})
-    : ({bottom: 0}))}
-></div>
+<div style={atom((ctx) => (ctx.spy(bool) ? { top: 0 } : { bottom: 0 }))}></div>
 ```
 
 Correct:
+
 ```tsx
 <div
   style={atom((ctx) => ctx.spy(bool)
     ? ({top: 0; bottom: undefined})
     : ({top: undefined; bottom: 0}))}
+></div>
+```
+
+To define a style property value, you should prepend the namespace `style:`:
+
+```tsx
+// <div style="top: 10px; right: 0;"></div>
+<div
+  style:top={atom('10px')}
+  style:right={0}
+  style:bottom={undefined}
+  style:left={null}
 ></div>
 ```
 
@@ -160,7 +170,7 @@ cn(['first', atom('second')]) // Atom<'first second'>
 /** The `active` class will be determined by the truthiness of the data property `isActiveAtom`. */
 cn({ active: isActiveAtom }) // Atom<'active' | ''>
 
-cn((ctx) => ctx.spy(isActiveAtom) ? 'active' : undefined) // Atom<'active' | ''>
+cn((ctx) => (ctx.spy(isActiveAtom) ? 'active' : undefined)) // Atom<'active' | ''>
 ```
 
 The `cn` function supports various complex data combinations, making it easier to declaratively describe classes for complex UI components.
@@ -178,11 +188,7 @@ const Button = (props) => {
     },
   ])
 
-  return (
-    <button class={classNameAtom}>
-      {props.children}
-    </button>
-  )
+  return <button class={classNameAtom}>{props.children}</button>
 }
 ```
 
@@ -241,9 +247,7 @@ In Reatom, there is no concept of "rerender" like React. Instead, we have a spec
 
 ```tsx
 <div
-  $spread={atom((ctx) => (ctx.spy(valid)
-    ? { disabled: true, readonly: true }
-    : { disabled: false, readonly: false }))}
+  $spread={atom((ctx) => (ctx.spy(valid) ? { disabled: true, readonly: true } : { disabled: false, readonly: false }))}
 />
 ```
 
@@ -264,11 +268,8 @@ If you need to use SVG as a string, you can choose from these options:
 Option 1:
 
 ```tsx
-const SvgIcon = (props: {svg: string}) => {
-  const svgEl = new DOMParser()
-    .parseFromString(props.svg, 'image/svg+xml')
-    .children
-    .item(0) as SVGElement
+const SvgIcon = (props: { svg: string }) => {
+  const svgEl = new DOMParser().parseFromString(props.svg, 'image/svg+xml').children.item(0) as SVGElement
   return svgEl
 }
 ```
@@ -289,26 +290,30 @@ const SvgIcon = (props: {svg: string}) => {
 
 The `ref` property is used to create and track references to DOM elements, allowing actions to be performed when these elements are mounted and unmounted.
 
-
 ```tsx
-<button ref={(ctx: Ctx, el: HTMLButtonElement) => {
-  el.focus()
-  return (ctx: Ctx, el: HTMLButtonElement) => el.blur()
-}}></button>
+<button
+  ref={(ctx: Ctx, el: HTMLButtonElement) => {
+    el.focus()
+    return (ctx: Ctx, el: HTMLButtonElement) => el.blur()
+  }}
+></button>
 ```
 
 Mounting and unmounting functions are called in order from child to parent.
 
 ```tsx
-<div ref={(ctx: Ctx, el: HTMLDivElement) => {
-  console.log('mount', 'parent')
-  return () => console.log('unmount', 'parent')
-}}>
-  <span ref={(ctx: Ctx, el: HTMLSpanElement) => {
-    console.log('mount', 'child')
-    return () => console.log('unmount', 'child')
-  }}>
-  </span>
+<div
+  ref={(ctx: Ctx, el: HTMLDivElement) => {
+    console.log('mount', 'parent')
+    return () => console.log('unmount', 'parent')
+  }}
+>
+  <span
+    ref={(ctx: Ctx, el: HTMLSpanElement) => {
+      console.log('mount', 'child')
+      return () => console.log('unmount', 'child')
+    }}
+  ></span>
 </div>
 ```
 
@@ -354,6 +359,36 @@ const MyWidget = () => {
   )
 }
 ``` -->
+
+## Utilities
+
+### css utility
+
+You can import `css` function from `@reatom/jsx` to describe separate css-in-js styles with syntax highlight and prettier support. Also, this function skips all falsy values, except `0`.
+
+```tsx
+import { css } from '@reatom/jsx'
+
+const styles = css`
+  color: red;
+  background: blue;
+  ${somePredicate && 'border: 0;'}
+`
+```
+
+### Bind utility
+
+You can use `Bind` component to use all reatom/jsx features on top of existed element. For example, there are some library, which creates an element and returns it to you and you want to add some reactive properties to it.
+
+```tsx
+import { Bind } from '@reatom/jsx'
+
+const MyComponent = () => {
+  const container = new SomeLibrary()
+
+  return <Bind element={container} class={atom((ctx) => (ctx.spy(visible) ? 'active' : 'disabled'))} />
+}
+```
 
 ### TypeScript
 
@@ -407,8 +442,9 @@ export const Form = () => {
 These limitations will be fixed in the feature
 
 - No DOM-less SSR (requires a DOM API implementation like `linkedom` to be provided)
-- No keyed lists support
+- No keyed lists support (use linked lists instead)
 - A component should have no more than one root element. If this interferes with the layout, you can wrap the parent elements in another element with the style `display: "contents"`:
+
 ```tsx
 <div style={'display: "contents";'}>
   <div class="parent-1">
