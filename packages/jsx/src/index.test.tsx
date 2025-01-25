@@ -225,14 +225,13 @@ it(
     list.swap(ctx, one, two)
     expect(parent.textContent).toEqual('21')
 
-  list.remove(ctx, two)
-    expect(parent.innerText).toEqual('1')
-  await sleep()
+    list.remove(ctx, two)
+    expect(parent.textContent).toEqual('1')
+    await sleep()
     expect(isConnected(ctx, one)).toBe(true)
-  expect(isConnected(ctx, two)).toBe(false)
+    expect(isConnected(ctx, two)).toBe(false)
   }),
 )
-
 
 it(
   'boolean as child',
@@ -253,7 +252,8 @@ it(
 
     expect(element.childNodes.length).toEqual(2)
     expect(element.textContent).toEqual('')
-}))
+  }),
+)
 
 it(
   'null as child',
@@ -270,7 +270,8 @@ it(
 
     expect(element.childNodes.length).toEqual(1)
     expect(element.textContent).toEqual('')
-}))
+  }),
+)
 
 it(
   'undefined as child',
@@ -287,7 +288,8 @@ it(
 
     expect(element.childNodes.length).toEqual(1)
     expect(element.textContent).toEqual('')
-}))
+  }),
+)
 
 it(
   'empty string as child',
@@ -304,7 +306,8 @@ it(
 
     expect(element.childNodes.length).toEqual(1)
     expect(element.textContent).toEqual('')
-}))
+  }),
+)
 
 it(
   'update skipped atom',
@@ -533,12 +536,13 @@ it(
     expect(ref1.hasAttribute('class')).toBeTruthy()
     expect(ref2.hasAttribute('class')).toBeTruthy()
 
-  classAtom(ctx, undefined)
+    classAtom(ctx, undefined)
     expect(ref1.className).toEqual('')
     expect(ref2.className).toEqual('')
     expect(!ref1.hasAttribute('class')).toBeTruthy()
     expect(!ref2.hasAttribute('class')).toBeTruthy()
-}))
+  }),
+)
 
 it(
   'ref mount and unmount callbacks order',
@@ -588,29 +592,32 @@ it(
     const firstEl = <div style={styleAtom}></div>
     const secondEl = (
       <div
-      style:top={styleTopAtom}
-      style:right={styleRightAtom}
-      style:bottom={styleBottomAtom}
-      style:left={styleLeftAtom}
-    ></div>
+        style:top={styleTopAtom}
+        style:right={styleRightAtom}
+        style:bottom={styleBottomAtom}
+        style:left={styleLeftAtom}
+      ></div>
     )
 
-    const component = <div >
+    const component = (
+      <div>
         {firstEl}
-        {secondEl}</div>
+        {secondEl}
+      </div>
+    )
 
     mount(parent, component)
 
-    assert.is(firstEl.getAttribute('style'), 'top: 0px; left: 0px;')
-    assert.is(secondEl.getAttribute('style'), 'top: 0px; left: 0px;')
+    expect(firstEl.getAttribute('style')).toEqual('top: 0px; left: 0px;')
+    expect(secondEl.getAttribute('style')).toEqual('top: 0px; left: 0px;')
 
     styleTopAtom(ctx, undefined)
     styleBottomAtom(ctx, 0)
 
-    assert.is(firstEl.getAttribute('style'), 'left: 0px; bottom: 0px;')
-    assert.is(secondEl.getAttribute('style'), 'left: 0px; bottom: 0px;')
-      }),
-    )
+    expect(firstEl.getAttribute('style')).toEqual('left: 0px; bottom: 0px;')
+    expect(secondEl.getAttribute('style')).toEqual('left: 0px; bottom: 0px;')
+  }),
+)
 
 it(
   'render different atom children',
@@ -768,7 +775,7 @@ it(
 
     inputState(ctx, '43')
 
-    assert.is(input.value, '43')
-    assert.is(testSvg.innerHTML, '<path d="M 10 10 H 100"></path>')
+    expect(input.value).toEqual('43')
+    expect(testSvg.innerHTML).toEqual('<path d="M 10 10 H 100"></path>')
   }),
 )
