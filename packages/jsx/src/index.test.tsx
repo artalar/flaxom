@@ -592,26 +592,53 @@ it(
 )
 
 it(
-  'render different atom children',
+  'render different atom children 2',
   setup((ctx, h, hf, mount, parent) => {
-    const name = 'child'
-    const target = `<!--${name}-->`
-    const childAtom = atom<Node | string>(
+    const aChild = atom(<span>a</span>, 'aChild')
+    const a = atom(
       <>
-        <div>div</div>
-        <p>p</p>
+        {aChild}
+        <span />
       </>,
-      name,
+      'a',
     )
 
-    const element = <div>{childAtom}</div>
-    expect(element.innerHTML).toEqual(`${target}<div>div</div><p>p</p>`)
+    const bChild = atom(<div>b</div>, 'bChild')
+    const b = atom(
+      <>
+        <div />
+        {bChild}
+      </>,
+      'b',
+    )
 
-    childAtom(ctx, <span>span</span>)
-    expect(element.innerHTML).toEqual(`${target}<span>span</span>`)
+    const container = (
+      <main>
+        <>
+          {a}
+          {b}
+        </>
+      </main>
+    )
 
-    childAtom(ctx, 'text')
-    expect(element.innerHTML).toEqual(`${target}text`)
+    mount(parent, container)
+    expect(container.innerHTML).toEqual(
+      `<!--a--><!--aChild--><span>a</span><span></span><!--b--><div></div><!--bChild--><div>b</div>`,
+    )
+
+    aChild(ctx, <h1>A</h1>)
+    expect(container.innerHTML).toEqual(
+      `<!--a--><!--aChild--><h1>A</h1><span></span><!--b--><div></div><!--bChild--><div>b</div>`,
+    )
+
+    // @ts-expect-error
+    bChild(ctx, null)
+    expect(container.innerHTML).toEqual(`<!--a--><!--aChild--><h1>A</h1><span></span><!--b--><div></div><!--bChild-->`)
+
+    bChild(ctx, <div>B</div>)
+    expect(container.innerHTML).toEqual(
+      `<!--a--><!--aChild--><h1>A</h1><span></span><!--b--><div></div><!--bChild--><div>B</div>`,
+    )
   }),
 )
 
