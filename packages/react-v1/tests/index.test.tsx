@@ -2,7 +2,7 @@ import React, { createContext } from 'react'
 import { renderHook, act as actHooks } from '@testing-library/react-hooks'
 import { render } from '@testing-library/react'
 import { declareAction, declareAtom, createStore, Store } from '@reatom/core-v1'
-import { expect, describe, test, vi } from 'vitest'
+import { expect, describe, test, vi, it, expectTypeOf } from 'vitest'
 import { Provider as StoreProvider, useAtom, useAction, createActionHook, createAtomHook } from '../src/index'
 
 const increment = declareAction()
@@ -335,6 +335,93 @@ describe('@reatom/react-v1', () => {
 
       expect(dispatch1).toBeCalledTimes(1)
       expect(dispatch2).toBeCalledTimes(1)
+    })
+  })
+
+  describe('useAction type tests', () => {
+    it('should handle basic action creator', () => {
+      const store = createStore()
+      const a = declareAction()
+
+      const { result } = renderHook(() => useAction(a), {
+        wrapper: (props) => <Provider {...props} store={store} />,
+      })
+
+      expectTypeOf(result.current).toBeFunction()
+      expectTypeOf(result.current).parameters.toEqualTypeOf<[]>()
+      expectTypeOf(result.current).returns.toEqualTypeOf<void>()
+    })
+
+    it('should handle action creator with primitive payload', () => {
+      const store = createStore()
+      const ap = declareAction<0>()
+
+      const { result } = renderHook(() => useAction(ap), {
+        wrapper: (props) => <Provider {...props} store={store} />,
+      })
+      const { result: result2 } = renderHook(() => useAction(() => ap(0)), {
+        wrapper: (props) => <Provider {...props} store={store} />,
+      })
+
+      expectTypeOf(result.current).parameters.toEqualTypeOf<[0]>()
+      expectTypeOf(result2.current).parameters.toEqualTypeOf<[]>()
+    })
+
+    it('should handle action creator with complex payload', () => {
+      const store = createStore()
+      const aop = declareAction<{ a: string; b: number; c: boolean }>()
+
+      const { result } = renderHook(
+        () => useAction(useAction((a: string, b: number, c: boolean = false) => aop({ a, b, c }))),
+        {
+          wrapper: (props) => <Provider {...props} store={store} />,
+        },
+      )
+
+      expectTypeOf(result.current).parameters.toEqualTypeOf<[a: string, b: number, c?: boolean]>()
+      expectTypeOf(result.current).returns.toEqualTypeOf<void>()
+    })
+
+    it('should handle generic payload types', () => {
+      const store = createStore()
+      const ap = declareAction<0>()
+
+      const { result } = renderHook(() => useAction<0>((v) => ap(v)), {
+        wrapper: (props) => <Provider {...props} store={store} />,
+      })
+
+      expectTypeOf(result.current).parameters.toEqualTypeOf<[0]>()
+    })
+
+    it('should handle conditional action returns', () => {
+      const store = createStore()
+      const a = declareAction()
+      const ap = declareAction<0>()
+
+      const { result } = renderHook(
+        () =>
+          useAction(() => {
+            if (Math.random()) return ap(0)
+            if (Math.random()) return a()
+            return undefined
+          }),
+        {
+          wrapper: (props) => <Provider {...props} store={store} />,
+        },
+      )
+
+      expectTypeOf(result.current).parameters.toEqualTypeOf<[]>()
+      expectTypeOf(result.current).returns.toEqualTypeOf<void>()
+    })
+
+    it('should enforce action return types', () => {
+      const store = createStore()
+      // @ts-expect-error
+      const { result } = renderHook(() => useAction(() => 123), {
+        wrapper: (props) => <Provider {...props} store={store} />,
+      })
+
+      expectTypeOf(result.current).returns.toEqualTypeOf<void>()
     })
   })
 
