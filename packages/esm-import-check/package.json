@@ -12,8 +12,8 @@
     "build": "tsc -p tsconfig.json",
     "start": "node ./dist/hello.js",
     "pretest": "npm run build",
-    "test": "vitest run src/hello.ts",
-    "test:watch": "vitest src/hello.ts"
+    "test": "vitest run src/*",
+    "test:watch": "vitest src/*"
   },
   "devDependencies": {
     "typescript": "5.4.5"
