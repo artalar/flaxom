@@ -8,6 +8,7 @@
     "build": "turbo run build",
     "reset": "./reset.sh",
     "test": "turbo run build --filter=testing && vitest",
+    "test:eslint-plugin": "turbo run test --filter=@reatom/eslint-plugin",
     "prettify": "prettier --write */**/**/*.{js,ts,md}",
     "prettify:check": "prettier --check */**/**/*.{js,ts,md}",
     "prettify:watch": "onchange */**/**/*.{js,ts,md} -- prettier --write {{changed}}",
