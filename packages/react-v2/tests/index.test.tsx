@@ -1,6 +1,6 @@
 import React from 'react'
 import { renderHook, act as actHooks } from '@testing-library/react-hooks'
-import { render, act as actReact } from '@testing-library/react'
+import { act as actReact } from '@testing-library/react'
 import { createAtom, createStore, Store } from '@reatom/core-v2'
 import { createPrimitiveAtom } from '@reatom/core-v2/primitives'
 import { reatomContext, useAtom, useAction, setBatchedUpdates } from '../src'
@@ -228,7 +228,7 @@ describe('@reatom/react-v2', () => {
     })
 
     /** github.com/facebook/react/issues/14259#issuecomment-439632622 */
-    test.skip('filter unnecessary updates', () => {
+    test('filter unnecessary updates', () => {
       const atom1 = createPrimitiveAtom(0, { inc: (state) => state + 1 })
       const atom2 = createAtom({ inc: atom1.inc }, (track, state = 0) => {
         track.onAction(`inc`, () => state++)
@@ -240,19 +240,14 @@ describe('@reatom/react-v2', () => {
       let rerenders = 0
       let datas: any[] = []
 
-      function Component() {
+      function useTestComponent() {
         datas = [useAtom(atom1)[0], useAtom(atom2)[0]]
-
         rerenders++
-
-        return null
       }
 
-      render(
-        <Provider store={store}>
-          <Component />
-        </Provider>,
-      )
+      renderHook(() => useTestComponent(), {
+        wrapper: (props) => <Provider {...props} store={store} />,
+      })
 
       expect(rerenders).toBe(1)
       expect(datas).toEqual([0, 0])

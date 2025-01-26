@@ -101,6 +101,5 @@ describe(
       expect(Math.abs(delay - passed - duration)).toBeLessThanOrEqual(2)
     })
   },
-  // TODO: do we want try this?
   { retry: 3 },
 )

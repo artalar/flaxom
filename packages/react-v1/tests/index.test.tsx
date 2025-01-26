@@ -1,6 +1,5 @@
 import React, { createContext } from 'react'
 import { renderHook, act as actHooks } from '@testing-library/react-hooks'
-import { render } from '@testing-library/react'
 import { declareAction, declareAtom, createStore, Store } from '@reatom/core-v1'
 import { expect, describe, test, vi, it, expectTypeOf } from 'vitest'
 import { Provider as StoreProvider, useAtom, useAction, createActionHook, createAtomHook } from '../src/index'
@@ -217,7 +216,7 @@ describe('@reatom/react-v1', () => {
     })
 
     /** github.com/facebook/react/issues/14259#issuecomment-439632622 */
-    test.skip('filter unnecessary updates', () => {
+    test('filter unnecessary updates', () => {
       const action = declareAction()
       const atom1 = declareAtom(0, (on) => [on(action, (s) => s + 1)])
       const atom2 = declareAtom(0, (on) => [on(action, (s) => s + 1)])
@@ -225,21 +224,16 @@ describe('@reatom/react-v1', () => {
       const store = createStore()
 
       let rerenders = 0
-      let datas = []
+      let datas: any[] = []
 
-      function Component() {
+      function useTestComponent() {
         datas = [useAtom(atom1), useAtom(atom2)]
-
         rerenders++
-
-        return null
       }
 
-      render(
-        <Provider store={store}>
-          <Component />
-        </Provider>,
-      )
+      renderHook(() => useTestComponent(), {
+        wrapper: (props) => <Provider {...props} store={store} />,
+      })
 
       expect(rerenders).toBe(1)
       expect(datas).toEqual([0, 0])
