@@ -7,7 +7,7 @@
     "postinstall": "turbo run build --filter=core --filter=framework --filter=testing",
     "build": "turbo run build",
     "reset": "./reset.sh",
-    "test": "turbo run build --filter=testing && turbo run test",
+    "test": "turbo run build --filter=testing && vitest",
     "prettify": "prettier --write */**/**/*.{js,ts,md}",
     "prettify:check": "prettier --check */**/**/*.{js,ts,md}",
     "prettify:watch": "onchange */**/**/*.{js,ts,md} -- prettier --write {{changed}}",

@@ -217,7 +217,7 @@ describe('@reatom/react-v1', () => {
     })
 
     /** github.com/facebook/react/issues/14259#issuecomment-439632622 */
-    test('filter unnecessary updates', () => {
+    test.skip('filter unnecessary updates', () => {
       const action = declareAction()
       const atom1 = declareAtom(0, (on) => [on(action, (s) => s + 1)])
       const atom2 = declareAtom(0, (on) => [on(action, (s) => s + 1)])

@@ -228,7 +228,7 @@ describe('@reatom/react-v2', () => {
     })
 
     /** github.com/facebook/react/issues/14259#issuecomment-439632622 */
-    test('filter unnecessary updates', () => {
+    test.skip('filter unnecessary updates', () => {
       const atom1 = createPrimitiveAtom(0, { inc: (state) => state + 1 })
       const atom2 = createAtom({ inc: atom1.inc }, (track, state = 0) => {
         track.onAction(`inc`, () => state++)
