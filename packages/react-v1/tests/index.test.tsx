@@ -1,7 +1,7 @@
 import React, { createContext } from 'react'
 import { renderHook, act as actHooks } from '@testing-library/react-hooks'
 import { declareAction, declareAtom, createStore, Store } from '@reatom/core-v1'
-import { expect, describe, test, vi, it, expectTypeOf } from 'vitest'
+import { expect, describe, it, vi, expectTypeOf } from 'vitest'
 import { Provider as StoreProvider, useAtom, useAction, createActionHook, createAtomHook } from '../src/index'
 
 const increment = declareAction()
@@ -17,12 +17,12 @@ function Provider(props: { store: Store; children?: any }) {
 
 describe('@reatom/react-v1', () => {
   describe('useAtom', () => {
-    test('throw Error if provider is not set', () => {
+    it('throw Error if provider is not set', () => {
       const { result } = renderHook(() => useAtom(countAtom))
       expect(result.error).toEqual(Error('[reatom] The provider is not defined'))
     })
 
-    test('returns atom state', () => {
+    it('returns atom state', () => {
       const store = createStore(countAtom)
 
       const { result } = renderHook(() => useAtom(countAtom), {
@@ -31,7 +31,7 @@ describe('@reatom/react-v1', () => {
       expect(result.current).toBe(0)
     })
 
-    test('subscribe once only at mount', () => {
+    it('subscribe once only at mount', () => {
       const store = createStore(null)
       const subscriber = vi.fn()
       store.subscribe = subscriber
@@ -45,7 +45,7 @@ describe('@reatom/react-v1', () => {
       expect(subscriber).toBeCalledTimes(1)
     })
 
-    test('updates state after store change', async () => {
+    it('updates state after store change', async () => {
       const store = createStore(countAtom, { count: 10 })
       const { result } = renderHook(() => useAtom(countAtom), {
         wrapper: (props) => <Provider {...props} store={store} />,
@@ -60,7 +60,7 @@ describe('@reatom/react-v1', () => {
       expect(result.current).toBe(12)
     })
 
-    test('updates dynamic atom state after props change', () => {
+    it('updates dynamic atom state after props change', () => {
       const store = createStore(countAtom, { count: 10 })
       const { result, rerender } = renderHook(
         ({ multiplier }) => useAtom(countAtom, (count) => count * multiplier, [multiplier]),
@@ -76,7 +76,7 @@ describe('@reatom/react-v1', () => {
       expect(result.current).toBe(30)
     })
 
-    test('unsubscribes from previous dynamic atom', () => {
+    it('unsubscribes from previous dynamic atom', () => {
       const store = createStore(countAtom, { count: 10 })
       const subscriber = vi.fn()
       const _subscribe = store.subscribe
@@ -99,7 +99,7 @@ describe('@reatom/react-v1', () => {
       expect(subscriber).toBeCalledTimes(2)
     })
 
-    test('does not rerender if atom value is not changing', () => {
+    it('does not rerender if atom value is not changing', () => {
       const store = createStore(countAtom, { count: 10 })
       const render = vi.fn()
       const useTest = () => {
@@ -115,7 +115,7 @@ describe('@reatom/react-v1', () => {
       expect(render).toBeCalledTimes(1)
     })
 
-    test('does not recalculate selector on rerender if deps is not changing', () => {
+    it('does not recalculate selector on rerender if deps is not changing', () => {
       const store = createStore(countAtom, { count: 10 })
       const selector = vi.fn((v) => v)
       const { rerender } = renderHook(() => useAtom(countAtom, selector, []), {
@@ -128,7 +128,7 @@ describe('@reatom/react-v1', () => {
       expect(selector).toBeCalledTimes(1)
     })
 
-    test('unsubscribes from store after unmount', () => {
+    it('unsubscribes from store after unmount', () => {
       const store = createStore(null)
       const _subscribe = store.subscribe
       const subscriber = vi.fn()
@@ -147,7 +147,7 @@ describe('@reatom/react-v1', () => {
       expect(subscriber).toBeCalledTimes(1)
     })
 
-    test('updates state if store instance has changed', () => {
+    it('updates state if store instance has changed', () => {
       const store1 = createStore(null)
       const store2 = createStore(null)
 
@@ -172,7 +172,7 @@ describe('@reatom/react-v1', () => {
       expect(result.current).toBe(1)
     })
 
-    test('unsubscribes from previous store instance', () => {
+    it('unsubscribes from previous store instance', () => {
       function getMocks(store: Store) {
         const subscribeMock = vi.fn()
         const unsubscribeMock = vi.fn()
@@ -216,7 +216,7 @@ describe('@reatom/react-v1', () => {
     })
 
     /** github.com/facebook/react/issues/14259#issuecomment-439632622 */
-    test('filter unnecessary updates', () => {
+    it('filter unnecessary updates', () => {
       const action = declareAction()
       const atom1 = declareAtom(0, (on) => [on(action, (s) => s + 1)])
       const atom2 = declareAtom(0, (on) => [on(action, (s) => s + 1)])
@@ -247,14 +247,14 @@ describe('@reatom/react-v1', () => {
   })
 
   describe('useAction', () => {
-    test('throw Error if provider is not set', () => {
+    it('throw Error if provider is not set', () => {
       // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
       // @ts-ignore
       const { result } = renderHook(() => useAtom())
       expect(result.error).toEqual(Error('[reatom] The provider is not defined'))
     })
 
-    test('returns binded action to dispatch', () => {
+    it('returns binded action to dispatch', () => {
       const store = createStore(countAtom)
       const { result } = renderHook(() => useAction(increment), {
         wrapper: (props) => <Provider {...props} store={store} />,
@@ -265,7 +265,7 @@ describe('@reatom/react-v1', () => {
       expect(store.getState(countAtom)).toBe(1)
     })
 
-    test('returns binded action wrapper to dispatch', () => {
+    it('returns binded action wrapper to dispatch', () => {
       const store = createStore(countAtom)
       const { result } = renderHook(() => useAction((p: number) => add(p * 2)), {
         wrapper: (props) => <Provider {...props} store={store} />,
@@ -277,7 +277,7 @@ describe('@reatom/react-v1', () => {
       expect(store.getState(countAtom)).toBe(4)
     })
 
-    test('updates action wrapper after props change', () => {
+    it('updates action wrapper after props change', () => {
       const store = createStore(null)
       const dispatch = vi.fn()
       store.dispatch = dispatch
@@ -299,7 +299,7 @@ describe('@reatom/react-v1', () => {
       expect(dispatch).toBeCalledWith(add(30))
     })
 
-    test('updates action wrapper if store instance has changed', () => {
+    it('updates action wrapper if store instance has changed', () => {
       const store1 = createStore(null)
       const store2 = createStore(null)
 
@@ -420,7 +420,7 @@ describe('@reatom/react-v1', () => {
   })
 
   describe('createActionHook', () => {
-    test(`calls the correct store's dispatch function`, () => {
+    it(`calls the correct store's dispatch function`, () => {
       const NestedContext = createContext(null)
       const useCustomAction = createActionHook(NestedContext)
 
@@ -459,7 +459,7 @@ describe('@reatom/react-v1', () => {
   })
 
   describe('createAtomHook', () => {
-    test(`returns the correct store's atom value`, () => {
+    it(`returns the correct store's atom value`, () => {
       const NestedContext = createContext(null)
       const useCustomAtom = createAtomHook(NestedContext)
 

@@ -1,4 +1,4 @@
-import { test, expect } from 'vitest'
+import { it, expect } from 'vitest'
 
 import {} from './'
 
@@ -27,6 +27,6 @@ import {} from './'
 //   )
 // })
 
-test(`base API`, async () => {
+it(`base API`, async () => {
   // TODO
 })

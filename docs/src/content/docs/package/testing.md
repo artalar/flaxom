@@ -52,7 +52,7 @@ declare function mockFn<I extends any[], O>(
 [source](https://github.com/artalar/reatom/blob/v3/packages/testing/src/index.story.test.ts)
 
 ```ts
-test('createTestCtx', async () => {
+it('createTestCtx', async () => {
   const add = action<number>()
   const countAtom = atom((ctx, state = 0) => {
     ctx.spy(add, ({ payload }) => (state += payload))

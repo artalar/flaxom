@@ -1,4 +1,4 @@
-import { describe, it, test, expect } from 'vitest'
+import { describe, it, it, expect } from 'vitest'
 import { createTestCtx, getDuration } from '@reatom/testing'
 import { sleep } from '@reatom/utils'
 import { reatomTimer } from './'

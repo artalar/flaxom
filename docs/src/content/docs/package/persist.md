@@ -111,13 +111,13 @@ export const tokenAtom = atom('', 'tokenAtom').pipe(withLocalStorage('token'))
 
 ```ts
 // feature.test.ts
-import { test } from 'vitest'
+import { it } from 'vitest'
 import { createTestCtx } from '@reatom/testing'
 import { createMemStorage } from '@reatom/persist'
 import { withLocalStorage } from '@reatom/persist-web-storage'
 import { tokenAtom } from './feature'
 
-test('token', () => {
+it('token', () => {
   const ctx = createTestCtx()
   const mockStorage = createMemStorage({ token: '123' })
   withLocalStorage.storageAtom(ctx, mockStorage)

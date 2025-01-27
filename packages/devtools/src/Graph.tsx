@@ -92,7 +92,7 @@ export const Graph = ({ clientCtx, getColor, width, height, initSize }: Props) =
 
           const exclude = ctx.spy(filters.exclude)
 
-          if (exclude && new RegExp(`.*${exclude}.*`, 'i').test(name!)) {
+          if (exclude && new RegExp(`.*${exclude}.*`, 'i').it(name!)) {
             display = 'none'
           }
 
@@ -103,7 +103,7 @@ export const Graph = ({ clientCtx, getColor, width, height, initSize }: Props) =
 
             try {
               const searchValue = ctx.spy(search)
-              const result = !searchValue || new RegExp(`.*${searchValue}.*`, 'i').test(name!)
+              const result = !searchValue || new RegExp(`.*${searchValue}.*`, 'i').it(name!)
 
               if (_type === 'filter' && !result) {
                 display = 'none'
@@ -273,7 +273,7 @@ export const Graph = ({ clientCtx, getColor, width, height, initSize }: Props) =
         !isConnection &&
         prev !== patch &&
         (!prev || !Object.is(patch.state, prev.state)) &&
-        (!exclude || !new RegExp(`.*${exclude}.*`, 'i').test(patch.proto.name!))
+        (!exclude || !new RegExp(`.*${exclude}.*`, 'i').it(patch.proto.name!))
 
       if (result && !isTimeStampWritten) {
         isTimeStampWritten = true

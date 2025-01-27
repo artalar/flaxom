@@ -25,12 +25,12 @@ export const add = action((ctx, payload) => {
 
 ```js
 // main.test.js
-import { expect, test } from 'vitest'
+import { expect, it } from 'vitest'
 import { createTestCtx } from '@reatom/testing'
 
 import { add, countAtom } from './main'
 
-test('Test main module', () => {
+it('Test main module', () => {
   const ctx = createTestCtx() // Create test context
   const track = ctx.subscribeTrack(countAtom) // Record atom changes
 
@@ -80,11 +80,11 @@ export const loadTodo = action(async (ctx) => {
 Let's test it without calling the real api
 
 ```js
-import { expect, test } from 'vitest';
+import { expect, it } from 'vitest';
 import { createTestCtx } from '@reatom/testing';
 import { loadTodo, fetchTodo, todoAtom } from './main';
 
-test('Test loadData atom', async () => {
+it('Test loadData atom', async () => {
   const ctx = createTestCtx()
   const track = ctx.subscribeTrack(todoAtom) 
 

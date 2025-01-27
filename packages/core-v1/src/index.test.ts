@@ -1,4 +1,4 @@
-import { test, expect, vi } from 'vitest'
+import { it, expect, vi } from 'vitest'
 import { mockFn } from '@reatom/testing'
 import * as v3 from '@reatom/core'
 
@@ -19,7 +19,7 @@ import {
 
 function noop() {}
 
-test('main api, getIsAction', () => {
+it('main api, getIsAction', () => {
   expect(getIsAction(undefined)).toBe(false)
   expect(getIsAction(null)).toBe(false)
   expect(getIsAction({})).toBe(false)
@@ -27,7 +27,7 @@ test('main api, getIsAction', () => {
   expect(getIsAction(declareAtom(0, noop))).toBe(false)
 })
 
-test('main api, getIsAtom', () => {
+it('main api, getIsAtom', () => {
   expect(getIsAtom(undefined)).toBe(false)
   expect(getIsAtom(null)).toBe(false)
   expect(getIsAtom({})).toBe(false)
@@ -35,7 +35,7 @@ test('main api, getIsAtom', () => {
   expect(getIsAtom(declareAction())).toBe(false)
 })
 
-test('main api, declareAction', () => {
+it('main api, declareAction', () => {
   expect(typeof declareAction() === 'function').toBe(true)
   const actionCreator = declareAction()
   const action = actionCreator()
@@ -50,7 +50,7 @@ test('main api, declareAction', () => {
   }
 })
 
-test('main api, declareAtom, basics', () => {
+it('main api, declareAtom, basics', () => {
   const name = '_atomName_'
   const initialState = {}
   const atom = declareAtom(name, initialState, () => {})
@@ -68,7 +68,7 @@ test('main api, declareAtom, basics', () => {
   })
 })
 
-test('main api, declareAtom, strict uid', () => {
+it('main api, declareAtom, strict uid', () => {
   const addUnderscore = declareAction()
   const atom1 = declareAtom(['name1'], '1', (on) => [on(addUnderscore, (state) => `_${state}`)])
   const atom2 = declareAtom(['name2'], '2', (on) => [on(addUnderscore, (state) => `_${state}`)])
@@ -89,14 +89,14 @@ test('main api, declareAtom, strict uid', () => {
   })
 })
 
-test('main api, declareAtom, throw error if declareAtom called with an undefined initial state', () => {
+it('main api, declareAtom, throw error if declareAtom called with an undefined initial state', () => {
   const run = () => declareAtom(['test'], undefined, () => [])
 
   expect(run).toThrow(`[reatom] Atom "test". Initial state can't be undefined`)
 })
 
 // TODO: (artalar) could you check this test?
-test.skip('main api, declareAtom, throw error if atom produced undefined value', () => {
+it.skip('main api, declareAtom, throw error if atom produced undefined value', () => {
   const action = declareAction()
 
   expect(() => declareAtom(['myAtom'], {}, (on) => on(action, () => undefined as any))({}, action())).toThrow(
@@ -108,7 +108,7 @@ test.skip('main api, declareAtom, throw error if atom produced undefined value',
   ).toThrow('[reatom] Invalid state. Reducer number 2 in "test" atom returns undefined')
 })
 
-test('main api, declareAtom, reducers collisions', () => {
+it('main api, declareAtom, reducers collisions', () => {
   const increment = declareAction()
 
   const counter = declareAtom(0, (on) => [
@@ -128,7 +128,7 @@ test('main api, declareAtom, reducers collisions', () => {
   expect(sideEffect.lastInput()).toBe(3)
 })
 
-test('main api, createStore', () => {
+it('main api, createStore', () => {
   const increment = declareAction('increment')
   const toggle = declareAction()
 
@@ -182,7 +182,7 @@ test('main api, createStore', () => {
   expect(subscriberToggled.calls.length).toBe(1)
 })
 
-test('main api, createStore lazy selectors', () => {
+it('main api, createStore lazy selectors', () => {
   const storeSubscriber = mockFn()
   const subscriberCount1 = mockFn()
   const count2Subscriber1 = mockFn()
@@ -248,7 +248,7 @@ test('main api, createStore lazy selectors', () => {
   expect(count2SetMap.calls.length).toBe(2)
 })
 
-test('main api, createStore lazy computed', () => {
+it('main api, createStore lazy computed', () => {
   const storeSubscriber = mockFn()
   const increment1 = declareAction()
   const increment2 = declareAction()
@@ -274,7 +274,7 @@ test('main api, createStore lazy computed', () => {
   expect(store.getState(count2Doubled)).toBe(2)
 })
 
-test('main api, createStore lazy resubscribes', () => {
+it('main api, createStore lazy resubscribes', () => {
   const storeSubscriber = mockFn()
   const increment = declareAction()
 
@@ -305,7 +305,7 @@ test('main api, createStore lazy resubscribes', () => {
   expect(store.getState().countDoubled).toBe(8)
 })
 
-test('main api, createStore lazy derived resubscribes', () => {
+it('main api, createStore lazy derived resubscribes', () => {
   const increment = declareAction()
   const count = declareAtom(['count'], 0, (on) => on(increment, (state) => state + 1))
   const root = combine(['root'], { count })
@@ -320,7 +320,7 @@ test('main api, createStore lazy derived resubscribes', () => {
   expect(store.getState().count).toBeUndefined()
 })
 
-test('main api, createStore with undefined atom', () => {
+it('main api, createStore with undefined atom', () => {
   const increment = declareAction()
   const countStatic = declareAtom(['countStatic'], 0, (on) => on(increment, (state) => state + 1))
 
@@ -335,12 +335,12 @@ test('main api, createStore with undefined atom', () => {
   expect(store.getState(countStatic)).toBe(11)
 })
 
-test('main api, createStore with undefined atom and state', () => {
+it('main api, createStore with undefined atom and state', () => {
   const store = createStore()
   expect(store.getState()).toEqual({})
 })
 
-test('main api, createStore preloaded state', () => {
+it('main api, createStore preloaded state', () => {
   const increment = declareAction()
   const staticCount = declareAtom(['staticCount'], 0, (on) => on(increment, (state) => state + 1))
   const dynamicCount = declareAtom(['dynamicCount'], 0, (on) => on(increment, (state) => state + 1))
@@ -369,7 +369,7 @@ test('main api, createStore preloaded state', () => {
   expect(storeWithPreloadedState.getState(dynamicCount)).toBe(2)
 })
 
-test('main api, createStore reactions state diff', () => {
+it('main api, createStore reactions state diff', () => {
   const increment1 = declareAction()
   const increment2 = declareAction()
 
@@ -406,7 +406,7 @@ test('main api, createStore reactions state diff', () => {
   ])
 })
 
-test('main api, createStore subscribe to action', () => {
+it('main api, createStore subscribe to action', () => {
   const action = declareAction<null>()
   const trackAction = mockFn()
   const trackActions = mockFn()
@@ -425,7 +425,7 @@ test('main api, createStore subscribe to action', () => {
   expect(trackActions.calls.length).toBe(2)
 })
 
-test('atom id as symbol', () => {
+it('atom id as symbol', () => {
   const atom = declareAtom(['my atom'], 0, () => [])
   const atomMap = map(atom, (v) => v)
   const atomCombine = combine([atom, atomMap])
@@ -446,7 +446,7 @@ test('atom id as symbol', () => {
   ).toBe('Symbol(123 [map])')
 })
 
-test('API atom initialization in createStore', () => {
+it('API atom initialization in createStore', () => {
   class Api {}
   const api = new Api()
   const mockApi = new Api()
@@ -463,7 +463,7 @@ test('API atom initialization in createStore', () => {
   expect(JSON.stringify(store.getState())).toBe('{}')
 })
 
-test('createStore replace state', () => {
+it('createStore replace state', () => {
   const increment = declareAction()
   const countAtom = declareAtom(0, (on) => [on(increment, (state) => state + 1)])
   const listener = mockFn()
@@ -491,7 +491,7 @@ test('createStore replace state', () => {
   expect(listener.lastInput()).toBe(2)
 })
 
-test('createStore().bind', () => {
+it('createStore().bind', () => {
   const a = declareAction<0>()
   const store = createStore()
   const track = mockFn()
@@ -502,7 +502,7 @@ test('createStore().bind', () => {
   expect(track.lastInput()).toBe(0)
 })
 
-test('declareAction reactions', async () => {
+it('declareAction reactions', async () => {
   const delay = () => new Promise((on) => setTimeout(on, 10))
   const setValue = declareAction<number>()
   let lastCallId = 0
@@ -542,7 +542,7 @@ test('declareAction reactions', async () => {
   expect(fn.calls.length).toBe(1)
 })
 
-test('derived state, map + combine', () => {
+it('derived state, map + combine', () => {
   const increment = declareAction()
 
   const count = declareAtom('@count', 0, (on) => on(increment, (state) => state + 1))
@@ -569,7 +569,7 @@ test('derived state, map + combine', () => {
   expect(getState(rootState, root)).toEqual({ count: 1, countDoubled: 2 })
 })
 
-test('derived state, combine array', () => {
+it('derived state, combine array', () => {
   const increment = declareAction()
   const count = declareAtom('@count', 0, (on) => on(increment, (state) => state + 1))
   const countDoubled = map(count, (state) => state * 2)
@@ -583,7 +583,7 @@ test('derived state, combine array', () => {
   expect(getState(state, root)).toEqual([1, 2])
 })
 
-test('derived state, should checks atoms with equal ids', () => {
+it('derived state, should checks atoms with equal ids', () => {
   const update = declareAction<number>()
 
   const aAtom = declareAtom(0, (on) => on(update, (state, payload) => payload))
@@ -597,7 +597,7 @@ test('derived state, should checks atoms with equal ids', () => {
   )
 })
 
-test('subscriber should not be called if returns previous state from atom reducer', () => {
+it('subscriber should not be called if returns previous state from atom reducer', () => {
   const increment = declareAction()
   const initialState = {
     counter: 0,
@@ -625,7 +625,7 @@ test('subscriber should not be called if returns previous state from atom reduce
   expect(counterReducerMock.calls.length).toBe(1)
 })
 
-test('subscriber should not be called if returns snapshot state from atom reducer', () => {
+it('subscriber should not be called if returns snapshot state from atom reducer', () => {
   const action = declareAction()
   const rootAtom = declareAtom(0, (on) => [on(action, (state) => state + 1), on(action, (state) => state - 1)])
 
@@ -640,7 +640,7 @@ test('subscriber should not be called if returns snapshot state from atom reduce
   expect(subReducerMock.calls.length).toBe(1)
 })
 
-test('subscriber should not be called if always returns NaN from atom reducer', () => {
+it('subscriber should not be called if always returns NaN from atom reducer', () => {
   const action = declareAction()
   const rootAtom = declareAtom(0, (on) => [on(action, () => NaN)])
 
@@ -657,7 +657,7 @@ test('subscriber should not be called if always returns NaN from atom reducer', 
   expect(counterReducerMock.calls.length).toBe(2)
 })
 
-test('state of initial atom with %s should not be cleared after unsubscribing', () => {
+it('state of initial atom with %s should not be cleared after unsubscribing', () => {
   ;(
     [
       ['basic id', 'atom'],
@@ -697,7 +697,7 @@ function getInitialStoreState(rootAtom, state): Record<string, any> {
   }
 }
 
-test('getInitialStoreState init root atom with combine', () => {
+it('getInitialStoreState init root atom with combine', () => {
   const setTitle = declareAction<string>()
   const titleAtom = declareAtom('title', (on) => [on(setTitle, (_, payload) => payload)])
 
@@ -724,7 +724,7 @@ test('getInitialStoreState init root atom with combine', () => {
   expect(store.getState(titleAtom)).toBe('My App')
 })
 
-test('subscription', () => {
+it('subscription', () => {
   // arrange
   const store = createStore()
 
@@ -755,7 +755,7 @@ test('subscription', () => {
   expect(store.getState(aAtom)).toEqual(['hello'])
 })
 
-test('direct and via combine subscription', () => {
+it('direct and via combine subscription', () => {
   // arrange
   const store = createStore()
 
@@ -792,7 +792,7 @@ test('direct and via combine subscription', () => {
   expect(store.getState()).toEqual({})
 })
 
-test('dynamic initialState, unsubscribed atom should recalculate on each `getState`', async () => {
+it('dynamic initialState, unsubscribed atom should recalculate on each `getState`', async () => {
   const sleep = (ms = 50) => new Promise((resolve) => setTimeout(resolve, ms))
   const dateAtom = declareAtom(Date.now(), (on) => [on(declareAction([initAction.type]), () => Date.now())])
   const store = createStore()
@@ -803,7 +803,7 @@ test('dynamic initialState, unsubscribed atom should recalculate on each `getSta
   expect(date1).not.toBe(date2)
 })
 
-test('dynamic initialState, reducer of `initAction.type` should calling on each mount', async () => {
+it('dynamic initialState, reducer of `initAction.type` should calling on each mount', async () => {
   const sleep = (ms = 50) => new Promise((r) => setTimeout(r, ms))
   const dateAtom = declareAtom(Date.now(), (on) => [on(declareAction([initAction.type]), () => Date.now())])
   const store = createStore()
@@ -821,7 +821,7 @@ test('dynamic initialState, reducer of `initAction.type` should calling on each 
   expect(date1).not.toBe(date3)
 })
 
-test('unsubscribe from atom should not cancel the subscription from the action', () => {
+it('unsubscribe from atom should not cancel the subscription from the action', () => {
   const subscription = vi.fn()
 
   const store = createStore()
@@ -838,7 +838,7 @@ test('unsubscribe from atom should not cancel the subscription from the action',
   unsubscribeAction()
 })
 
-test(`v3`, () => {
+it(`v3`, () => {
   const store = createStore()
   const increment = declareAction(['increment'])
   const counter = declareAtom(['counter'], 0, (on) => [on(increment, (state) => state + 1)])
@@ -868,7 +868,7 @@ test(`v3`, () => {
   expect(lastCallV1 * 2).toBe(lastCallV3)
 })
 
-test(`v3 computed`, () => {
+it(`v3 computed`, () => {
   const store = createStore()
   const increment = declareAction()
   const counterV1 = declareAtom('counterV1', 0, (on) => [on(increment, (state) => state + 1)])
@@ -892,7 +892,7 @@ test(`v3 computed`, () => {
   expect(lastCall).toBe(4)
 })
 
-test('stale unconnected atom', () => {
+it('stale unconnected atom', () => {
   const createEntityAtom = <T>(name: string, initState: T) => {
     const set = declareAction<T>(`${name}.set`)
 

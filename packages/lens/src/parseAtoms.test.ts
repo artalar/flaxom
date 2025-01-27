@@ -1,5 +1,5 @@
 import { createTestCtx } from '@reatom/testing'
-import { it, describe, test, expect, vi } from 'vitest'
+import { it, describe, it, expect, vi } from 'vitest'
 import { atom } from '@reatom/core'
 import { parseAtoms } from './parseAtoms'
 import { reatomZod } from '@reatom/npm-zod'
@@ -188,7 +188,7 @@ describe('parseAtoms', () => {
   })
 })
 
-test('should ignore constructor', () => {
+it('should ignore constructor', () => {
   const ctx = createTestCtx()
 
   const constructObject = new AbortController()

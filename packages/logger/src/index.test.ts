@@ -1,4 +1,4 @@
-import { test, expect } from 'vitest'
+import { it, expect } from 'vitest'
 import { action, atom, createCtx } from '@reatom/core'
 import { mapPayloadAwaited } from '@reatom/lens'
 import { sleep } from '@reatom/utils'
@@ -6,7 +6,7 @@ import { mockFn } from '@reatom/testing'
 
 import { connectLogger, createLogBatched } from '.'
 
-test.skip('base', async () => {
+it.skip('base', async () => {
   const a1 = atom(0)
   const a2 = atom(0, 'a2')
   const ctx = createCtx()
@@ -46,7 +46,7 @@ test.skip('base', async () => {
   })
 })
 
-test.skip('cause', async () => {
+it.skip('cause', async () => {
   const doAsync = action((ctx, v) => ctx.schedule(() => Promise.resolve(v)), 'doAsync')
   const asyncResAtom = doAsync.pipe(mapPayloadAwaited((ctx, v) => v, 'asyncResAtom'))
   const resMapAtom = atom((ctx) => ctx.spy(asyncResAtom), 'resMapAtom')
@@ -77,7 +77,7 @@ test.skip('cause', async () => {
   })
 })
 
-test.skip('should skip logs without state changes', async () => {
+it.skip('should skip logs without state changes', async () => {
   const a = atom(0, 'nAtom')
   const ctx = createCtx()
   const log = mockFn()

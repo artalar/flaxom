@@ -1,13 +1,13 @@
 import { createEnumAtom } from './createEnumAtom'
-import { test, expect } from 'vitest'
+import { it, expect } from 'vitest'
 
-test(`enum object`, async () => {
+it(`enum object`, async () => {
   const enumAtom = createEnumAtom(['a', 'b'])
 
   expect(enumAtom.enum).toEqual({ a: 'a', b: 'b' })
 })
 
-test(`camelCase`, async () => {
+it(`camelCase`, async () => {
   const sortFilterAtom = createEnumAtom(['fullName', 'created', 'updated', 'pushed'])
 
   sortFilterAtom.setUpdated.dispatch()
@@ -15,7 +15,7 @@ test(`camelCase`, async () => {
   expect(sortFilterAtom.getState()).toEqual('updated')
 })
 
-test(`snake_case`, async () => {
+it(`snake_case`, async () => {
   const sortFilterAtom = createEnumAtom(['full_name', 'created', 'updated', 'pushed'], { format: 'snake_case' })
 
   sortFilterAtom.enum

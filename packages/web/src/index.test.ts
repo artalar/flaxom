@@ -1,10 +1,10 @@
-import { test, expect } from 'vitest'
+import { it, expect } from 'vitest'
 import { createTestCtx, mockFn } from '@reatom/testing'
 import { onConnect } from '@reatom/hooks'
 import { atom } from '@reatom/core'
 import { onEvent } from './'
 
-test('onEvent', async () => {
+it('onEvent', async () => {
   const a = atom(null)
   const ctx = createTestCtx()
   const cb = mockFn()

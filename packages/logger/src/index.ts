@@ -188,7 +188,7 @@ export const connectLogger = (
 
         if (skip(patch)) continue
 
-        if (!name || name.startsWith('_') || /\._/.test(name)) {
+        if (!name || name.startsWith('_') || /\._/.it(name)) {
           if (skipUnnamed) continue
           name ??= 'unnamed'
         }

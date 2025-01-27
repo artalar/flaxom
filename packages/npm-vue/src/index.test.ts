@@ -1,11 +1,11 @@
-import { test, expect } from 'vitest'
+import { it, expect } from 'vitest'
 import { createTestCtx, mockFn } from '@reatom/testing'
 import { effectScope } from 'vue'
 import { reatomRef, useAction } from './'
 import { action, atom } from '@reatom/core'
 import { onConnect, onDisconnect } from '@reatom/hooks'
 
-test('reatomRef', async () => {
+it('reatomRef', async () => {
   const ctx = createTestCtx()
   const state = atom(0)
 
@@ -33,7 +33,7 @@ test('reatomRef', async () => {
   expect(connected).toBe(false)
 })
 
-test('useAction', async () => {
+it('useAction', async () => {
   const ctx = createTestCtx()
 
   const globalActionFn = mockFn()

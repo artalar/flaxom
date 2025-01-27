@@ -1,4 +1,4 @@
-import { describe, test, expect, vi } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { Action, action, atom, Ctx, Fn } from '@reatom/core'
 import { noop, sleep } from '@reatom/utils'
 import { createTestCtx, mockFn } from '@reatom/testing'
@@ -16,7 +16,7 @@ import {
   // effects should be tested only on top of builded sources
 } from '../build'
 
-test('disposable async branch', async () => {
+it('disposable async branch', async () => {
   const act = action((ctx, v: number) => ctx.schedule(() => Promise.resolve(v)))
   const actRes = act.pipe(mapPayloadAwaited((ctx, v) => v))
   const ctx = createTestCtx()
@@ -38,7 +38,7 @@ test('disposable async branch', async () => {
   expect(track.calls.length).toBe(0)
 })
 
-test('take', async () => {
+it('take', async () => {
   const act = action((ctx, v: number) => ctx.schedule(() => Promise.resolve(4)))
   const at = atom(0)
   const ctx = createTestCtx()
@@ -50,7 +50,7 @@ test('take', async () => {
   expect(await take(ctx, at)).toBe(4)
 })
 
-test('await transaction', async () => {
+it('await transaction', async () => {
   let resolve1: Fn
   const promise1 = new Promise<void>((r) => (resolve1 = r))
   let resolve2: Fn
@@ -93,7 +93,7 @@ test('await transaction', async () => {
   expect(effect3Resolved).toBe(true)
 })
 
-test('withAbortableSchedule', async () => {
+it('withAbortableSchedule', async () => {
   const asyncAction = <I extends any[], O>(cb: Fn<[Ctx, ...I], O>, name: string): Action<I, O> =>
     action((ctx, ...a) => cb(withAbortableSchedule(ctx), ...a), name)
 
@@ -124,7 +124,7 @@ test('withAbortableSchedule', async () => {
   await sleep(10)
   expect(track.calls.length).toBe(1)
 })
-test('take filter', async () => {
+it('take filter', async () => {
   const act = action((ctx, v: number) => ctx.schedule(() => Promise.resolve(v)))
   const track = mockFn()
   const ctx = createTestCtx()
@@ -143,7 +143,7 @@ test('take filter', async () => {
   expect(track.lastInput()).toBe('4')
 })
 
-test('concurrent', async () => {
+it('concurrent', async () => {
   const countAtom = atom(0)
   const results: any[] = []
   countAtom.onChange(
@@ -179,7 +179,7 @@ test('concurrent', async () => {
   expect(results).toEqual(['AbortError', 2, 'AbortError', 'AbortError'])
 })
 
-test('spawn', async () => {
+it('spawn', async () => {
   const countAtom = atom(0)
   const results: any[] = []
   countAtom.onChange(
@@ -203,7 +203,7 @@ test('spawn', async () => {
   expect(results).toEqual([1, 2])
 })
 
-test('reaction base usage', async () => {
+it('reaction base usage', async () => {
   const a = atom(0)
   const someReaction = reaction(async (ctx) => {
     const value = ctx.spy(a)
@@ -238,7 +238,7 @@ test('reaction base usage', async () => {
   expect(changed).toBe(false)
 })
 
-test('reaction parameters usage', async () => {
+it('reaction parameters usage', async () => {
   const a = atom('a')
   const someReaction = reaction(async (ctx, param: string) => {
     const value = ctx.spy(a)
@@ -267,7 +267,7 @@ test('reaction parameters usage', async () => {
   expect(track.inputs()).toEqual(['1a', '1c', '2c', '2d'])
 })
 
-test('throttle example', async () => {
+it('throttle example', async () => {
   const ctx = createTestCtx()
   const n = atom(0)
   const update = action(

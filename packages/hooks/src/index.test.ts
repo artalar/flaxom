@@ -1,17 +1,17 @@
 import { action, atom, CtxSpy } from '@reatom/core'
 import { createTestCtx, mockFn } from '@reatom/testing'
 import { sleep } from '@reatom/utils'
-import { test, expect } from 'vitest'
+import { it, expect } from 'vitest'
 
 import { withInit, controlConnection, isConnected, onConnect, isInit } from './'
 
-test('withInit', () => {
+it('withInit', () => {
   const a = atom(0).pipe(withInit(() => 123))
   const ctx = createTestCtx()
   expect(ctx.get(a)).toBe(123)
 })
 
-test('controlledConnection', () => {
+it('controlledConnection', () => {
   const aAtom = atom(0)
   const track = mockFn((ctx: CtxSpy) => ctx.spy(aAtom))
   const bAtom = atom(track)
@@ -32,7 +32,7 @@ test('controlledConnection', () => {
   expect(isConnected(ctx, bAtom)).toBe(false)
 })
 
-test('onConnect ctx.isConnect', async () => {
+it('onConnect ctx.isConnect', async () => {
   const a = atom(0)
   const ctx = createTestCtx()
   const delay = 5
@@ -56,7 +56,7 @@ test('onConnect ctx.isConnect', async () => {
   expect(i).toBe(2)
 })
 
-test('onConnect ctx.controller', async () => {
+it('onConnect ctx.controller', async () => {
   const a = atom(0)
   const ctx = createTestCtx()
   let aborted: null | boolean = null
@@ -91,7 +91,7 @@ test('onConnect ctx.controller', async () => {
   expect(throwed).toBe(true)
 })
 
-test('isInit', () => {
+it('isInit', () => {
   const ctx = createTestCtx()
 
   const logs = new Array<boolean>()

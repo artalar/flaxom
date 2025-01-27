@@ -1,4 +1,4 @@
-import { expect, test } from 'vitest'
+import { expect, it } from 'vitest'
 import { createTestCtx, mockFn } from '@reatom/testing'
 import { ReatomFetchConfig, createReatomFetch, reatomFetch } from './index'
 
@@ -8,7 +8,7 @@ const transport = mockFn((url: string, init: RequestInit) => {
 
 const API = 'https://api.acme.com'
 
-test('configuration', async () => {
+it('configuration', async () => {
   const ctx = createTestCtx()
 
   const reatomFetch = createReatomFetch({ transport })
@@ -25,7 +25,7 @@ test('configuration', async () => {
   await configure(() => API)
 })
 
-test('merges URLs', async () => {
+it('merges URLs', async () => {
   const ctx = createTestCtx()
 
   async function mergeUrls(urlBase: string, url: string, result: string) {
@@ -43,7 +43,7 @@ test('merges URLs', async () => {
   await mergeUrls(`${API}/v2`, '/user', `${API}/v2/user`)
 })
 
-test('merges headers', async () => {
+it('merges headers', async () => {
   const ctx = createTestCtx()
 
   async function mergeHeaders(headersBase: HeadersInit, headers: HeadersInit, result: HeadersInit) {
@@ -72,7 +72,7 @@ test('merges headers', async () => {
   )
 })
 
-test('content parsing', async () => {
+it('content parsing', async () => {
   const ctx = createTestCtx()
 
   const fetcher = reatomFetch({
