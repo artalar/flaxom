@@ -1,8 +1,9 @@
 name: preview
 
-on:
-  pull_request
+on: pull_request
 
 jobs:
+  lint:
+    uses: ./.github/workflows/lint.yml
   test:
     uses: ./.github/workflows/test.yml
