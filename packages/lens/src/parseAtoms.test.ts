@@ -1,5 +1,5 @@
 import { createTestCtx } from '@reatom/testing'
-import { it, describe, it, expect, vi } from 'vitest'
+import { it, describe, expect } from 'vitest'
 import { atom } from '@reatom/core'
 import { parseAtoms } from './parseAtoms'
 import { reatomZod } from '@reatom/npm-zod'

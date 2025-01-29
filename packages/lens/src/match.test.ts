@@ -1,5 +1,5 @@
 import { createTestCtx } from '@reatom/testing'
-import { describe, it, expect, it } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import { match } from './match'
 import { Ctx, CtxSpy, atom } from '@reatom/core'
 
