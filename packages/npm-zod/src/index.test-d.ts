@@ -9,6 +9,8 @@ test("right types for basic schema", async () => {
 		readonly: z.string().readonly(),
 		nullable: z.string().nullable(),
 		optional: z.string().optional(),
+		nullishNumber: z.number().nullish(),
+		nullishBoolean: z.boolean().nullish(),
 	})
 	const model = reatomZod(schema)
 	type InferedSchema = z.infer<typeof schema>;
@@ -18,6 +20,8 @@ test("right types for basic schema", async () => {
 	expectTypeOf(model.readonly).toEqualTypeOf<InferedSchema['readonly']>()
 	expectTypeOf(model.nullable).toEqualTypeOf<AtomMut<InferedSchema['nullable']>>()
 	expectTypeOf(model.optional).toEqualTypeOf<AtomMut<InferedSchema['optional']>>()
+	expectTypeOf(model.nullishNumber).toEqualTypeOf<AtomMut<InferedSchema['nullishNumber']>>()
+	expectTypeOf(model.nullishBoolean).toEqualTypeOf<AtomMut<InferedSchema['nullishBoolean']>>()
 })
 
 test("right types for catch", async () => {
@@ -60,17 +64,17 @@ test("right types for brands", async () => {
 
 	const objectSchema = z.object({
 		brand: z.object({
-			kek: z.string().brand('foo'),
-		}).nullish().brand('foo'),
-		brand2: z.object({}).nullish().brand('bar'),
+			kek: z.string().nullable().brand('foo'),
+		}).brand('foo'),
+		brand2: z.object({}).brand('bar'),
 	})
 
 	const objectModel = reatomZod(objectSchema)
-	type InferedObjectSchema = z.infer<typeof objectSchema>
+	type InferedObjectSchema = z.infer<typeof objectSchema>;
 
 	expectTypeOf(objectModel).toEqualTypeOf<{
 		brand: {
-			kek: AtomMut<InferedObjectSchema['brand']['kek']>
+			kek: AtomMut<InferedObjectSchema['brand']['kek'] | null>
 		} & z.BRAND<'foo'>,
 		brand2: InferedObjectSchema['brand2']
 	}>();
