@@ -12,7 +12,7 @@ import {
   bind,
   BooleanAtom,
 } from '@reatom/framework'
-import { h, mount, ctx } from '@reatom/jsx'
+import { mount, ctx } from '@reatom/jsx'
 import { withLocalStorage } from '@reatom/persist-web-storage'
 import { Graph, update } from './Graph'
 import { getColor } from './utils'

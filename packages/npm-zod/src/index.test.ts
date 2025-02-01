@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import { createTestCtx, mockFn } from '@reatom/testing'
 import { ParseAtoms, parseAtoms } from '@reatom/lens'
 import { z } from 'zod'

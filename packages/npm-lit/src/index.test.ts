@@ -1,4 +1,4 @@
-import { it, expect } from 'vitest'
+import { it } from 'vitest'
 
 it(`base API`, async () => {
   // Todo?

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { it, expect } from 'vitest'
 import { Action, action, atom, Ctx, Fn } from '@reatom/core'
 import { noop, sleep } from '@reatom/utils'
 import { createTestCtx, mockFn } from '@reatom/testing'

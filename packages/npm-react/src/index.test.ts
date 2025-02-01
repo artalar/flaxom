@@ -1,7 +1,5 @@
 import { it, expect } from 'vitest'
 
-import {} from './'
-
 // export const Counter = (props) => {
 //   const [count, setCount] = useState(props.value ?? 0)
 //   const inc = useCallback(() => setCount((s) => s + 1), [setCount])
@@ -27,6 +25,4 @@ import {} from './'
 //   )
 // })
 
-it(`base API`, async () => {
-  // TODO
-})
+it(`base API`, async () => {})

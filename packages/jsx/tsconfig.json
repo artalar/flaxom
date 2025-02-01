@@ -5,6 +5,7 @@
     "jsx": "preserve",
     "jsxFactory": "h",
     "jsxFragmentFactory": "hf",
-    "jsxImportSource": "@reatom/jsx"
+    "jsxImportSource": "@reatom/jsx",
+    "types": ["@vitest/browser/providers/playwright"]
   }
 }

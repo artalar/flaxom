@@ -1,7 +1,3 @@
-import { describe, it, expect } from 'vitest'
+import { it } from 'vitest'
 
-describe('base API', () => {
-  it('should implement the base API', async () => {
-    // TODO
-  })
-})
+it('base API', () => {})
