@@ -1,10 +1,10 @@
-import { it, expect } from "vitest";
+import { test, expect } from "vitest";
 import { createTestCtx, mockFn } from "@reatom/testing";
 import { ParseAtoms, parseAtoms } from "@reatom/lens";
 import { z } from "zod";
 import { reatomZod } from "./";
 
-it("base API", async () => {
+test("base API", async () => {
   const model = reatomZod(
     z.object({ n: z.number(), s: z.string(), readonly: z.string().readonly() }),
     {
@@ -24,7 +24,7 @@ it("base API", async () => {
   expect(track.lastInput()).toEqual({ n: 42, s: "bar", readonly: "foo" });
 });
 
-it("right values for effects", async () => {
+test("right values for effects", async () => {
   const schema = z.object({
     refine: z.string().nullable().refine((v) => !v || v.length > 0, 'too short'),
     transform: z.string().transform(v => v.length > 3 ? 1337 : v),
@@ -47,7 +47,7 @@ it("right values for effects", async () => {
   expect(ctx.get(model.transform)).toBe(1337)
 })
 
-it("right values for catch", async () => {
+test("right values for catch", async () => {
   const schema = z.object({
     catch: z.string().nullable().catch(''),
   })
@@ -67,7 +67,7 @@ it("right values for catch", async () => {
   expect(ctx.get(model.catch)).toBe(null)
 })
 
-it("right values for brand", async () => {
+test("right values for brand", async () => {
   const brandSchema = z.string().nullable().brand('foo');
   const brandedValue = brandSchema.parse('string');
 
@@ -90,7 +90,7 @@ it("right values for brand", async () => {
   expect(ctx.get(model.brand)).toBe(brandedValue)
 })
 
-it("right values for pipeline", async () => {
+test("right values for pipeline", async () => {
   const dateValue = new Date();
 
   const schema = z.object({
@@ -112,7 +112,7 @@ it("right values for pipeline", async () => {
   expect(ctx.get(model.pipeline)).toBe(dateValue)
 })
 
-it("right values for lazy", async () => {
+test("right values for lazy", async () => {
   const lazySchema = z.lazy(() => z.object({
     number: z.number(),
     string: z.string(),
