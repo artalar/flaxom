@@ -110,25 +110,35 @@ export type ZodAtomization<T extends z.ZodFirstPartySchemaTypes, Union = never> 
                                                 ? ZodAtomization<T, Union extends undefined ? never : Union>
                                                 : T extends z.ZodOptional<infer T>
                                                   ? ZodAtomization<T, undefined | Union>
-                                                  : T extends z.ZodNullable<infer T>
-                                                    ? ZodAtomization<T, null | Union>
-                                                    : T extends z.ZodUnion<infer T>
-                                                      ? AtomMut<z.infer<T[number]> | Union>
-                                                      : T extends z.ZodDiscriminatedUnion<infer K, infer T>
-                                                        ? never extends Union
-                                                          ? T extends Array<z.ZodObject<infer Shape>>
-                                                            ? Atom<{
-                                                                [K in keyof Shape]: ZodAtomization<Shape[K]>;
-                                                              }> &
-                                                                ((
-                                                                  ctx: Ctx,
-                                                                  value: {
-                                                                    [K in keyof Shape]: z.infer<Shape[K]>;
-                                                                  },
-                                                                ) => void)
-                                                            : unknown
-                                                          : unknown
-                                                        : T;
+                                                  : T extends z.ZodCatch<infer T>
+                                                    ? ZodAtomization<T, Union>
+                                                    : T extends z.ZodBranded<infer T, infer Brand>
+                                                      ? ZodAtomization<T, Union>
+                                                      : T extends z.ZodEffects<infer T, infer Output>
+                                                        ? ZodAtomization<T, Union | Output>
+                                                        : T extends z.ZodPipeline<infer T, infer Output>
+                                                          ? ZodAtomization<Output>
+                                                          : T extends z.ZodLazy<infer T>
+                                                            ? ZodAtomization<T>
+                                                            : T extends z.ZodNullable<infer T>
+                                                              ? ZodAtomization<T, null | Union>
+                                                              : T extends z.ZodUnion<infer T>
+                                                                ? AtomMut<z.infer<T[number]> | Union>
+                                                                : T extends z.ZodDiscriminatedUnion<infer K, infer T>
+                                                                  ? never extends Union
+                                                                    ? T extends Array<z.ZodObject<infer Shape>>
+                                                                      ? Atom<{
+                                                                          [K in keyof Shape]: ZodAtomization<Shape[K]>;
+                                                                        }> &
+                                                                          ((
+                                                                            ctx: Ctx,
+                                                                            value: {
+                                                                              [K in keyof Shape]: z.infer<Shape[K]>;
+                                                                            },
+                                                                          ) => void)
+                                                                      : unknown
+                                                                    : unknown
+                                                                  : T;
 
 
 type Primitive = null | undefined | string | number | boolean | symbol | bigint;
@@ -317,6 +327,24 @@ export const reatomZod = <Schema extends z.ZodFirstPartySchemaTypes>(
         initState: initState ?? def.defaultValue(),
         name,
       })
+    }
+    case z.ZodFirstPartyTypeKind.ZodCatch: {
+      return reatomZod(def.innerType, { sync, initState, name })
+    }
+    case z.ZodFirstPartyTypeKind.ZodEffects: {
+      return reatomZod(def.schema, { sync, initState, name })
+    }
+    case z.ZodFirstPartyTypeKind.ZodBranded: {
+      return reatomZod(def.type, { sync, initState, name })
+    }
+    case z.ZodFirstPartyTypeKind.ZodPipeline: {
+      return reatomZod(def.out, { sync, initState, name })
+    }
+    case z.ZodFirstPartyTypeKind.ZodLazy: {
+      return reatomZod(def.getter(), { sync, initState, name })
+    }
+    case z.ZodFirstPartyTypeKind.ZodIntersection: {
+      throw new TypeError(`Unsupported Zod type: ${def.typeName}. Please use .merge instead`)
     }
 
     default: {
