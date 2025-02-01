@@ -6,7 +6,11 @@ import { reatomZod } from "./";
 
 test("base API", async () => {
   const model = reatomZod(
-    z.object({ n: z.number(), s: z.string(), readonly: z.string().readonly() }),
+    z.object({ 
+      n: z.number(), 
+      s: z.string(), 
+      readonly: z.string().readonly(),
+    }),
     {
       sync: () => {
         track(parseAtoms(ctx, model));

@@ -53,7 +53,6 @@ export interface LinkedListAtom<
     ReatomLinkedListAtom<Params, Model> {}
 
 type DistributeIntersection<U, T> = U extends any ? U & T : never;
-type Example = DistributeIntersection<number | string | boolean, z.BRAND<'test'>>;
 
 export type ZodAtomization<T extends z.ZodFirstPartySchemaTypes, Union = never, Intersection = unknown> = T extends z.ZodAny
   ? AtomMut<(any & Intersection) | Union>
@@ -74,11 +73,11 @@ export type ZodAtomization<T extends z.ZodFirstPartySchemaTypes, Union = never, 
                 : T extends z.ZodLiteral<infer T>
                   ? (T & Intersection) | Union
                   : T extends z.ZodBoolean
-                    ? never extends Union
+                    ? [Union] extends [never]
                       ? BooleanAtom
                       : AtomMut<(boolean & Intersection) | Union>
                     : T extends z.ZodNumber
-                      ? never extends Union
+                      ? [Union] extends [never]
                         ? NumberAtom
                         : AtomMut<(number & Intersection) | Union>
                       : T extends z.ZodBigInt
@@ -94,29 +93,31 @@ export type ZodAtomization<T extends z.ZodFirstPartySchemaTypes, Union = never, 
                                 : T extends z.ZodTuple<infer Tuple>
                                   ? AtomMut<(z.infer<Tuple[number]> & Intersection) | Union>
                                   : T extends z.ZodObject<infer Shape>
-                                    ? never extends Union
+                                    ? [Union] extends [never]
                                       ? {
                                           [K in keyof Shape]: ZodAtomization<Shape[K]>;
                                         } & Intersection
-                                      : AtomMut<(Shape & Intersection) | Union>
+                                      : AtomMut<({ 
+                                          [K in keyof Shape]: ZodAtomization<Shape[K]> 
+                                        } & Intersection) | Union>
                                     : T extends z.ZodRecord<infer KeyType, infer ValueType>
-                                      ? never extends Union
+                                      ? [Union] extends [never]
                                         ? RecordAtom<Record<z.infer<KeyType>, ZodAtomization<ValueType>>>
                                         : AtomMut<(Record<z.infer<KeyType>, ZodAtomization<ValueType>> & Intersection) | Union>
                                       : T extends z.ZodMap<infer KeyType, infer ValueType>
-                                        ? never extends Union
+                                        ? [Union] extends [never]
                                           ? MapAtom<z.infer<KeyType>, ZodAtomization<ValueType>>
                                           : AtomMut<(Map<z.infer<KeyType>, ZodAtomization<ValueType>> & Intersection) | Union>
                                         : T extends z.ZodSet<infer ValueType>
-                                          ? never extends Union
+                                          ? [Union] extends [never]
                                             ? SetAtom<z.infer<ValueType>>
                                             : AtomMut<(Set<z.infer<ValueType>> & Intersection) | Union>
                                           : T extends z.ZodEnum<infer Enum>
-                                            ? never extends Union
+                                            ? [Union] extends [never]
                                               ? EnumAtom<Enum[number]>
                                               : AtomMut<(Enum[number] & Intersection) | Union>
                                             : T extends z.ZodNativeEnum<infer Enum>
-                                              ? never extends Union
+                                              ? [Union] extends [never]
                                                 ? // @ts-expect-error шо?
                                                   EnumAtom<Enum[keyof Enum]>
                                                 : AtomMut<(Enum[keyof Enum] & Intersection) | Union>
@@ -139,7 +140,7 @@ export type ZodAtomization<T extends z.ZodFirstPartySchemaTypes, Union = never, 
                                                               : T extends z.ZodUnion<infer T>
                                                                 ? AtomMut<DistributeIntersection<z.infer<T[number]>, Intersection> | Union>
                                                                 : T extends z.ZodDiscriminatedUnion<infer K, infer T>
-                                                                  ? never extends Union
+                                                                  ? [Union] extends [never]
                                                                     ? T extends Array<z.ZodObject<infer Shape>>
                                                                       ? Atom<{
                                                                           [K in keyof Shape]: ZodAtomization<Shape[K]>;
