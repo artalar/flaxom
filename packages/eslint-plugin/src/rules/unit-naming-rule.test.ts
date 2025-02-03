@@ -29,12 +29,15 @@ tester.run('unit-naming-rule', unitNamingRule, {
     {
       code: `function reatomSome() { const Atoms = { someAtom: atom(0, 'Some.Atoms.someAtom') } }`,
     },
-    { 
-      code: `function reatomSome({name}) { const Atoms = { someAtom: atom(0, \`\${name}.Atoms.someAtom\`) } }`
-    }, 
     {
-      code: `const someFactory = reatomSome({ name: 'someFactory' })`
-    }
+      code: `function reatomSome({name}) { const Atoms = { someAtom: atom(0, \`\${name}.Atoms.someAtom\`) } }`,
+    },
+    {
+      code: `const someFactory = reatomSome({ name: 'someFactory' })`,
+    },
+    {
+      code: `function reatomSome(options, name) { const Atoms = { someAtom: atom(0, \`\${name}.Atoms.someAtom\`) } }`,
+    },
   ],
   invalid: [
     {
@@ -103,6 +106,11 @@ tester.run('unit-naming-rule', unitNamingRule, {
       code: `function reatomSome(config) { const {name} = config; const field = atom(0, 'Some.field'); }`,
       errors: [{ message: /domain must be derived from/ }],
       output: `function reatomSome(config) { const {name} = config; const field = atom(0, \`\${name}.field\`); }`,
+    },
+    {
+      code: `function reatomSome(config, name) { const field = atom(0, 'Some.field'); }`,
+      errors: [{ message: /domain must be derived from/ }],
+      output: `function reatomSome(config, name) { const field = atom(0, \`\${name}.field\`); }`,
     },
   ],
 })

@@ -396,7 +396,7 @@ Reatom operates a few queues to manage mutations and pure computations, effects 
 > For more details on how to use the queues, refer to the [ctx.schedule](/package/core#ctxschedule) documentation.
 
 - **Mutations**
-  > `anAction(ctx, payload);` `anAtom(ctx, newState);` `bach(ctx, cb);`
+  > `anAction(ctx, payload);` `anAtom(ctx, newState);` `batch(ctx, cb);`
   - **Computations**
     > `atom((ctx) => ctx.spy(anAtom) + 1);` `reaction((ctx) => console.log(ctx.spy(anAtom)))`
     - **Updates**
