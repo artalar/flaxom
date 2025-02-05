@@ -47,26 +47,34 @@ test(`reatomArray. with`, () => {
 
 test(`reatomArray. push`, () => {
   const ctx = createCtx()
+  const arrayAtom = reatomArray([3, 1, 2])
 
-  assert.equal(reatomArray([3, 1, 2]).push(ctx, 4), [3, 1, 2, 4])
+  assert.equal(arrayAtom.push(ctx, 4), 4)
+  assert.equal(ctx.get(arrayAtom), [3, 1, 2, 4])
 })
 
 test(`reatomArray. pop`, () => {
   const ctx = createCtx()
+  const arrayAtom = reatomArray([3, 1, 2])
 
-  assert.equal(reatomArray([3, 1, 2]).pop(ctx), [3, 1])
+  assert.equal(arrayAtom.pop(ctx), 2)
+  assert.equal(ctx.get(arrayAtom), [3, 1])
 })
 
 test(`reatomArray. shift`, () => {
   const ctx = createCtx()
+  const arrayAtom = reatomArray([3, 1, 2])
 
-  assert.equal(reatomArray([3, 1, 2]).shift(ctx), [1, 2])
+  assert.equal(arrayAtom.shift(ctx), 3)
+  assert.equal(ctx.get(arrayAtom), [1, 2])
 })
 
 test(`reatomArray. unshift`, () => {
   const ctx = createCtx()
+  const arrayAtom = reatomArray([3, 1, 2])
 
-  assert.equal(reatomArray([3, 1, 2]).unshift(ctx, 4, 5), [4, 5, 3, 1, 2])
+  assert.equal(arrayAtom.unshift(ctx, 4, 5), 5)
+  assert.equal(ctx.get(arrayAtom), [4, 5, 3, 1, 2])
 })
 
 test(`reatomArray. slice`, () => {
