@@ -67,9 +67,7 @@ export const reatomArray = <T>(initState = [] as T[], name?: string): ArrayAtom<
         target(ctx, arrCopy);
         
         return unshifted;
-      }, `${name}.unshift`),      slice: action(
-        (ctx, start?: number, end?: number) => target(ctx, (state) => state.slice(start, end)),
-        `${name}.slice`,
-      ),
+      }, `${name}.unshift`),
+
     })),
   )
