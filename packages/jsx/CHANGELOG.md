@@ -1,5 +1,19 @@
 # Changelog
 
+## [3.17.0](https://github.com/artalar/reatom/compare/jsx-v3.16.1...jsx-v3.17.0) (2025-02-05)
+
+
+### Features
+
+* **jsx:** add Bind component ([ea4617e](https://github.com/artalar/reatom/commit/ea4617e3d9f8bd680b1fc8b1ef2d28eb00ea0cb6))
+* **jsx:** style property helper ([#1011](https://github.com/artalar/reatom/issues/1011)) ([2fe6f85](https://github.com/artalar/reatom/commit/2fe6f850b781c1f75120fb1623b1cdb68ebbaf70))
+
+
+### Bug Fixes
+
+* **jsx:** fragment better support ([5c984cd](https://github.com/artalar/reatom/commit/5c984cde6a514ff2b36f25d94c3be04797bb6285))
+* **jsx:** render a factory returning an atom ([#874](https://github.com/artalar/reatom/issues/874)) ([c6d8ac9](https://github.com/artalar/reatom/commit/c6d8ac975dc16b6b1cb4c58cafb03a44c381d16e))
+
 ## [3.16.1](https://github.com/artalar/reatom/compare/jsx-v3.16.0...jsx-v3.16.1) (2025-01-17)
 
 
