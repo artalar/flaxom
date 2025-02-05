@@ -27,6 +27,11 @@ thingsAtom.toReversed(ctx)
 thingsAtom.toSorted(ctx, (a, b) => (a.some > b.some ? -1 : 1))
 thingsAtom.toSpliced(ctx, index, count)
 thingsAtom.with(ctx, index, element)
+thingsAtom.push(ctx, element)
+thingsAtom.pop(ctx)
+thingsAtom.shift(ctx)
+thingsAtom.unshift(ctx, element)
+thingsAtom.slice(ctx, start, end)
 ```
 
 ## `reatomBoolean`
