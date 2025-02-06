@@ -46,12 +46,15 @@ const walkLinkedList = (ctx: Ctx, DOM: DomApis, el: JSX.Element, list: Atom<Link
     } else {
       for (const change of state.changes) {
         if (change.kind === 'create') {
+          throwReatomError(!isLiveFragment(change.node), 'native fragment is not supported')
           el.append(change.node)
         }
         if (change.kind === 'remove') {
-          if (change.node instanceof DOM.DocumentFragment) {
-            throwReatomError(!isLiveFragment(change.node), 'native fragment is not supported')
-            ;(change.node as any as LiveDocumentFragment).__reatomFragment.update()
+          if (isLiveFragment(change.node)) {
+            const fragment = change.node.__reatomFragment
+            fragment.update()
+            fragment.start.remove()
+            fragment.end.remove()
           } else {
             el.removeChild(change.node)
           }
@@ -102,19 +105,19 @@ const walkLinkedList = (ctx: Ctx, DOM: DomApis, el: JSX.Element, list: Atom<Link
 type LiveDocumentFragment = DocumentFragment & {
   __reatomFragment: {
     start: Comment
-    end: Node
+    end: Comment
     update: (element?: JSX.ElementPrimitiveChildren) => void
   }
 }
 
 // TODO optimize
 const isLiveFragment = (node: Node): node is LiveDocumentFragment =>
-  String(node) === '[object DocumentFragment]' && '__reatom' in node
+  String(node) === '[object DocumentFragment]' && '__reatomFragment' in node
 
 const createLiveFragment = (DOM: DomApis, name: string): LiveDocumentFragment => {
   const fragment = DOM.document.createDocumentFragment()
   const start = DOM.document.createComment(name)
-  const end = start.cloneNode()
+  const end = start.cloneNode() as Comment
   fragment.append(start, end)
 
   const update = (element?: JSX.ElementPrimitiveChildren) => {

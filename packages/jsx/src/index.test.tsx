@@ -755,3 +755,33 @@ it(
     expect(container.outerHTML).toBe('<div><!--test--><!--test.child-->child atom<!--test.child--><!--test--></div>')
   }),
 )
+
+it(
+  'linked list',
+  setup((ctx, h, hf, mount, parent) => {
+    const a = atom(true)
+    const list = reatomLinkedList((ctx, value: string) => (
+      <>
+        <span>{value}</span>
+        {atom((ctx) => (ctx.spy(a) ? <a /> : <br />), 'test')}
+      </>
+    ))
+    list.create(ctx, '1')
+
+    const container = <div>{list}</div>
+    mount(parent, container)
+
+    expect(container.outerHTML).toBe('<div><!----><span>1</span><!--test--><a></a><!--test--><!----></div>')
+
+    a(ctx, false)
+    expect(container.outerHTML).toBe('<div><!----><span>1</span><!--test--><br><!--test--><!----></div>')
+
+    const node = list.create(ctx, '2')
+    expect(container.outerHTML).toBe(
+      '<div><!----><span>1</span><!--test--><br><!--test--><!----><!----><span>2</span><!--test--><br><!--test--><!----></div>',
+    )
+
+    list.remove(ctx, node)
+    expect(container.outerHTML).toBe('<div><!----><span>1</span><!--test--><br><!--test--><!----></div>')
+  }),
+)
