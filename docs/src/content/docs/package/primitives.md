@@ -79,11 +79,13 @@ thingsAtom.delete(ctx, key)
 thingsAtom.clear(ctx)
 thingsAtom.reset(ctx)
 thingsAtom.getOrCreate(ctx, key, () => new Entity()) // non nullable entity
-thingsAtom.get(ctx, key) // nullable entity
-thingsAtom.has(ctx, key)
 thingsAtom.entries(ctx, key)
 thingsAtom.values(ctx, key)
 thingsAtom.keys(ctx, key)
+
+// built-in functions:
+thingsAtom.get(ctx, key) // nullable entity
+thingsAtom.has(ctx, key)
 
 // built-in atoms:
 ctx.get(thingsAtom.sizeAtom)

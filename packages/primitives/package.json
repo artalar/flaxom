@@ -27,8 +27,7 @@
   },
   "dependencies": {
     "@reatom/core": "^3.1.1",
-    "@reatom/utils": "^3.1.1",
-    "@reatom/lens": "^3.1.1"
+    "@reatom/utils": "^3.1.1"
   },
   "author": "artalar",
   "license": "MIT",
