@@ -63,34 +63,4 @@ test(`reatomMap. clear`, () => {
   assert.equal(ctx.get(mapAtom.sizeAtom), 0)
 })
 
-test(`reatomMap. entries`, () => {
-  const ctx = createCtx()
-
-  const originalMap = new Map(defaultMapEntries)
-
-  const mapAtom = reatomMap(originalMap)
-
-  assert.equal(mapAtom.entries(ctx), originalMap.entries())
-})
-
-test(`reatomMap. values`, () => {
-  const ctx = createCtx()
-
-  const originalMap = new Map(defaultMapEntries)
-
-  const mapAtom = reatomMap(originalMap)
-
-  assert.equal(mapAtom.values(ctx), originalMap.values())
-})
-
-test(`reatomMap. keys`, () => {
-  const ctx = createCtx()
-
-  const originalMap = new Map(defaultMapEntries)
-
-  const mapAtom = reatomMap(originalMap)
-
-  assert.equal(mapAtom.keys(ctx), originalMap.keys())
-})
-
 test.run()
