@@ -10,7 +10,6 @@ export interface ArrayAtom<T> extends AtomMut<Array<T>> {
   pop: Action<[], T | undefined>
   shift: Action<[], T | undefined>
   unshift: Action<[...items: T[]], number>
-  slice: Action<[start?: number, end?: number], T[]>
 }
 
 export const reatomArray = <T>(initState = [] as T[], name?: string): ArrayAtom<T> =>

@@ -77,10 +77,4 @@ test(`reatomArray. unshift`, () => {
   assert.equal(ctx.get(arrayAtom), [4, 5, 3, 1, 2])
 })
 
-test(`reatomArray. slice`, () => {
-  const ctx = createCtx()
-
-  assert.equal(reatomArray([3, 1, 2]).slice(ctx, 1, 2), [1])
-})
-
 test.run()
