@@ -1,5 +1,6 @@
-import { Action, action, atom, AtomMut, Ctx } from '@reatom/core'
+import { Action, action, Atom, atom, AtomMut, Ctx } from '@reatom/core'
 import { withAssign } from './withAssign'
+import { select } from '@reatom/lens'
 
 export interface MapAtom<Key, Value> extends AtomMut<Map<Key, Value>> {
   get: (ctx: Ctx, key: Key) => Value | undefined
@@ -9,6 +10,10 @@ export interface MapAtom<Key, Value> extends AtomMut<Map<Key, Value>> {
   delete: Action<[key: Key], Map<Key, Value>>
   clear: Action<[], Map<Key, Value>>
   reset: Action<[], Map<Key, Value>>
+  sizeAtom: Atom<number>
+  entries: Action<[], IterableIterator<[Key, Value]>>
+  keys: Action<[], IterableIterator<Key>>
+  values: Action<[], IterableIterator<Value>>
 }
 
 export const reatomMap = <Key, Value>(
@@ -52,6 +57,10 @@ export const reatomMap = <Key, Value>(
         ),
         clear: action((ctx) => target(ctx, new Map()), `${name}.clear`),
         reset: action((ctx) => target(ctx, initState), `${name}.reset`),
+        sizeAtom: atom(ctx => select(ctx, (ctx) => ctx.spy(target).size), `${name}.size`),
+        entries: action((ctx) => ctx.get(target).entries(), `${name}.entries`),
+        keys: action((ctx) => ctx.get(target).keys(), `${name}.keys`),
+        values: action((ctx) => ctx.get(target).values(), `${name}.values`),
       }
 
       return actions

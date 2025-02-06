@@ -70,16 +70,23 @@ import { reatomMap } from '@reatom/primitives'
 
 const thingsAtom = reatomMap<string, Entity>()
 
+// read map
+ctx.get(thingsAtom)
+
 // built-in actions:
 thingsAtom.set(ctx, key, new Entity())
 thingsAtom.delete(ctx, key)
 thingsAtom.clear(ctx)
 thingsAtom.reset(ctx)
 thingsAtom.getOrCreate(ctx, key, () => new Entity()) // non nullable entity
-
-// built-in functions:
 thingsAtom.get(ctx, key) // nullable entity
 thingsAtom.has(ctx, key)
+thingsAtom.entries(ctx, key)
+thingsAtom.values(ctx, key)
+thingsAtom.keys(ctx, key)
+
+// built-in atoms:
+ctx.get(thingsAtom.sizeAtom)
 ```
 
 ## `reatomNumber`
