@@ -47,9 +47,7 @@ The main goal of this adapter is to synchronize atom between tabs without pollut
 import { atom } from '@reatom/framework'
 import { withBroadcastChannel } from '@reatom/persist-web-storage'
 
-export const isAuthedAtom = atom('', 'isAuthedAtom').pipe(
-  withBroadcastChannel('isAuthedAtom'),
-)
+export const isAuthedAtom = atom('', 'isAuthedAtom').pipe(withBroadcastChannel('isAuthedAtom'))
 ```
 
 You can also give an instance of `BroadcastChannel`
@@ -68,10 +66,7 @@ myChannel.onmessage((event) => {
 
 const withMyBroadcastChannel = reatomPersistBroadcastChannel(myChannel)
 
-
-export const isAuthedAtom = atom('', 'isAuthedAtom').pipe(
-  withMyBroadcastChannel('isAuthedAtom'),
-)
+export const isAuthedAtom = atom('', 'isAuthedAtom').pipe(withMyBroadcastChannel('isAuthedAtom'))
 ```
 
 ### withIndexedDb
@@ -84,10 +79,9 @@ The main goal of this adapter is to persist atom's state to IndexedDB. `withInde
 import { reatomResource, withCache } from '@reatom/framework'
 import { withIndexedDb } from '@reatom/persist-web-storage'
 
-export const listResource = reatomResource(
-  async (ctx) => api.getList(ctx.spy(pageAtom)),
-  'listResource',
-).pipe(withCache({ withPersist: withIndexedDb }))
+export const listResource = reatomResource(async (ctx) => api.getList(ctx.spy(pageAtom)), 'listResource').pipe(
+  withCache({ withPersist: withIndexedDb }),
+)
 ```
 
 You can also specify a custom database name and a custom `BroadcastChannel' that will be used to synchronize the data in real time.
@@ -96,13 +90,12 @@ You can also specify a custom database name and a custom `BroadcastChannel' that
 import { reatomResource, withCache } from '@reatom/framework'
 import { withIndexedDb } from '@reatom/persist-web-storage'
 
-export const listResource = reatomResource(
-  async (ctx) => api.getList(ctx.spy(pageAtom)),
-  'listResource',
-).pipe(withIndexedDb({ key: 'hugeListAtom', dbName: 'myCustomDb', channel }))
+export const listResource = reatomResource(async (ctx) => api.getList(ctx.spy(pageAtom)), 'listResource').pipe(
+  withIndexedDb({ key: 'hugeListAtom', dbName: 'myCustomDb', channel }),
+)
 ```
 
-If you want to avoid flickering, all you have to do is add a small delay after the atom is connected. Subscribe / spy the data atom, wait the ready atom and then use the actual data.
+If you want to avoid flickering, all you have to do is add `withIndexedDb.init(ctx)` at the top-level (before the application mounts).
 
 > [example](https://github.com/artalar/reatom/blob/v3/examples/react-persist-web/src/app.tsx)
 
@@ -110,21 +103,18 @@ If you want to avoid flickering, all you have to do is add a small delay after t
 import { reatomResource, withCache, onConnect, sleep } from '@reatom/framework'
 import { withIndexedDb } from '@reatom/persist-web-storage'
 
-export const listResource = reatomResource(
-  async (ctx) => api.getList(ctx.spy(pageAtom)),
-  'listResource',
-).pipe(withIndexedDb({ key: 'hugeListAtom', dbName: 'myCustomDb', channel }))
-const isListReadyAtom = atom(false, 'isListReadyAtom')
-onConnect(listResource, async (ctx) => {
-  await ctx.schedule(() => new Promise((r) => requestIdleCallback(r)))
-  isListReadyAtom(ctx, true)
-  return () => isListReadyAtom(ctx, false)
-})
+export const listResource = reatomResource(async (ctx) => api.getList(ctx.spy(pageAtom)), 'listResource').pipe(
+  withIndexedDb({ key: 'hugeListAtom', dbName: 'myCustomDb', channel }),
+)
+
+await withIndexedDb.init(ctx):
+
+ctx.spy(listResource) // will return the actual value, without flcikering
 ```
 
 ### withCookie
 
-Synchronizes atom state to the `document.cookie` with a given name. 
+Synchronizes atom state to the `document.cookie` with a given name.
 
 When using `withCookie`, the first argument it takes is an options object that allows you to configure various aspects of cookie behavior.
 
@@ -141,9 +131,9 @@ interface CookieAttributes {
   sameSite?: 'strict' | 'lax' | 'none'
 }
 
-export const tokenAtom = atom("", "tokenAtom").pipe(
+export const tokenAtom = atom('', 'tokenAtom').pipe(
   withCookie({
     maxAge: 3600, // 1 hour
-  })("token"),
-);
+  })('token'),
+)
 ```
