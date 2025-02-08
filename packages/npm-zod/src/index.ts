@@ -333,7 +333,15 @@ export const reatomZod = <Schema extends z.ZodFirstPartySchemaTypes>(
       })
     }
     case z.ZodFirstPartyTypeKind.ZodCatch: {
-      return reatomZod(def.innerType, { sync, initState, name })
+      try {
+        def.innerType.parse(state)
+      } 
+      catch (error) {
+        if(error instanceof z.ZodError)
+          state = def.catchValue({ error, input: state })
+      }
+            
+      return reatomZod(def.innerType, { sync, initState: state, name })
     }
     case z.ZodFirstPartyTypeKind.ZodEffects: {
       return reatomZod(def.schema, { sync, initState, name })
