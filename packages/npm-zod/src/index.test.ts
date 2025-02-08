@@ -6,9 +6,9 @@ import { reatomZod } from "./";
 
 test("base API", async () => {
   const model = reatomZod(
-    z.object({ 
-      n: z.number(), 
-      s: z.string(), 
+    z.object({
+      n: z.number(),
+      s: z.string(),
       readonly: z.string().readonly(),
     }),
     {
@@ -43,7 +43,7 @@ test("right values for effects", async () => {
       transform: 1337,
     }
   })
-  
+
   const track = mockFn<[ParseAtoms<typeof model>], any>();
   const ctx = createTestCtx();
 
@@ -53,7 +53,7 @@ test("right values for effects", async () => {
 
 test("right values for catch", async () => {
   const schema = z.object({
-    catch: z.string().nullable().catch(''),
+    catch: z.string().nullable().catch('catchValue'),
   })
 
   const model = reatomZod(schema, {
@@ -64,11 +64,14 @@ test("right values for catch", async () => {
       catch: null,
     }
   })
-  
+
   const track = mockFn<[ParseAtoms<typeof model>], any>();
   const ctx = createTestCtx();
 
   expect(ctx.get(model.catch)).toBe(null)
+
+  const catchModel = reatomZod(schema, { initState: undefined });
+  expect(ctx.get(catchModel.catch)).toBe('catchValue')
 })
 
 test("right values for brand", async () => {
@@ -87,7 +90,7 @@ test("right values for brand", async () => {
       brand: brandedValue,
     }
   })
-  
+
   const track = mockFn<[ParseAtoms<typeof model>], any>();
   const ctx = createTestCtx();
 

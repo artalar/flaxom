@@ -1,6 +1,5 @@
 {
   "name": "@reatom/npm-zod",
-  "type": "module",
   "version": "3.10.3",
   "private": false,
   "sideEffects": false,
