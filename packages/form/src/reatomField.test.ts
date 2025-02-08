@@ -1,7 +1,7 @@
 import { test, expect, vi, assert } from 'vitest'
 import { createCtx } from '@reatom/core'
 import { reatomField, withField } from '.'
-import { reatomEnum, reatomLinkedList } from '@reatom/primitives';
+import { reatomEnum } from '@reatom/primitives';
 
 test(`validateOnChange`, async () => {
   const ctx = createCtx();
