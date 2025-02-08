@@ -1,6 +1,5 @@
-import { type Action, type Atom, type AtomMut, type Ctx, __count, action, atom } from '@reatom/core'
-import { __thenReatomed } from '@reatom/effects'
-import { type CtxSpy, abortCauseContext, withAbortableSchedule } from '@reatom/framework'
+import { type Action, type Atom, type AtomMut, AtomState, type Ctx, CtxSpy, __count, action, atom } from '@reatom/core'
+import { __thenReatomed, abortCauseContext, withAbortableSchedule } from '@reatom/effects'
 import { type RecordAtom, reatomRecord } from '@reatom/primitives'
 import { isDeepEqual, noop, toAbortError } from '@reatom/utils'
 
@@ -112,7 +111,7 @@ export interface FieldOptions<State = any, Value = State> {
   /**
    * The callback to validate field contract.
    */
-  contract?: (state: State) => any
+  contract?: (state: State) => unknown
 
   /**
    * Defines the reset behavior of the validation state during async validation.
@@ -163,8 +162,9 @@ export const fieldInitValidationLess: FieldValidation = {
 export const reatomField = <State, Value>(
   _initState: State,
   options: string | FieldOptions<State, Value> = {},
+  _stateAtom?: AtomMut<State>
 ): FieldAtom<State, Value> => {
-  interface This extends FieldAtom<State, Value> {}
+  interface This extends FieldAtom<State, Value> { }
 
   const {
     filter = () => true,
@@ -182,7 +182,7 @@ export const reatomField = <State, Value>(
 
   const initState = atom(_initState, `${name}.initState`)
 
-  const field = atom(_initState, `${name}.field`) as This
+  const field = _stateAtom ?? atom(_initState, `${name}.field`);
 
   const value: This['value'] = atom((ctx) => fromState(ctx, ctx.spy(field)), `${name}.value`)
 
@@ -205,6 +205,7 @@ export const reatomField = <State, Value>(
     validateFn || contract ? fieldInitValidation : fieldInitValidationLess,
     `${name}.validation`,
   ) as This['validation']
+
   if (validateFn || contract) {
     // @ts-expect-error the original computed state can't be typed properly
     validation.__reatom.computer = (ctx, state: FieldValidation) => {
@@ -238,7 +239,6 @@ export const reatomField = <State, Value>(
 
     try {
       contract?.(state)
-      // eslint-disable-next-line no-var
       promise = validateFn?.(withAbortableSchedule(ctx), {
         state,
         value: valueValue,
@@ -246,7 +246,6 @@ export const reatomField = <State, Value>(
         validation: validationValue,
       })
     } catch (error) {
-      // eslint-disable-next-line no-var
       message = toError(error)
     }
 
@@ -331,4 +330,14 @@ export const reatomField = <State, Value>(
     validation,
     value,
   })
+}
+
+export const withField = <T extends AtomMut, Value = AtomState<T>>(
+  _initState: AtomState<T>,
+  options: Omit<FieldOptions<AtomState<T>, Value>, 'name'> = {}
+): ((anAtom: T) => T & FieldAtom<AtomState<T>, Value>) => {
+  return (anAtom: T) => Object.assign(
+    anAtom,
+    reatomField(_initState, { name: anAtom.__reatom.name, ...options }, anAtom)
+  );
 }

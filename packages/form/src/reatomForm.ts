@@ -1,19 +1,53 @@
-import { action, Action, Atom, atom, Ctx, Fn, __count } from '@reatom/core'
-import { isInit } from '@reatom/hooks'
-import { isShallowEqual } from '@reatom/utils'
 import {
-  FieldAtom,
-  FieldFocus,
-  FieldOptions,
-  FieldValidation,
+  type Action,
+  type Atom,
+  AtomMut,
+  AtomState,
+  type Ctx,
+  type Unsubscribe,
+  __count,
+  action,
+  atom,
+} from '@reatom/core';
+import { take } from '@reatom/effects';
+
+import {
+  reatomAsync,
+  withAbort,
+  type AsyncAction,
+  withErrorAtom,
+  withStatusesAtom,
+  type AsyncStatusesAtom,
+} from '@reatom/async';
+
+import { withAssign } from '@reatom/primitives'
+import { isShallowEqual } from '@reatom/utils';
+
+import {
+  type FieldAtom,
+  type FieldFocus,
+  type FieldValidation,
   fieldInitFocus,
   fieldInitValidation,
   reatomField,
-} from './reatomField'
-import { take } from '@reatom/effects'
-import { AsyncAction, reatomAsync, withAbort } from '@reatom/async'
-import { reatomRecord } from '@reatom/primitives'
-import { toError } from './utils'
+  type FieldOptions,
+} from './reatomField';
+import { isInit } from '@reatom/hooks';
+
+export interface FormFieldOptions<State = any, Value = State>
+  extends FieldOptions<State, Value> {
+  initState: State;
+}
+
+export interface FieldsAtom extends Atom<Array<FieldAtom>> {
+  add: Action<[FieldAtom], Unsubscribe>;
+  remove: Action<[FieldAtom], void>;
+}
+
+export interface SubmitAction extends AsyncAction<[], void> {
+  error: Atom<Error | undefined>;
+  statusesAtom: AsyncStatusesAtom;
+}
 
 export interface FormFieldAtom<State = any, Value = State>
   extends FieldAtom<State, Value> {
@@ -21,156 +55,194 @@ export interface FormFieldAtom<State = any, Value = State>
 }
 
 export interface Form {
-  /** Atom with a list of currently connected fields created by this form's `reatomField` method. */
-  fieldsListAtom: Atom<Array<FormFieldAtom>>
-  /** Atom with focus state of the form, computed from all the fields in `fieldsListAtom` */
-  focusAtom: Atom<FieldFocus>
-  /** Submit async handler. It checks the validation of all the fields in `fieldsListAtom`, calls the form's `validate` options handler, and then the `onSubmit` options handler. Check the additional options properties of async action: https://www.reatom.dev/package/async/. */
-  onSubmit: AsyncAction<[], void>
-  /** The same `reatomField` method, but with bindings to `fieldsListAtom`. */
+  /** Atom with the list of fields in the form */
+  fieldsList: FieldsAtom;
+
+  /** The same `reatomField` method, but with bindings to `fieldsList`. */
   reatomField<State, Value>(
-    options: FieldOptions<State, Value>,
-    name?: string,
-  ): FormFieldAtom<State, Value>
+    _initState: State,
+    options?: string | FieldOptions<State, Value>,
+  ): FormFieldAtom<State, Value>;
+
+  /** The same `withField` operator, but with bindings to `fieldsList`. */
+  withField: <T extends AtomMut, Value = AtomState<T>>(
+    _initState: AtomState<T>,
+    options?: Omit<FieldOptions<AtomState<T>, Value>, 'name'>
+  ) => ((anAtom: T) => T & FieldAtom<AtomState<T>, Value>)
+
+  /** Atom with the focus state of the form, computed from all the fields in `fieldsList` */
+  focus: Atom<FieldFocus>;
+
   /** Action to reset the state, the value, the validation, and the focus states. */
-  reset: Action<[], void>
-  /** Atom with validation state of the form, computed from all the fields in `fieldsListAtom` */
-  validationAtom: Atom<FieldValidation>
-  /** Atom with validation statuses around form `validate` options handler. */
-  formValidationAtom: Atom<FieldValidation>
+  reset: Action<[], void>;
+
+  /** Submit async handler. It checks the validation of all the fields in `fieldsList`, calls the form's `validate` options handler, and then the `onSubmit` options handler. Check the additional options properties of async action: https://www.reatom.dev/package/async/. */
+  submit: SubmitAction;
+
+  /** Atom with the submitted state of the form, true if the form is submitted and valid, false otherwise initially or after form reset */
+  submitted: Atom<boolean>;
+
+  /** Atom with validation state of the form, computed from all the fields in `fieldsList` */
+  validation: Atom<FieldValidation>;
 }
 
 export interface FormOptions {
   name?: string
+
   /** The callback to process valid form data */
   onSubmit: (ctx: Ctx, form: Form) => void | Promise<void>
-  /** The callback to handle validation errors on the attempt to submit */
-  onSubmitError?: Fn<[ctx: Ctx]>
+
   /** The callback to validate form fields. */
   validate?: (ctx: Ctx, form: Form) => any
+
+  /** Should reset the state after success submit? @default true */
+  resetOnSubmit?: boolean;
 }
 
 export const reatomForm = (
-  { name: optionsName, onSubmit, onSubmitError, validate }: FormOptions,
-  // this is out of the options for eslint compatibility
+  { name: optionsName, onSubmit, resetOnSubmit, validate }: FormOptions,
   name = optionsName ?? __count('form'),
 ): Form => {
-  const fieldsListAtom = atom<Array<FormFieldAtom>>(
-    [],
-    `${name}.fieldsListAtom`,
-  )
-  const focusAtom = atom((ctx, state = fieldInitFocus) => {
-    const formFocus = { ...fieldInitFocus }
-    for (const fieldAtom of ctx.spy(fieldsListAtom)) {
-      const { active, dirty, touched } = ctx.spy(fieldAtom.focusAtom)
-      formFocus.active ||= active
-      formFocus.dirty ||= dirty
-      formFocus.touched ||= touched
-    }
-    return isShallowEqual(formFocus, state) ? state : formFocus
-  }, `${name}.focusAtom`)
-  const formValidationAtom: FieldAtom['validationAtom'] = reatomRecord(
-    fieldInitValidation,
-    `${name}.formValidationAtom`,
-  )
-  const validationAtom = atom((ctx, state = fieldInitValidation) => {
-    const formValid = { ...fieldInitValidation }
+  const fieldsList = atom<FieldAtom[]>([], `${name}.fieldsList`).pipe(
+    withAssign((list) => ({
+      add: action((ctx, fieldAtom) => {
+        list(ctx, (list) => [...list, fieldAtom]);
+        return () => {
+          list(ctx, (list) => list.filter((v) => v !== fieldAtom));
+        };
+      }),
+      remove: action((ctx, fieldAtom) => {
+        list(ctx, (list) => list.filter((v) => v !== fieldAtom));
+      }),
+    }))
+  ) satisfies FieldsAtom;
 
-    const check = ({ valid, validating, error }: FieldValidation) => {
-      formValid.valid &&= valid
-      formValid.validating ||= validating
-      formValid.error ||= error
+  const focus = atom((ctx, state = fieldInitFocus) => {
+    const formFocus = { ...fieldInitFocus };
+
+    for (const field of ctx.spy(fieldsList)) {
+      const { active, dirty, touched } = ctx.spy(field.focus);
+      formFocus.active ||= active;
+      formFocus.dirty ||= dirty;
+      formFocus.touched ||= touched;
     }
 
-    check(ctx.spy(formValidationAtom))
+    return isShallowEqual(formFocus, state) ? state : formFocus;
+  }, `${name}.focus`);
 
-    for (const fieldAtom of ctx.spy(fieldsListAtom)) {
-      check(ctx.spy(fieldAtom.validationAtom))
+  const validation = atom((ctx, state = fieldInitValidation) => {
+    const formValid = { ...fieldInitValidation };
+    formValid.triggered = true;
+
+    for (const field of ctx.spy(fieldsList)) {
+      const { triggered, validating, error } = ctx.spy(field.validation);
+
+      formValid.triggered &&= triggered;
+      formValid.validating ||= validating;
+      formValid.error ||= error;
     }
 
-    return isShallowEqual(formValid, state) ? state : formValid
-  }, `${name}.validationAtom`)
+    return isShallowEqual(formValid, state) ? state : formValid;
+  }, `${name}.validation`);
+
+  const submitted = atom(false, `${name}.submitted`);
 
   const reset = action((ctx) => {
-    formValidationAtom.reset(ctx)
-    ctx.get(fieldsListAtom).forEach((fieldAtom) => fieldAtom.reset(ctx))
-    handleSubmit.abort(ctx)
-  }, `${name}.reset`)
+    ctx.get(fieldsList).forEach((fieldAtom) => fieldAtom.reset(ctx));
+    submitted(ctx, false);
+    submit.errorAtom.reset(ctx);
+    submit.abort(ctx, `${name}.reset`);
+  }, `${name}.reset`);
 
-  const handleSubmit = reatomAsync(async (ctx) => {
-    for (const fieldAtom of ctx.get(fieldsListAtom)) {
-      if (!ctx.get(fieldAtom.validationAtom).valid) {
-        fieldAtom.validate(ctx)
-      }
-    }
-
-    let { valid, validating } = ctx.get(validationAtom)
-
-    if (validating) {
-      valid = await take(
-        ctx,
-        validationAtom,
-        (ctx, { validating, valid }, skip) => (validating ? skip : valid),
-      )
-    }
-
-    if (valid) {
-      if (validate) {
-        try {
-          formValidationAtom.merge(ctx, {
-            error: undefined,
-            valid,
-            validating: true,
-          })
-          const promise = validate(ctx, form)
-          if (promise instanceof promise) {
-            await ctx.schedule(() => promise)
-          }
-          formValidationAtom.merge(ctx, { valid, validating: false })
-        } catch (error) {
-          formValidationAtom.merge(ctx, {
-            error: toError(error),
-            valid: false,
-            validating: false,
-          })
-          throw error
+  const submit = reatomAsync(async (ctx) => {
+    ctx.get(() => {
+      for (const field of ctx.get(fieldsList)) {
+        if (!ctx.get(field.validation).triggered) {
+          field.validation.trigger(ctx);
         }
       }
+    });
 
-      await ctx.schedule(() => onSubmit(ctx, form))
-    } else {
-      onSubmitError?.(ctx)
+    if (ctx.get(validation).validating) {
+      await take(ctx, validation, (ctx, { validating }, skip) => {
+        if (validating) return skip;
+      });
     }
-  }, `${name}.onSubmit`).pipe(withAbort())
 
-  const reatomFormField: Form['reatomField'] = (
-    options,
-    fieldName = options.name ?? __count(`${typeof options.initState}Field`),
+    const error = ctx.get(validation).error;
+
+    if (error) throw new Error(error);
+
+    if (validate) {
+      const promise = validate(ctx, form);
+      if (promise instanceof promise) {
+        await ctx.schedule(() => promise);
+      }
+    }
+
+    if (onSubmit) await ctx.schedule(() => onSubmit(ctx, form));
+
+    submitted(ctx, true);
+
+    if (resetOnSubmit) {
+      // do not use `reset` action here to not abort the success
+      ctx.get(fieldsList).forEach((fieldAtom) => fieldAtom.reset(ctx));
+      submit.errorAtom.reset(ctx);
+      submit.statusesAtom.reset(ctx);
+      submitted(ctx, false);
+    }
+  }, `${name}.onSubmit`).pipe(
+    withStatusesAtom(),
+    withAbort(),
+    withErrorAtom(undefined, { resetTrigger: 'onFulfill' }),
+    (submit) => Object.assign(submit, { error: submit.errorAtom }),
+  );
+
+  const reatomFormField = ((
+    _initState,
+    options = {},
+    _stateAtom?: AtomMut<typeof _initState> | undefined
   ) => {
-    fieldName = `${name}.${fieldName}`
-    const atomField = reatomField(options, fieldName) as FormFieldAtom
+    const {
+      name: fieldName = __count(`${typeof _initState}Field`),
+      ...restOptions
+    } = typeof options === 'string' ? { name: options } : options
+
+    const atomField = reatomField(_initState, {
+      name: `${name}.${fieldName}`,
+      ...restOptions
+    }, _stateAtom) as FormFieldAtom;
 
     atomField.onChange((ctx) => {
       if (isInit(ctx)) {
-        fieldsListAtom(ctx, (list) => [...list, atomField])
+        fieldsList.add(ctx, atomField)
       }
     })
+
     atomField.remove = action((ctx) => {
-      fieldsListAtom(ctx, (list) => [...list, atomField])
+      fieldsList.remove(ctx, atomField)
     }, `${fieldName}.remove`)
 
     return atomField
-  }
+  }) satisfies Form['reatomField']
 
-  const form: Form = {
-    fieldsListAtom,
-    focusAtom,
-    onSubmit: handleSubmit,
-    reatomField: reatomFormField,
+  const withField: Form['withField'] = (_initState, options) => (
+    anAtom => Object.assign(
+      anAtom,
+      reatomFormField(_initState, { name, ...options }, anAtom)
+    )
+  );
+
+  const form = {
+    fieldsList,
+    focus,
     reset,
-    validationAtom,
-    formValidationAtom,
+    submit,
+    submitted,
+    validation,
+    reatomField: reatomFormField,
+    withField
   }
 
-  return form
-}
+  return form;
+};
