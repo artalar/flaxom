@@ -1,27 +1,37 @@
 import {
   type Action,
   type Atom,
-  AtomMut,
-  AtomState,
   type Ctx,
-  type Unsubscribe,
+  CtxSpy,
+  type Rec,
   __count,
   action,
   atom,
+  isAtom,
 } from '@reatom/core';
+
 import { take } from '@reatom/effects';
 
 import {
-  reatomAsync,
-  withAbort,
   type AsyncAction,
   withErrorAtom,
   withStatusesAtom,
   type AsyncStatusesAtom,
+  reatomAsync,
+  withAbort,
 } from '@reatom/async';
 
-import { withAssign } from '@reatom/primitives'
-import { isShallowEqual } from '@reatom/utils';
+import {
+  ArrayAtom,
+  SetAtom,
+  LinkedListAtom,
+  isLinkedListAtom,
+  isSetAtom,
+  isArrayAtom
+} from '@reatom/primitives';
+
+import { parseAtoms, type ParseAtoms } from '@reatom/lens';
+import { entries, isObject, isShallowEqual } from '@reatom/utils';
 
 import {
   type FieldAtom,
@@ -31,47 +41,83 @@ import {
   fieldInitValidation,
   reatomField,
   type FieldOptions,
+  FieldLikeAtom,
 } from './reatomField';
-import { isInit } from '@reatom/hooks';
 
 export interface FormFieldOptions<State = any, Value = State>
   extends FieldOptions<State, Value> {
   initState: State;
 }
 
-export interface FieldsAtom extends Atom<Array<FieldAtom>> {
-  add: Action<[FieldAtom], Unsubscribe>;
-  remove: Action<[FieldAtom], void>;
-}
+export type FormFieldArray =
+  | ArrayAtom<FieldAtom>
+  | SetAtom<FieldAtom>
+  | LinkedListAtom<[], FieldAtom>;
+
+export type FormInitState = Rec<
+  | string
+  | number
+  | boolean
+  | null
+  | undefined
+  | File
+  | symbol
+  | bigint
+  | Date
+  | Array<any>
+  // TODO contract as parsing method
+  // | ((state: any) => any)
+  | FormFieldArray
+  | FieldAtom
+  | FormFieldOptions
+  | FormInitState
+>;
+
+export type FormFields<T extends FormInitState = FormInitState> = {
+  [K in keyof T]: T[K] extends FieldLikeAtom
+  ? T[K]
+  : T[K] extends Date
+  ? FieldAtom<T[K]>
+  : T[K] extends FieldOptions & { initState: infer State }
+  ? T[K] extends FieldOptions<State, State>
+  ? FieldAtom<State>
+  : T[K] extends FieldOptions<State, infer Value>
+  ? FieldAtom<State, Value>
+  : never
+  : T[K] extends FormFieldArray
+  ? T[K]
+  : T[K] extends Rec
+  ? FormFields<T[K]>
+  : FieldAtom<T[K]>;
+};
+
+export type FormState<T extends FormInitState = FormInitState> = ParseAtoms<
+  FormFields<T>
+>;
+
+export type DeepPartial<T> = {
+  [K in keyof T]?: T[K] extends Rec ? DeepPartial<T[K]> : T[K];
+};
+
+export type FormPartialState<T extends FormInitState = FormInitState> =
+  DeepPartial<FormState<T>>;
 
 export interface SubmitAction extends AsyncAction<[], void> {
   error: Atom<Error | undefined>;
   statusesAtom: AsyncStatusesAtom;
 }
 
-export interface FormFieldAtom<State = any, Value = State>
-  extends FieldAtom<State, Value> {
-  remove: Action<[], void>
-}
+export interface Form<T extends FormInitState = any> {
+  /** Fields from the init state */
+  fields: FormFields<T>;
 
-export interface Form {
-  /** Atom with the list of fields in the form */
-  fieldsList: FieldsAtom;
+  /** Atom with the state of the form, computed from all the fields in `fieldsList` */
+  fieldsState: Atom<FormState<T>>;
 
-  /** The same `reatomField` method, but with bindings to `fieldsList`. */
-  reatomField<State, Value>(
-    _initState: State,
-    options?: string | FieldOptions<State, Value>,
-  ): FormFieldAtom<State, Value>;
-
-  /** The same `withField` operator, but with bindings to `fieldsList`. */
-  withField: <T extends AtomMut, Value = AtomState<T>>(
-    _initState: AtomState<T>,
-    options?: Omit<FieldOptions<AtomState<T>, Value>, 'name'>
-  ) => ((anAtom: T) => T & FieldAtom<AtomState<T>, Value>)
-
-  /** Atom with the focus state of the form, computed from all the fields in `fieldsList` */
+  /** Atom with focus state of the form, computed from all the fields in `fieldsList` */
   focus: Atom<FieldFocus>;
+
+  init: Action<[initState: FormPartialState<T>], void>;
 
   /** Action to reset the state, the value, the validation, and the focus states. */
   reset: Action<[], void>;
@@ -79,43 +125,93 @@ export interface Form {
   /** Submit async handler. It checks the validation of all the fields in `fieldsList`, calls the form's `validate` options handler, and then the `onSubmit` options handler. Check the additional options properties of async action: https://www.reatom.dev/package/async/. */
   submit: SubmitAction;
 
-  /** Atom with the submitted state of the form, true if the form is submitted and valid, false otherwise initially or after form reset */
   submitted: Atom<boolean>;
 
   /** Atom with validation state of the form, computed from all the fields in `fieldsList` */
   validation: Atom<FieldValidation>;
 }
 
-export interface FormOptions {
-  name?: string
+export interface FormOptions<T extends FormInitState = any> {
+  name?: string;
 
   /** The callback to process valid form data */
-  onSubmit: (ctx: Ctx, form: Form) => void | Promise<void>
-
-  /** The callback to validate form fields. */
-  validate?: (ctx: Ctx, form: Form) => any
+  onSubmit?: (ctx: Ctx, state: FormState<T>) => void | Promise<void>;
 
   /** Should reset the state after success submit? @default true */
   resetOnSubmit?: boolean;
+
+  /** The callback to validate form fields. */
+  validate?: (ctx: Ctx, state: FormState<T>) => any;
 }
 
-export const reatomForm = (
-  { name: optionsName, onSubmit, resetOnSubmit, validate }: FormOptions,
-  name = optionsName ?? __count('form'),
-): Form => {
-  const fieldsList = atom<FieldAtom[]>([], `${name}.fieldsList`).pipe(
-    withAssign((list) => ({
-      add: action((ctx, fieldAtom) => {
-        list(ctx, (list) => [...list, fieldAtom]);
-        return () => {
-          list(ctx, (list) => list.filter((v) => v !== fieldAtom));
-        };
-      }),
-      remove: action((ctx, fieldAtom) => {
-        list(ctx, (list) => list.filter((v) => v !== fieldAtom));
-      }),
-    }))
-  ) satisfies FieldsAtom;
+const reatomFormFields = <T extends FormInitState>(
+  initState: T,
+  name: string,
+): FormFields<T> => {
+  const fields = Array.isArray(initState)
+    ? ([] as FormFields<T>)
+    : ({} as FormFields<T>);
+  for (const [key, value] of Object.entries(initState)) {
+    if (isAtom(value)) {
+      // @ts-expect-error bad keys type inference
+      fields[key] = value;
+    } else if (isObject(value) && !(value instanceof Date)) {
+      if ('initState' in value) {
+        // @ts-expect-error bad keys type inference
+        fields[key] = reatomField(value.initState, {
+          name: `${name}.${key}`,
+          ...(value as FieldOptions),
+        });
+      } else {
+        // @ts-expect-error bad keys type inference
+        fields[key] = reatomFormFields(value, `${name}.${key}`);
+      }
+    } else {
+      // @ts-expect-error bad keys type inference
+      fields[key] = reatomField(value, {
+        name: `${name}.${key}`,
+      });
+    }
+  }
+  return fields;
+};
+
+const computeFieldsList = <T extends FormInitState>(
+  ctx: CtxSpy,
+  fields: FormFields<T>,
+  acc: Array<FieldAtom> = [],
+): Array<FieldAtom> => {
+  for (const [_, field] of entries(fields)) {
+    if (isArrayAtom(field)) acc.push(...ctx.spy(field));
+    else if (isSetAtom(field)) acc.push(...ctx.spy(field));
+    else if (isLinkedListAtom(field)) acc.push(...ctx.spy(field.array));
+    else if (isAtom(field)) acc.push(field as FieldAtom);
+    else computeFieldsList(ctx, field as FormFields, acc);
+  }
+  return acc;
+};
+
+export const reatomForm = <T extends FormInitState>(
+  initState: T,
+  options: string | FormOptions<T> = {},
+): Form<T> => {
+  const {
+    name = __count('form'),
+    onSubmit,
+    resetOnSubmit = true,
+    validate,
+  } = typeof options === 'string'
+      ? ({ name: options } as FormOptions<T>)
+      : options;
+
+  const fields = reatomFormFields(initState, `${name}.fields`);
+
+  const fieldsState = atom(
+    (ctx) => parseAtoms(ctx, fields),
+    `${name}.fieldsState`,
+  );
+
+  const fieldsList = atom(ctx => computeFieldsList(ctx, fields), `${name}.fieldsList`);
 
   const focus = atom((ctx, state = fieldInitFocus) => {
     const formFocus = { ...fieldInitFocus };
@@ -154,6 +250,25 @@ export const reatomForm = (
     submit.abort(ctx, `${name}.reset`);
   }, `${name}.reset`);
 
+  const reinitState = (ctx: Ctx, initState: FormPartialState<T>, fields: FormFields) => {
+    for (const [key, value] of Object.entries(initState as Rec)) {
+      if (
+        isObject(value) &&
+        !(value instanceof Date) &&
+        key in fields &&
+        !isAtom(fields[key])
+      ) {
+        reinitState(ctx, value, fields[key] as unknown as FormFields);
+      } else {
+        fields[key]?.initState(ctx, value);
+      }
+    }
+  };
+
+  const init = action((ctx, initState: FormPartialState<T>) => {
+    reinitState(ctx, initState, fields as FormFields);
+  }, `${name}.init`);
+
   const submit = reatomAsync(async (ctx) => {
     ctx.get(() => {
       for (const field of ctx.get(fieldsList)) {
@@ -173,14 +288,16 @@ export const reatomForm = (
 
     if (error) throw new Error(error);
 
+    const state = ctx.get(fieldsState);
+
     if (validate) {
-      const promise = validate(ctx, form);
+      const promise = validate(ctx, state);
       if (promise instanceof promise) {
         await ctx.schedule(() => promise);
       }
     }
 
-    if (onSubmit) await ctx.schedule(() => onSubmit(ctx, form));
+    if (onSubmit) await ctx.schedule(() => onSubmit(ctx, state));
 
     submitted(ctx, true);
 
@@ -198,51 +315,14 @@ export const reatomForm = (
     (submit) => Object.assign(submit, { error: submit.errorAtom }),
   );
 
-  const reatomFormField = ((
-    _initState,
-    options = {},
-    _stateAtom?: AtomMut<typeof _initState> | undefined
-  ) => {
-    const {
-      name: fieldName = __count(`${typeof _initState}Field`),
-      ...restOptions
-    } = typeof options === 'string' ? { name: options } : options
-
-    const atomField = reatomField(_initState, {
-      name: `${name}.${fieldName}`,
-      ...restOptions
-    }, _stateAtom) as FormFieldAtom;
-
-    atomField.onChange((ctx) => {
-      if (isInit(ctx)) {
-        fieldsList.add(ctx, atomField)
-      }
-    })
-
-    atomField.remove = action((ctx) => {
-      fieldsList.remove(ctx, atomField)
-    }, `${fieldName}.remove`)
-
-    return atomField
-  }) satisfies Form['reatomField']
-
-  const withField: Form['withField'] = (_initState, options) => (
-    anAtom => Object.assign(
-      anAtom,
-      reatomFormField(_initState, { name, ...options }, anAtom)
-    )
-  );
-
-  const form = {
-    fieldsList,
+  return {
+    fields,
+    fieldsState,
     focus,
+    init,
     reset,
     submit,
     submitted,
     validation,
-    reatomField: reatomFormField,
-    withField
-  }
-
-  return form;
+  };
 };
