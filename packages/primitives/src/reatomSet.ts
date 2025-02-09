@@ -1,7 +1,11 @@
 import { Action, action, atom, AtomMut, Ctx } from '@reatom/core'
 import { withAssign } from './withAssign'
 
-export interface SetAtom<T> extends AtomMut<Set<T>> {
+export interface SetLikeAtom<T = any> extends AtomMut<Set<T>> {
+  __reatomSet: true
+}
+
+export interface SetAtom<T> extends SetLikeAtom<T> {
   add: Action<[el: T], Set<T>>
   delete: Action<[el: T], Set<T>>
   toggle: Action<[el: T], Set<T>>
@@ -36,6 +40,8 @@ export const reatomSet = <T>(
 ): SetAtom<T> =>
   atom(initState, name).pipe(
     withAssign((target, name) => ({
+      __reatomSet: true as const,
+      
       add: action(
         (ctx, el) =>
           target(ctx, (prev) => (prev.has(el) ? prev : new Set(prev).add(el))),
@@ -102,3 +108,5 @@ export const reatomSet = <T>(
       size: (ctx: Ctx) => ctx.get(target).size,
     })),
   )
+
+export const isSetAtom = (thing: any): thing is SetLikeAtom => thing?.__reatomSet === true
