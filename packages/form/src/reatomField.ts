@@ -43,7 +43,11 @@ export interface ValidationAtom extends RecordAtom<FieldValidation> {
   trigger: Action<[], FieldValidation>
 }
 
-export interface FieldAtom<State = any, Value = State> extends AtomMut<State> {
+export interface FieldLikeAtom<State = any> extends AtomMut<State> {
+  __reatomField: true
+}
+
+export interface FieldAtom<State = any, Value = State> extends FieldLikeAtom<State> {
   /** Action for handling field changes, accepts the "value" parameter and applies it to `toState` option. */
   change: Action<[Value], Value>
 
@@ -159,7 +163,7 @@ export const fieldInitValidationLess: FieldValidation = {
   validating: false,
 }
 
-export const reatomField = <State, Value>(
+export const reatomField = <State, Value = State>(
   _initState: State,
   options: string | FieldOptions<State, Value> = {},
   _stateAtom?: AtomMut<State>
@@ -329,6 +333,8 @@ export const reatomField = <State, Value>(
     reset,
     validation,
     value,
+
+    __reatomField: true as const
   })
 }
 
@@ -341,3 +347,5 @@ export const withField = <T extends AtomMut, Value = AtomState<T>>(
     reatomField(_initState, { name: anAtom.__reatom.name, ...options }, anAtom)
   );
 }
+
+export const isFieldAtom = (thing: any): thing is FieldLikeAtom => thing?.__reatomField === true
