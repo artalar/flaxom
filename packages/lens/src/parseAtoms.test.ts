@@ -197,19 +197,3 @@ describe('parseAtoms', () => {
     expect(parseAtoms(ctx, { constructObject }).constructObject).toBe(constructObject)
   })
 })
-
-// const ctx = createTestCtx();
-
-// const result = parseAtoms(ctx, {
-//   numberValue: 123,
-//   atom: atom(123),
-//   fileValue: new File([], 'file.txt'),
-//   nested: {
-//     numberValue: 123,
-//     fileValue: new File([], 'file.txt'),
-//   },
-//   atomic: {
-//     atom: atom(123),
-//     linkedList: reatomLinkedList((ctx, n: number) => ({ n }))
-//   }
-// })

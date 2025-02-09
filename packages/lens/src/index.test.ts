@@ -29,7 +29,7 @@ test(`map and mapInput`, async () => {
   const aMapInput = a.pipe(mapInput((ctx, v: string) => Number(v)))
   const ctx = createTestCtx()
 
-  const aMapInputTrack = ctx.subscribeTrack(aMapInput, () => {})
+  const aMapInputTrack = ctx.subscribeTrack(aMapInput, () => { })
 
   expect(ctx.get(a)).toBe(0)
   expect(ctx.get(aMap)).toBe(1)
@@ -39,7 +39,6 @@ test(`map and mapInput`, async () => {
   expect(ctx.get(a)).toBe(1)
   expect(ctx.get(aMap)).toBe(2)
   expect(aMapInputTrack.lastInput()).toEqual([{ params: ['1'], payload: 1 }])
-  ;`👍` //?
 })
 
 test(`readonly and plain`, () => {
@@ -53,7 +52,6 @@ test(`readonly and plain`, () => {
   expect(() => aReadonly(ctx, 1)).toThrow()
   // @ts-expect-error
   expect(() => aPlain.increment(ctx, 1)).toThrow()
-  ;`👍` //?
 })
 
 test(`mapPayload, mapPayloadAwaited, toAtom`, async () => {
@@ -89,7 +87,6 @@ test(`mapPayload, mapPayloadAwaited, toAtom`, async () => {
   expect(trackMaybeString.lastInput()).toEqual([{ params: [4], payload: '4' }])
   expect(trackString.lastInput()).toBe('4')
   expect(trackNumber.lastInput()).toBe(4)
-  ;`👍` //?
 })
 
 test(`mapPayloadAwaited sync resolution`, async () => {
@@ -115,7 +112,6 @@ test(`mapPayloadAwaited sync resolution`, async () => {
 
   expect(cb.calls.length).toBe(2)
   expect(cb.lastInput()).toEqual([1, 2])
-  ;`👍` //?
 })
 
 test('filter atom', () => {
@@ -150,7 +146,6 @@ test('filter atom', () => {
   expect(track1.lastInput()).toBe(3)
   expect(track2.calls.length).toBe(3)
   expect(track2.lastInput()).toEqual([3])
-  ;`👍` //?
 })
 
 test('filter action', () => {
@@ -168,7 +163,6 @@ test('filter action', () => {
   act(ctx, 3)
   expect(track.calls.length).toBe(2)
   expect(track.lastInput()[0]?.payload).toBe(3)
-  ;`👍` //?
 })
 
 test('debounce atom', async () => {
@@ -186,7 +180,6 @@ test('debounce atom', async () => {
   await sleep()
   expect(track.calls.length).toBe(2)
   expect(track.lastInput()).toBe(3)
-  ;`👍` //?
 })
 
 test('debounce action', async () => {
@@ -210,7 +203,6 @@ test('debounce action', async () => {
   await sleep()
   expect(track.calls.length).toBe(3)
   expect(track.lastInput().at(0)?.payload).toBe(3)
-  ;`👍` //?
 })
 
 test('sample atom', () => {
@@ -230,7 +222,6 @@ test('sample atom', () => {
   signal(ctx)
   expect(track.calls.length).toBe(2)
   expect(track.lastInput()).toBe(2)
-  ;`👍` //?
 })
 
 test('sample action', () => {
@@ -249,7 +240,6 @@ test('sample action', () => {
   signal(ctx, 1)
   expect(track.calls.length).toBe(2)
   expect(track.lastInput()).toEqual([{ params: [2], payload: 2 }])
-  ;`👍` //?
 })
 
 test('mapPayload atom', () => {
@@ -266,7 +256,6 @@ test('mapPayload atom', () => {
   act(ctx, 1)
   expect(atomTrack.lastInput()).toBe(1)
   expect(actMapTrack.lastInput()).toBe(2)
-  ;`👍` //?
 })
 
 test('mapPayloadAwaited atom', async () => {
@@ -283,7 +272,6 @@ test('mapPayloadAwaited atom', async () => {
   await act(ctx, 1)
   expect(atomTrack.lastInput()).toBe(1)
   expect(actMapTrack.lastInput()).toBe(2)
-  ;`👍` //?
 })
 
 test('effect', async () => {
@@ -317,7 +305,6 @@ test('effect', async () => {
   expect(track.calls.length).toBe(3)
   expect(track.lastInput()).toEqual([{ params: [1], payload: 1 }])
   expect(ctx.get(d)).toBe(1)
-  ;`👍` //?
 })
 
 test('onLensUpdate', async () => {
@@ -356,23 +343,22 @@ test('onLensUpdate', async () => {
   e(ctx, { a: 2, c: 2 })
   expect(track.calls.length).toBe(3)
   expect(track.lastInput()).toEqual({ a: 2, c: 2 })
-  ;`👍` //?
 })
 
 test('withOnUpdate and sampleBuffer example', () => {
   const sampleBuffer =
     <T>(signal: Atom) =>
-    (anAction: Action<[T], T>) => {
-      const bufferAtom = atom(
-        new Array<T>(),
-        `${anAction.__reatom.name}._sampleBuffer`,
-      )
-      return anAction.pipe(
-        mapPayload((ctx, value) => bufferAtom(ctx, (v) => [...v, value])),
-        sample(signal),
-        withOnUpdate((ctx, v) => bufferAtom(ctx, [])),
-      )
-    }
+      (anAction: Action<[T], T>) => {
+        const bufferAtom = atom(
+          new Array<T>(),
+          `${anAction.__reatom.name}._sampleBuffer`,
+        )
+        return anAction.pipe(
+          mapPayload((ctx, value) => bufferAtom(ctx, (v) => [...v, value])),
+          sample(signal),
+          withOnUpdate((ctx, v) => bufferAtom(ctx, [])),
+        )
+      }
 
   const signal = action()
   const a = action<number>()
@@ -400,7 +386,6 @@ test('withOnUpdate and sampleBuffer example', () => {
   signal(ctx)
   expect(track.calls.length).toBe(2)
   expect(track.lastInput()).toEqual([4])
-  ;`👍` //?
 })
 
 test('throttle', async () => {
@@ -415,6 +400,4 @@ test('throttle', async () => {
     expect(a(ctx, (s) => ++s) <= 5).toBe(true)
     await sleep(10)
   }
-
-  ;`👍` //?
 })

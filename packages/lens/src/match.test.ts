@@ -42,7 +42,6 @@ test('is method', () => {
 
   a(ctx, 'abc')
   expect(track.lastInput()).toBe(false)
-  ;`👍` //?
 })
 
 test('with', () => {
@@ -80,7 +79,6 @@ test('default should checks in the end', () => {
   const ctx = createTestCtx()
 
   expect(ctx.get(match(true).default(false).truthy(true))).toBe(true)
-  ;`👍` //?
 })
 
 test('reactive change', () => {
