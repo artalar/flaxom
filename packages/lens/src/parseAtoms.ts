@@ -4,14 +4,13 @@ import { isRec } from '@reatom/utils'
 
 type Primitive = string | number | boolean | null | undefined
 type Builtin = Date | RegExp | Function
-export type ParseAtoms<T> = T extends Primitive | Builtin
-  ? T
-  : T extends Action
+
+export type ParseAtoms<T> = T extends Action
   ? T
   : T extends LinkedListLikeAtom<infer T>
   ? T extends LinkedList<infer T>
-    ? Array<T>
-    : never
+  ? Array<ParseAtoms<T>>
+  : never
   : T extends Atom<infer T>
   ? ParseAtoms<T>
   : T extends Map<infer K, infer T>
@@ -20,11 +19,12 @@ export type ParseAtoms<T> = T extends Primitive | Builtin
   ? Set<ParseAtoms<T>>
   : T extends Array<infer T>
   ? Array<ParseAtoms<T>>
+  : T extends Primitive | Builtin
+  ? T
   : T extends object
   ? {
-      [K in keyof T]: T[K] extends object & { constructor: Function } ? T[K] : ParseAtoms<T[K]>
-      // [K in keyof T]: ParseAtoms<T[K]>
-    }
+    [K in keyof T]: ParseAtoms<T[K]>
+  }
   : T
 
 export const parseAtoms = <Value>(ctx: Ctx, value: Value): ParseAtoms<Value> => {

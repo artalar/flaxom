@@ -2,12 +2,7 @@ import { Action, Atom, AtomState, action, atom } from '@reatom/core'
 import { sleep } from '@reatom/utils'
 import { reatomNumber } from '@reatom/primitives'
 import { createTestCtx, mockFn } from '@reatom/testing'
-import { test } from 'uvu'
-import * as assert from 'uvu/assert'
-
-import './match.test'
-import './parseAtoms.test'
-import './select.test'
+import { test, expect } from 'vitest'
 
 import {
   combine,
@@ -36,14 +31,14 @@ test(`map and mapInput`, async () => {
 
   const aMapInputTrack = ctx.subscribeTrack(aMapInput, () => {})
 
-  assert.is(ctx.get(a), 0)
-  assert.is(ctx.get(aMap), 1)
-  assert.equal(ctx.get(aMapInput), [])
+  expect(ctx.get(a)).toBe(0)
+  expect(ctx.get(aMap)).toBe(1)
+  expect(ctx.get(aMapInput)).toEqual([])
 
   aMapInput(ctx, '1')
-  assert.is(ctx.get(a), 1)
-  assert.is(ctx.get(aMap), 2)
-  assert.equal(aMapInputTrack.lastInput(), [{ params: ['1'], payload: 1 }])
+  expect(ctx.get(a)).toBe(1)
+  expect(ctx.get(aMap)).toBe(2)
+  expect(aMapInputTrack.lastInput()).toEqual([{ params: ['1'], payload: 1 }])
   ;`👍` //?
 })
 
@@ -52,12 +47,12 @@ test(`readonly and plain`, () => {
   const aReadonly = a.pipe(readonly, plain)
   const aPlain = a.pipe(readonly, plain)
   const ctx = createTestCtx()
-  assert.is(a(ctx, 1), 1)
-  assert.is(a.increment(ctx, 1), 2)
+  expect(a(ctx, 1)).toBe(1)
+  expect(a.increment(ctx, 1)).toBe(2)
   // @ts-expect-error
-  assert.throws(() => aReadonly(ctx, 1))
+  expect(() => aReadonly(ctx, 1)).toThrow()
   // @ts-expect-error
-  assert.throws(() => aPlain.increment(ctx, 1))
+  expect(() => aPlain.increment(ctx, 1)).toThrow()
   ;`👍` //?
 })
 
@@ -78,22 +73,22 @@ test(`mapPayload, mapPayloadAwaited, toAtom`, async () => {
   const trackString = ctx.subscribeTrack(aString)
   const trackNumber = ctx.subscribeTrack(aNumber)
 
-  assert.equal(ctx.get(a), [])
-  assert.equal(ctx.get(aMaybeString), [])
-  assert.is(ctx.get(aString), '0')
-  assert.is(ctx.get(aNumber), 0)
+  expect(ctx.get(a)).toEqual([])
+  expect(ctx.get(aMaybeString)).toEqual([])
+  expect(ctx.get(aString)).toBe('0')
+  expect(ctx.get(aNumber)).toBe(0)
 
   const promise = a(ctx, 4)
 
-  assert.is(trackMaybeString.calls.length, 1)
-  assert.is(trackString.calls.length, 1)
-  assert.is(trackNumber.calls.length, 1)
+  expect(trackMaybeString.calls.length).toBe(1)
+  expect(trackString.calls.length).toBe(1)
+  expect(trackNumber.calls.length).toBe(1)
 
   await promise
 
-  assert.equal(trackMaybeString.lastInput(), [{ params: [4], payload: '4' }])
-  assert.is(trackString.lastInput(), '4')
-  assert.is(trackNumber.lastInput(), 4)
+  expect(trackMaybeString.lastInput()).toEqual([{ params: [4], payload: '4' }])
+  expect(trackString.lastInput()).toBe('4')
+  expect(trackNumber.lastInput()).toBe(4)
   ;`👍` //?
 })
 
@@ -113,13 +108,13 @@ test(`mapPayloadAwaited sync resolution`, async () => {
 
   ctx.subscribe(sumAtom, cb)
 
-  assert.equal(cb.calls.length, 1)
-  assert.equal(cb.lastInput(), [])
+  expect(cb.calls.length).toBe(1)
+  expect(cb.lastInput()).toEqual([])
 
   await act(ctx)
 
-  assert.equal(cb.calls.length, 2)
-  assert.equal(cb.lastInput(), [1, 2])
+  expect(cb.calls.length).toBe(2)
+  expect(cb.lastInput()).toEqual([1, 2])
   ;`👍` //?
 })
 
@@ -134,27 +129,27 @@ test('filter atom', () => {
 
   const track1 = ctx.subscribeTrack(a1)
   const track2 = ctx.subscribeTrack(a2)
-  assert.is(track1.calls.length, 1)
-  assert.is(track1.lastInput(), 1)
-  assert.is(track2.calls.length, 1)
-  assert.equal(track2.lastInput(), [1])
+  expect(track1.calls.length).toBe(1)
+  expect(track1.lastInput()).toBe(1)
+  expect(track2.calls.length).toBe(1)
+  expect(track2.lastInput()).toEqual([1])
 
   a(ctx, 2)
-  assert.is(track1.calls.length, 1)
-  assert.equal(ctx.get(a2), [2])
-  assert.is(track2.calls.length, 2)
-  assert.equal(track2.lastInput(), [2])
+  expect(track1.calls.length).toBe(1)
+  expect(ctx.get(a2)).toEqual([2])
+  expect(track2.calls.length).toBe(2)
+  expect(track2.lastInput()).toEqual([2])
 
   a(ctx, 2)
-  assert.is(track1.calls.length, 1)
-  assert.is(track2.calls.length, 2)
-  assert.equal(track2.lastInput(), [2])
+  expect(track1.calls.length).toBe(1)
+  expect(track2.calls.length).toBe(2)
+  expect(track2.lastInput()).toEqual([2])
 
   a(ctx, 3)
-  assert.is(track1.calls.length, 2)
-  assert.is(track1.lastInput(), 3)
-  assert.is(track2.calls.length, 3)
-  assert.equal(track2.lastInput(), [3])
+  expect(track1.calls.length).toBe(2)
+  expect(track1.lastInput()).toBe(3)
+  expect(track2.calls.length).toBe(3)
+  expect(track2.lastInput()).toEqual([3])
   ;`👍` //?
 })
 
@@ -164,15 +159,15 @@ test('filter action', () => {
   const ctx = createTestCtx()
 
   const track = ctx.subscribeTrack(act1)
-  assert.is(track.calls.length, 1)
-  assert.equal(track.lastInput(), [])
+  expect(track.calls.length).toBe(1)
+  expect(track.lastInput()).toEqual([])
 
   act(ctx, 2)
-  assert.is(track.calls.length, 1)
+  expect(track.calls.length).toBe(1)
 
   act(ctx, 3)
-  assert.is(track.calls.length, 2)
-  assert.equal(track.lastInput()[0]?.payload, 3)
+  expect(track.calls.length).toBe(2)
+  expect(track.lastInput()[0]?.payload).toBe(3)
   ;`👍` //?
 })
 
@@ -185,12 +180,12 @@ test('debounce atom', async () => {
   a(ctx, 1)
   a(ctx, 2)
   a(ctx, 3)
-  assert.is(track.calls.length, 1)
-  assert.equal(track.lastInput(), 0)
+  expect(track.calls.length).toBe(1)
+  expect(track.lastInput()).toBe(0)
 
   await sleep()
-  assert.is(track.calls.length, 2)
-  assert.is(track.lastInput(), 3)
+  expect(track.calls.length).toBe(2)
+  expect(track.lastInput()).toBe(3)
   ;`👍` //?
 })
 
@@ -201,20 +196,20 @@ test('debounce action', async () => {
   const track = ctx.subscribeTrack(b)
 
   a(ctx, 1)
-  assert.is(track.calls.length, 1)
-  assert.equal(track.lastInput(), [])
+  expect(track.calls.length).toBe(1)
+  expect(track.lastInput()).toEqual([])
 
   await sleep()
-  assert.is(track.calls.length, 2)
-  assert.is(track.lastInput().at(0)?.payload, 1)
+  expect(track.calls.length).toBe(2)
+  expect(track.lastInput().at(0)?.payload).toBe(1)
 
   a(ctx, 2)
   a(ctx, 3)
-  assert.is(track.calls.length, 2)
+  expect(track.calls.length).toBe(2)
 
   await sleep()
-  assert.is(track.calls.length, 3)
-  assert.is(track.lastInput().at(0)?.payload, 3)
+  expect(track.calls.length).toBe(3)
+  expect(track.lastInput().at(0)?.payload).toBe(3)
   ;`👍` //?
 })
 
@@ -225,16 +220,16 @@ test('sample atom', () => {
   const ctx = createTestCtx()
 
   const track = ctx.subscribeTrack(aSampled)
-  assert.is(track.calls.length, 1)
-  assert.equal(track.lastInput(), 0)
+  expect(track.calls.length).toBe(1)
+  expect(track.lastInput()).toBe(0)
 
   a(ctx, 1)
   a(ctx, 2)
-  assert.is(track.calls.length, 1)
+  expect(track.calls.length).toBe(1)
 
   signal(ctx)
-  assert.is(track.calls.length, 2)
-  assert.equal(track.lastInput(), 2)
+  expect(track.calls.length).toBe(2)
+  expect(track.lastInput()).toBe(2)
   ;`👍` //?
 })
 
@@ -244,16 +239,16 @@ test('sample action', () => {
   const ctx = createTestCtx()
 
   const track = ctx.subscribeTrack(a.pipe(sample(signal)))
-  assert.is(track.calls.length, 1)
-  assert.equal(track.lastInput(), [])
+  expect(track.calls.length).toBe(1)
+  expect(track.lastInput()).toEqual([])
 
   a(ctx, 1)
   a(ctx, 2)
-  assert.is(track.calls.length, 1)
+  expect(track.calls.length).toBe(1)
 
   signal(ctx, 1)
-  assert.is(track.calls.length, 2)
-  assert.equal(track.lastInput(), [{ params: [2], payload: 2 }])
+  expect(track.calls.length).toBe(2)
+  expect(track.lastInput()).toEqual([{ params: [2], payload: 2 }])
   ;`👍` //?
 })
 
@@ -265,12 +260,12 @@ test('mapPayload atom', () => {
   const atomTrack = ctx.subscribeTrack(actAtom)
   const actMapTrack = ctx.subscribeTrack(actMapAtom)
 
-  assert.is(atomTrack.lastInput(), 0)
-  assert.is(actMapTrack.lastInput(), 0)
+  expect(atomTrack.lastInput()).toBe(0)
+  expect(actMapTrack.lastInput()).toBe(0)
 
   act(ctx, 1)
-  assert.is(atomTrack.lastInput(), 1)
-  assert.is(actMapTrack.lastInput(), 2)
+  expect(atomTrack.lastInput()).toBe(1)
+  expect(actMapTrack.lastInput()).toBe(2)
   ;`👍` //?
 })
 
@@ -282,12 +277,12 @@ test('mapPayloadAwaited atom', async () => {
   const atomTrack = ctx.subscribeTrack(actAtom)
   const actMapTrack = ctx.subscribeTrack(actMapAtom)
 
-  assert.is(atomTrack.lastInput(), 0)
-  assert.is(actMapTrack.lastInput(), 0)
+  expect(atomTrack.lastInput()).toBe(0)
+  expect(actMapTrack.lastInput()).toBe(0)
 
   await act(ctx, 1)
-  assert.is(atomTrack.lastInput(), 1)
-  assert.is(actMapTrack.lastInput(), 2)
+  expect(atomTrack.lastInput()).toBe(1)
+  expect(actMapTrack.lastInput()).toBe(2)
   ;`👍` //?
 })
 
@@ -300,28 +295,28 @@ test('effect', async () => {
   const ctx = createTestCtx()
 
   const track = ctx.subscribeTrack(e)
-  assert.is(track.calls.length, 1)
-  assert.equal(track.lastInput(), [])
-  assert.is(ctx.get(d), 0)
+  expect(track.calls.length).toBe(1)
+  expect(track.lastInput()).toEqual([])
+  expect(ctx.get(d)).toBe(0)
 
   await sleep()
-  assert.is(track.calls.length, 2)
-  assert.equal(track.lastInput(), [{ params: [0], payload: 0 }])
+  expect(track.calls.length).toBe(2)
+  expect(track.lastInput()).toEqual([{ params: [0], payload: 0 }])
 
   ctx.get(() => {
     a(ctx, 1)
-    assert.is(ctx.get(b), 1)
-    assert.is(ctx.get(c).length, 0)
-    assert.is(ctx.get(d), 0)
+    expect(ctx.get(b)).toBe(1)
+    expect(ctx.get(c).length).toBe(0)
+    expect(ctx.get(d)).toBe(0)
   })
 
-  assert.is(track.calls.length, 2)
-  assert.is(ctx.get(d), 1)
+  expect(track.calls.length).toBe(2)
+  expect(ctx.get(d)).toBe(1)
 
   await sleep()
-  assert.is(track.calls.length, 3)
-  assert.equal(track.lastInput(), [{ params: [1], payload: 1 }])
-  assert.is(ctx.get(d), 1)
+  expect(track.calls.length).toBe(3)
+  expect(track.lastInput()).toEqual([{ params: [1], payload: 1 }])
+  expect(ctx.get(d)).toBe(1)
   ;`👍` //?
 })
 
@@ -348,19 +343,19 @@ test('onLensUpdate', async () => {
     (ctx, value) => track(value),
   )
 
-  assert.is(track.calls.length, 0)
+  expect(track.calls.length).toBe(0)
 
   a(ctx, 1)
-  assert.is(track.calls.length, 1)
+  expect(track.calls.length).toBe(1)
   track.lastInput() //?
-  assert.equal(track.lastInput(), { a: 1, c: 0 })
+  expect(track.lastInput()).toEqual({ a: 1, c: 0 })
   await sleep()
-  assert.is(track.calls.length, 2)
-  assert.equal(track.lastInput(), { a: 1, c: 1 })
+  expect(track.calls.length).toBe(2)
+  expect(track.lastInput()).toEqual({ a: 1, c: 1 })
 
   e(ctx, { a: 2, c: 2 })
-  assert.is(track.calls.length, 3)
-  assert.equal(track.lastInput(), { a: 2, c: 2 })
+  expect(track.calls.length).toBe(3)
+  expect(track.lastInput()).toEqual({ a: 2, c: 2 })
   ;`👍` //?
 })
 
@@ -390,21 +385,21 @@ test('withOnUpdate and sampleBuffer example', () => {
   a(ctx, 1)
   a(ctx, 2)
   a(ctx, 3)
-  assert.is(track.calls.length, 0)
+  expect(track.calls.length).toBe(0)
 
   signal(ctx)
-  assert.is(track.calls.length, 1)
-  assert.equal(track.lastInput(), [1, 2, 3])
+  expect(track.calls.length).toBe(1)
+  expect(track.lastInput()).toEqual([1, 2, 3])
 
   signal(ctx)
-  assert.is(track.calls.length, 1)
+  expect(track.calls.length).toBe(1)
 
   a(ctx, 4)
-  assert.is(track.calls.length, 1)
+  expect(track.calls.length).toBe(1)
 
   signal(ctx)
-  assert.is(track.calls.length, 2)
-  assert.equal(track.lastInput(), [4])
+  expect(track.calls.length).toBe(2)
+  expect(track.lastInput()).toEqual([4])
   ;`👍` //?
 })
 
@@ -413,15 +408,13 @@ test('throttle', async () => {
   const ctx = createTestCtx()
 
   const track = ctx.subscribeTrack(a.pipe(throttle(30)))
-  assert.is(track.calls.length, 1)
-  assert.equal(track.lastInput(), 0)
+  expect(track.calls.length).toBe(1)
+  expect(track.lastInput()).toBe(0)
 
   while (track.calls.length === 1) {
-    assert.is(a(ctx, (s) => ++s) <= 5, true)
+    expect(a(ctx, (s) => ++s) <= 5).toBe(true)
     await sleep(10)
   }
 
   ;`👍` //?
 })
-
-test.run()
