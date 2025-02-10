@@ -166,6 +166,45 @@ it(
 )
 
 it(
+  'multiple renden shared element',
+  setup(async (ctx, h, hf, mount, parent) => {
+    const valueAtom = atom('abc', 'value')
+    const element = <p>{valueAtom}</p>
+
+    const Component = () => <>
+      <div id="1">
+        {element}
+      </div>
+      <div id="2">
+        {element}
+      </div>
+    </>
+
+    const childAtom = atom<JSX.Element | undefined>(<Component></Component>, 'child')
+    const app = <div>
+      {childAtom}
+    </div>
+
+    mount(parent, app)
+    await sleep()
+    assert.is(app.innerHTML, '<!--child--><div id="1"></div><div id="2"><p><!--value-->abc</p></div>')
+
+    valueAtom(ctx, 'def')
+    await sleep()
+    assert.is(app.innerHTML, '<!--child--><div id="1"></div><div id="2"><p><!--value-->def</p></div>')
+
+    childAtom(ctx, undefined)
+    await sleep()
+    assert.is(app.innerHTML, '<!--child-->')
+
+    childAtom(ctx, <Component></Component>)
+    valueAtom(ctx, 'ghi')
+    await sleep()
+    assert.is(app.innerHTML, '<!--child--><div id="1"></div><div id="2"><p><!--value-->def</p></div>')
+  }),
+)
+
+it(
   'fragment as child',
   setup((ctx, h, hf, mount, parent) => {
     const child = (
@@ -484,6 +523,32 @@ it(
     expect(ref2.dataset.reatom).toBeTruthy()
 
     expect(ref1.dataset.reatom).toBe(ref2.dataset.reatom)
+  }),
+)
+
+it(
+  'css property generate class name',
+  setup(async (ctx, h, hf, mount, parent) => {
+    const css = 'color: red;'
+
+    const First = () => <div css={css}></div>
+    const Second = () => <div css={css}></div>
+
+    const first = <First></First>
+    const second = <Second></Second>
+
+    const component = (
+      <div>
+        {first}
+        {second}
+      </div>
+    )
+
+    mount(parent, component)
+    await sleep()
+
+    assert.ok(first.dataset.reatom!.startsWith(First.name))
+    assert.ok(second.dataset.reatom!.startsWith(Second.name))
   }),
 )
 

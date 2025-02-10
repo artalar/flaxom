@@ -182,9 +182,11 @@ export const reatomJsx = (ctx: Ctx, DOM: DomApis = globalThis.window) => {
         DOM.document.head.appendChild(stylesheet)
       }
 
-      let styleId = styles[val]
+      const prefix = name ? name + '_' : ''
+      const styleKey = prefix + val
+      let styleId = styles[styleKey]
       if (!styleId) {
-        styleId = styles[val] = `${name ? name + '_' : ''}${random(0, 1e6).toString()}`
+        styleId = styles[styleKey] = prefix + random(0, 1e6).toString()
         stylesheet.innerText += '[data-reatom="' + styleId + '"]{' + val + '}\n'
       }
       /** @see https://measurethat.net/Benchmarks/Show/11819 */
