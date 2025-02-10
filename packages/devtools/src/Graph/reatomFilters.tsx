@@ -184,7 +184,7 @@ const FilterView = ({ filter, remove }: { filter: Filter; remove?: Fn<[Ctx]> }) 
         {remove && (
           <FilterButton
             css={`
-              margin-left: 5px;
+              margin-left: 10px;
               padding-bottom: 2px;
             `}
             title="Remove"
@@ -238,7 +238,7 @@ const ActionButton = (props: JSX.IntrinsicElements['button']) => (
     css={`
       ${buttonCss}
       flex-shrink: 0;
-      width: 80px;
+      width: 95px;
       ${props.css || ''}
     `}
   />
@@ -284,7 +284,7 @@ const ActionLabel = ({ model, children, ...props }: JSX.IntrinsicElements['label
     css={`
       ${buttonCss}
       flex-shrink: 0;
-      width: 90px;
+      width: 95px;
       padding: 2px 6px 2px 2px;
       /* TODO : fix this */
       &:has(input:focus) {
@@ -354,6 +354,9 @@ export const reatomFilters = (
   const FiltersComponent = () => (
     <div
       css={`
+        flex-shrink: 0;
+        max-height: 40%;
+        overflow: auto;
         & input::placeholder {
           color: currentColor;
           opacity: 0.8;
@@ -422,7 +425,7 @@ export const reatomFilters = (
               padding-bottom: 2px;
               background: none;
               border: 2px solid #151134;
-              margin-left: 2px;
+              margin-left: 5px;
             `}
           >
             save
@@ -465,7 +468,7 @@ export const reatomFilters = (
               border: 1px solid #151134;
               border-radius: 2px;
               background: none;
-              margin-right: 5px;
+              margin-right: 10px;
             `}
           />
           <input

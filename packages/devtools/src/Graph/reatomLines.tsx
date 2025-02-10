@@ -49,11 +49,11 @@ export const reatomLines = (name: string): Lines => {
             return cause.cause?.cause && calc(target, cause.cause)
           }
 
-          const toX = 70 + toRec.x + -containerRec.x
-          const toY = toRec.y + 27 - containerRec.y
+          const toX = 61 + toRec.x + -containerRec.x
+          const toY = toRec.y + 20 - containerRec.y
 
-          const fromX = 70 + fromRec.x + -containerRec.x
-          const fromY = fromRec.y + 27 - containerRec.y
+          const fromX = 61 + fromRec.x + -containerRec.x
+          const fromY = fromRec.y + 20 - containerRec.y
 
           const middleX = toX + (toY - fromY) / 6
           const middleY = fromY + (toY - fromY) / 2
@@ -73,7 +73,7 @@ export const reatomLines = (name: string): Lines => {
         return (
           <svg:polyline
             points={points}
-            stroke={`hsla(${200 /* + 40 * ctx.get(highlightedTargets).length */}deg 20% 40%)`}
+            stroke={`hsla(${170 + 50 * ctx.get(highlightedTargets).length}deg 20% 40%)`}
             fill="none"
             css={`
               stroke-width: 4;

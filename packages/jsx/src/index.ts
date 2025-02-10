@@ -1,5 +1,5 @@
 import { action, Atom, AtomMut, createCtx, Ctx, Fn, isAtom, Rec, throwReatomError, Unsubscribe } from '@reatom/core'
-import { isObject, random } from '@reatom/utils'
+import { noop, random } from '@reatom/utils'
 import { type LinkedList, type LLNode, isLinkedListAtom, LL_NEXT } from '@reatom/primitives'
 import type { AttributesAtomMaybe, JSX } from './jsx'
 
@@ -34,53 +34,123 @@ let unlink = (parent: Node, un: Unsubscribe) => {
   })
 }
 
-const walkLinkedList = (ctx: Ctx, el: JSX.Element, list: Atom<LinkedList<LLNode<JSX.Element>>>) => {
+const walkLinkedList = (ctx: Ctx, DOM: DomApis, el: JSX.Element, list: Atom<LinkedList<LLNode<JSX.Element>>>) => {
   let lastVersion = -1
-  unlink(
-    el,
-    ctx.subscribe(list, (state) => {
-      if (state.version - 1 > lastVersion) {
-        el.innerHTML = ''
-        for (let { head } = state; head; head = head[LL_NEXT]) {
-          el.append(head)
+
+  const cb = (state: LinkedList<LLNode<JSX.Element>>) => {
+    if (state.version - 1 > lastVersion) {
+      el.innerHTML = ''
+      for (let { head } = state; head; head = head[LL_NEXT]) {
+        el.append(head)
+      }
+    } else {
+      for (const change of state.changes) {
+        if (change.kind === 'create') {
+          throwReatomError(!isLiveFragment(change.node), 'native fragment is not supported')
+          el.append(change.node)
         }
-      } else {
-        for (const change of state.changes) {
-          if (change.kind === 'create') {
-            el.append(change.node)
-          }
-          if (change.kind === 'remove') {
+        if (change.kind === 'remove') {
+          if (isLiveFragment(change.node)) {
+            const fragment = change.node.__reatomFragment
+            fragment.update()
+            fragment.start.remove()
+            fragment.end.remove()
+          } else {
             el.removeChild(change.node)
           }
-          if (change.kind === 'swap') {
-            let [aNext, bNext] = [change.a.nextSibling, change.b.nextSibling]
-            if (bNext) {
-              el.insertBefore(change.a, bNext)
-            } else {
-              el.append(change.a)
-            }
+        }
+        // TODO support fragments
+        if (change.kind === 'swap') {
+          let [aNext, bNext] = [change.a.nextSibling, change.b.nextSibling]
+          if (bNext) {
+            el.insertBefore(change.a, bNext)
+          } else {
+            el.append(change.a)
+          }
 
-            if (aNext) {
-              el.insertBefore(change.b, aNext)
-            } else {
-              el.append(change.b)
-            }
-          }
-          if (change.kind === 'move') {
-            if (change.after) {
-              change.after.insertAdjacentElement('afterend', change.node)
-            } else {
-              el.append(change.node)
-            }
-          }
-          if (change.kind === 'clear') {
-            el.innerHTML = ''
+          if (aNext) {
+            el.insertBefore(change.b, aNext)
+          } else {
+            el.append(change.b)
           }
         }
+        // TODO support fragments
+        if (change.kind === 'move') {
+          if (change.after) {
+            change.after.insertAdjacentElement('afterend', change.node)
+          } else {
+            el.append(change.node)
+          }
+        }
+        if (change.kind === 'clear') {
+          el.innerHTML = ''
+        }
       }
-      lastVersion = state.version
-    }),
-  )
+    }
+    lastVersion = state.version
+  }
+
+  // it's critical to not use not a last state, but the each state.
+  const unSubscribe = ctx.subscribe(list, noop)
+  const unChange = list.onChange((ctx, state) => cb(state))
+
+  cb(ctx.get(list))
+
+  unlink(el, () => {
+    unSubscribe()
+    unChange()
+  })
+}
+
+type LiveDocumentFragment = DocumentFragment & {
+  __reatomFragment: {
+    start: Comment
+    end: Comment
+    update: (element?: JSX.ElementPrimitiveChildren) => void
+  }
+}
+
+// TODO optimize
+const isLiveFragment = (node: Node): node is LiveDocumentFragment =>
+  String(node) === '[object DocumentFragment]' && '__reatomFragment' in node
+
+const createLiveFragment = (DOM: DomApis, name: string): LiveDocumentFragment => {
+  const fragment = DOM.document.createDocumentFragment()
+  const start = DOM.document.createComment(name)
+  const end = start.cloneNode() as Comment
+  fragment.append(start, end)
+
+  const update = (element?: JSX.ElementPrimitiveChildren) => {
+    while (start.nextSibling && start.nextSibling !== end) {
+      start.nextSibling!.remove?.()
+    }
+
+    if (element instanceof DOM.Node) {
+      start.after(element)
+    } else if (!isSkipped(element)) {
+      const node = isAtom(element) ? walkAtom(ctx, DOM, element) : DOM.document.createTextNode(String(element))
+      start.after(node)
+    }
+  }
+
+  return Object.assign(fragment, {
+    __reatomFragment: {
+      start,
+      end,
+      update,
+    },
+  })
+}
+
+const walkAtom = (ctx: Ctx, DOM: DomApis, anAtom: Atom<JSX.ElementPrimitiveChildren>): DocumentFragment => {
+  const fragment = createLiveFragment(DOM, anAtom.__reatom.name!)
+
+  const un = ctx.subscribe(anAtom, fragment.__reatomFragment.update)
+
+  unsubscribesMap.set(fragment.__reatomFragment.start, [])
+  unlink(fragment.__reatomFragment.start, un)
+
+  return fragment
 }
 
 const patchStyleProperty = (style: CSSStyleDeclaration, key: string, value: any): void => {
@@ -112,9 +182,11 @@ export const reatomJsx = (ctx: Ctx, DOM: DomApis = globalThis.window) => {
         DOM.document.head.appendChild(stylesheet)
       }
 
-      let styleId = styles[val]
+      const prefix = name ? name + '_' : ''
+      const styleKey = prefix + val
+      let styleId = styles[styleKey]
       if (!styleId) {
-        styleId = styles[val] = `${name ? name + '_' : ''}${random(0, 1e6).toString()}`
+        styleId = styles[styleKey] = prefix + random(0, 1e6).toString()
         stylesheet.innerText += '[data-reatom="' + styleId + '"]{' + val + '}\n'
       }
       /** @see https://measurethat.net/Benchmarks/Show/11819 */
@@ -145,44 +217,19 @@ export const reatomJsx = (ctx: Ctx, DOM: DomApis = globalThis.window) => {
     }
   }
 
-  const walkAtom = (ctx: Ctx, anAtom: Atom<JSX.ElementPrimitiveChildren>): DocumentFragment => {
-    const fragment = DOM.document.createDocumentFragment()
-    const target = DOM.document.createComment(anAtom.__reatom.name ?? '')
-    fragment.append(target)
-
-    let childNodes: ChildNode[] = []
-    const un = ctx.subscribe(anAtom, (v): void => {
-      childNodes.forEach((node) => node.remove())
-
-      if (v instanceof DOM.Node) {
-        childNodes = v instanceof DOM.DocumentFragment ? [...v.childNodes] : [v as ChildNode]
-        target.after(v)
-      } else if (isSkipped(v)) {
-        childNodes = []
-      } else {
-        const node = DOM.document.createTextNode(String(v))
-        childNodes = [node]
-        target.after(node)
-      }
-    })
-
-    if (!unsubscribesMap.get(target)) unsubscribesMap.set(target, [])
-    unlink(target, un)
-
-    return fragment
-  }
-
   let h = (tag: any, props: Rec, ...children: any[]) => {
     if (isAtom(tag)) {
-      return walkAtom(ctx, tag)
+      return walkAtom(ctx, DOM, tag)
     }
 
     if (tag === hf) {
-      const fragment = DOM.document.createDocumentFragment()
+      // needed for `walkLinkedList`
+      const fragment = createLiveFragment(DOM, '')
       for (let i = 0; i < children.length; i++) {
         const child = children[i]
-        fragment.append(isAtom(child) ? walkAtom(ctx, child) : child)
+        fragment.append(isAtom(child) ? walkAtom(ctx, DOM, child) : child)
       }
+      fragment.append(fragment.__reatomFragment.end)
       return fragment
     }
 
@@ -216,7 +263,7 @@ export const reatomJsx = (ctx: Ctx, DOM: DomApis = globalThis.window) => {
     if ('children' in props) children = props.children
 
     for (let k in props) {
-      if (k !== 'children') {
+      if (k !== 'children' && k !== 'element') {
         let prop = props[k]
         if (k === 'ref') {
           ctx.schedule(() => {
@@ -268,10 +315,9 @@ export const reatomJsx = (ctx: Ctx, DOM: DomApis = globalThis.window) => {
         for (let i = 0; i < child.length; i++) walk(child[i])
       } else {
         if (isLinkedListAtom(child)) {
-          walkLinkedList(ctx, element, child)
+          walkLinkedList(ctx, DOM, element, child)
         } else if (isAtom(child)) {
-          const fragment = walkAtom(ctx, child)
-          element.append(fragment)
+          element.append(walkAtom(ctx, DOM, child))
         } else if (!isSkipped(child)) {
           element.append(child as Node | string)
         }
@@ -292,7 +338,9 @@ export const reatomJsx = (ctx: Ctx, DOM: DomApis = globalThis.window) => {
   let hf = () => {}
 
   let mount = (target: Element, child: Element) => {
-    target.append(...[child].flat(Infinity))
+    // TODO fix
+    // target.append(...[child].flat(Infinity))
+    target.append(child)
 
     new DOM.MutationObserver((mutationsList) => {
       for (let mutation of mutationsList) {

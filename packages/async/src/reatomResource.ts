@@ -1,5 +1,12 @@
 import { Atom, AtomCache, Ctx, Fn, __count, atom, throwReatomError, Unsubscribe, AtomProto, action } from '@reatom/core'
-import { CauseContext, __thenReatomed, abortCauseContext, onCtxAbort, withAbortableSchedule } from '@reatom/effects'
+import {
+  CauseContext,
+  __thenReatomed,
+  abortCauseContext,
+  getTopController,
+  onCtxAbort,
+  withAbortableSchedule,
+} from '@reatom/effects'
 import { merge, noop, toAbortError } from '@reatom/utils'
 
 import { reatomAsync, AsyncAction, ControlledPromise, AsyncCtx } from '.'
@@ -50,9 +57,13 @@ export const reatomResource = <T>(
       },
     }) as AsyncCtx
 
+    const abortError = toAbortError('concurrent')
     const controller = new AbortController()
     const unabort = onCtxAbort(ctx, (error) => {
-      if (!isConnected(ctx, theReaction)) {
+      if (
+        abortError !== error && // recursion
+        !isConnected(ctx, theReaction)
+      ) {
         controller.abort(error)
       }
     })
@@ -94,7 +105,7 @@ export const reatomResource = <T>(
       () => resolved.add(promise),
     ).catch(noop)
 
-    state?.controller.abort(toAbortError('concurrent'))
+    state?.controller.abort(abortError)
 
     return promise
   }, `${name}._promiseAtom`)

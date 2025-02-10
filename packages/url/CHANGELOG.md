@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.8.1](https://github.com/artalar/reatom/compare/url-v3.8.0...url-v3.8.1) (2025-02-10)
+
+
+### Bug Fixes
+
+* **url:** subpath handling ([6f4ad7d](https://github.com/artalar/reatom/commit/6f4ad7d247fbc788c17c8711a9ddf97c92c87767))
+
 ## [3.8.0](https://github.com/artalar/reatom/compare/url-v3.7.5...url-v3.8.0) (2024-11-05)
 
 

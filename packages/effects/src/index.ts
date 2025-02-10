@@ -304,9 +304,11 @@ export const concurrent: {
       }
 
       const unabort = onCtxAbort(topCtx, (error) => {
-        // prevent unhandled error for abort
-        if (result instanceof Promise) result.catch(noop)
-        controller.abort(error)
+        if (error !== abort) {
+          // prevent unhandled error for abort
+          if (result instanceof Promise) result.catch(noop)
+          controller.abort(error)
+        }
       })
 
       abortCauseContext.set(ctx.cause, controller)
@@ -390,7 +392,8 @@ export const reaction = <Params extends any[], Payload>(
     }
     const un = ctx.subscribe(reactionAtom, noop)
     const unabort = onCtxAbort(ctx, (error) => {
-      un(), abort(error)
+      un()
+      abort(error)
     })
     const unsubscribe = () => {
       un()

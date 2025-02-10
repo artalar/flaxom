@@ -773,6 +773,22 @@ test('computed deps change during unconnection', () => {
   assert.is(ctx.get(subscription), 1)
 })
 
+test('extra log for init update', () => {
+  const ctx = createCtx()
+  const logger = mockFn()
+
+  ctx.subscribe(logger)
+
+  const a = atom('')
+  const b = atom('')
+
+  ctx.get(a)
+  assert.is(logger.lastInput().length, 1)
+
+  b(ctx, '')
+  assert.is(logger.lastInput().length, 2)
+})
+
 // test(`maximum call stack`, () => {
 //   const atoms = new Map<AtomProto, Atom>()
 //   let i = 0

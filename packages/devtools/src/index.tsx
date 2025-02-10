@@ -80,7 +80,7 @@ export const _connectDevtools = async (
       aria-label="Reatom devtools DnD handler"
       tabindex="0"
       css={`
-        --size: 5rem;
+        --size: 80px;
         position: absolute;
         width: var(--size);
         height: var(--size);
@@ -96,8 +96,8 @@ export const _connectDevtools = async (
         if (e.currentTarget.hasPointerCapture(e.pointerId)) {
           moved = true
           folded = null
-          width(ctx, `${Math.min(window.innerWidth * 0.9, window.innerWidth - e.clientX)}px`)
-          height(ctx, `${Math.min(window.innerHeight * 0.9, window.innerHeight - e.clientY)}px`)
+          width(ctx, `${Math.min(window.innerWidth * 0.95, window.innerWidth - e.clientX)}px`)
+          height(ctx, `${Math.min(window.innerHeight * 0.95, window.innerHeight - e.clientY)}px`)
         }
       }}
       on:lostpointercapture={() => {
@@ -254,7 +254,8 @@ export const createDevtools = ({
   const state: Devtools['state'] = (name, initState) => {
     let target = cache.get(name) as AtomMut | undefined
     if (!target) {
-      cache.set(name, (target = atom(initState, name)))
+      cache.set(name, (target = atom(123, name)))
+      target(clientCtx, initState)
     } else if (ctx.get(target) !== initState) {
       target(clientCtx, initState)
     }

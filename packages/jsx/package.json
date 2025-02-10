@@ -1,6 +1,6 @@
 {
   "name": "@reatom/jsx",
-  "version": "3.16.1",
+  "version": "3.17.1",
   "private": false,
   "sideEffects": false,
   "description": "Reatom for jsx",
@@ -31,8 +31,8 @@
   "scripts": {
     "prepublishOnly": "npm run build && npm run test",
     "build": "microbundle -f esm,cjs && cp src/jsx.d.ts build/ && cp -r build jsx-runtime/ && cp -r build jsx-dev-runtime/",
-    "test": "tsc && wtr src/*.test.{ts,tsx}",
-    "test:watch": "wtr src/*.test.{ts,tsx} --watch"
+    "test": "vitest run src/*",
+    "test:watch": "vitest src/*"
   },
   "dependencies": {
     "@reatom/core": ">=3.6.0",
@@ -41,9 +41,8 @@
     "csstype": "^3.1.2"
   },
   "devDependencies": {
-    "@types/mocha": "^10.0.8",
-    "@web/dev-server-esbuild": "^1.0.2",
-    "@web/test-runner": "^0.19.0"
+    "@vitest/browser": "^3.0.4",
+    "playwright": "^1.50.1"
   },
   "author": "artalar",
   "maintainers": [

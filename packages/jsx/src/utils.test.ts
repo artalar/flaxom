@@ -1,24 +1,24 @@
 import { atom } from '@reatom/core'
 import { createTestCtx } from '@reatom/testing'
-import * as assert from 'uvu/assert'
+import { describe, it, expect } from 'vitest'
 import { cn } from './utils'
 
 describe('parseClasses', () => {
   const ctx = createTestCtx()
 
   it('handles falsy correctly', () => {
-    assert.is(ctx.get(cn(false)), '')
-    assert.is(ctx.get(cn(true)), '')
-    assert.is(ctx.get(cn(null)), '')
-    assert.is(ctx.get(cn(undefined)), '')
-    assert.is(ctx.get(cn({})), '')
-    assert.is(ctx.get(cn([])), '')
-    assert.is(ctx.get(cn(atom(undefined))), '')
-    assert.is(ctx.get(cn(() => undefined)), '')
+    expect(ctx.get(cn(false))).toBe('')
+    expect(ctx.get(cn(true))).toBe('')
+    expect(ctx.get(cn(null))).toBe('')
+    expect(ctx.get(cn(undefined))).toBe('')
+    expect(ctx.get(cn({}))).toBe('')
+    expect(ctx.get(cn([]))).toBe('')
+    expect(ctx.get(cn(atom(undefined)))).toBe('')
+    expect(ctx.get(cn(() => undefined))).toBe('')
   })
 
   it('handles falsy object correctly', () => {
-    assert.is(ctx.get(cn({
+    expect(ctx.get(cn({
       a: '',
       b: 0,
       c: NaN,
@@ -26,11 +26,11 @@ describe('parseClasses', () => {
       e: null,
       f: undefined,
       g: atom(undefined),
-    })), '')
+    }))).toBe('')
   })
 
   it('handles falsy array correctly', () => {
-    assert.is(ctx.get(cn([
+    expect(ctx.get(cn([
       '',
       null,
       undefined,
@@ -38,11 +38,11 @@ describe('parseClasses', () => {
       [],
       atom(undefined),
       () => undefined,
-    ])), '')
+    ]))).toBe('')
   })
 
   it('handles object correctly', () => {
-    assert.is(ctx.get(cn({
+    expect(ctx.get(cn({
       a: 'a',
       b: 1,
       c: true,
@@ -50,19 +50,22 @@ describe('parseClasses', () => {
       e: [],
       f: atom(true),
       g: () => undefined,
-    })), 'a b c d e f g')
+    }))).toBe('a b c d e f g')
   })
 
   it('handles deep array correctly', () => {
-    assert.is(ctx.get(cn(['a', ['b', ['c']]])), 'a b c')
+    expect(ctx.get(cn(['a', ['b', ['c']]])))
+      .toBe('a b c')
   })
 
   it('handles deep atom correctly', () => {
-    assert.is(ctx.get(cn(atom(() => atom(() => atom('a'))))), 'a')
+    expect(ctx.get(cn(atom(() => atom(() => atom('a'))))))
+      .toBe('a')
   })
 
   it('handles deep getter correctly', () => {
-    assert.is(ctx.get(cn(() => () => () => 'a')), 'a')
+    expect(ctx.get(cn(() => () => () => 'a')))
+      .toBe('a')
   })
 
   it('handles complex correctly', () => {
@@ -76,11 +79,11 @@ describe('parseClasses', () => {
       () => 'e',
     ]))
 
-    assert.is(ctx.get(classNameAtom), 'a b c d e')
+    expect(ctx.get(classNameAtom)).toBe('a b c d e')
 
     isBAtom(ctx, false)
     stringAtom(ctx, 'dd')
 
-    assert.is(ctx.get(classNameAtom), 'a c dd e')
+    expect(ctx.get(classNameAtom)).toBe('a c dd e')
   })
 })

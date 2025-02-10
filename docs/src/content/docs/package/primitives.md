@@ -27,6 +27,11 @@ thingsAtom.toReversed(ctx)
 thingsAtom.toSorted(ctx, (a, b) => (a.some > b.some ? -1 : 1))
 thingsAtom.toSpliced(ctx, index, count)
 thingsAtom.with(ctx, index, element)
+thingsAtom.push(ctx, element)
+thingsAtom.pop(ctx)
+thingsAtom.shift(ctx)
+thingsAtom.unshift(ctx, element)
+thingsAtom.slice(ctx, start, end)
 ```
 
 ## `reatomBoolean`
@@ -65,16 +70,25 @@ import { reatomMap } from '@reatom/primitives'
 
 const thingsAtom = reatomMap<string, Entity>()
 
+// read map
+ctx.get(thingsAtom)
+
 // built-in actions:
 thingsAtom.set(ctx, key, new Entity())
 thingsAtom.delete(ctx, key)
 thingsAtom.clear(ctx)
 thingsAtom.reset(ctx)
 thingsAtom.getOrCreate(ctx, key, () => new Entity()) // non nullable entity
+thingsAtom.entries(ctx, key)
+thingsAtom.values(ctx, key)
+thingsAtom.keys(ctx, key)
 
 // built-in functions:
 thingsAtom.get(ctx, key) // nullable entity
 thingsAtom.has(ctx, key)
+
+// built-in atoms:
+ctx.get(thingsAtom.sizeAtom)
 ```
 
 ## `reatomNumber`

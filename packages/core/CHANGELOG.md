@@ -1,5 +1,17 @@
 # Changelog
 
+## [3.10.0](https://github.com/artalar/reatom/compare/core-v3.9.3...core-v3.10.0) (2025-02-05)
+
+
+### Features
+
+* **core:** extra log for init update ([d26d615](https://github.com/artalar/reatom/commit/d26d615cc12df427162b23ada77ccff92f58f93b))
+
+
+### Bug Fixes
+
+* **core:** isBrowser test ([60c7e8f](https://github.com/artalar/reatom/commit/60c7e8fc2fe346960cc2b5d71db1f7cb0d3312c1))
+
 ## [3.9.3](https://github.com/artalar/reatom/compare/core-v3.9.2...core-v3.9.3) (2025-01-17)
 
 

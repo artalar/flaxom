@@ -1,5 +1,18 @@
 # Changelog
 
+## [3.8.0](https://github.com/artalar/reatom/compare/eslint-plugin-v3.7.1...eslint-plugin-v3.8.0) (2025-02-05)
+
+
+### Features
+
+* **eslint-plugin:** schedule-import-rule ([#930](https://github.com/artalar/reatom/issues/930)) ([89d63d0](https://github.com/artalar/reatom/commit/89d63d06dd4018ef6aeed8db6daf6928f3ffd24a))
+
+
+### Bug Fixes
+
+* **eslint-plugin:** false-negative for `name` as prop and invalid derivation for objects inside a named factory ([#1021](https://github.com/artalar/reatom/issues/1021)) ([6b15f13](https://github.com/artalar/reatom/commit/6b15f131682d88373e6a0f9f1bb75af60a989d8a))
+* **eslint-plugin:** fix eslint build [#1027](https://github.com/artalar/reatom/issues/1027) ([#1030](https://github.com/artalar/reatom/issues/1030)) ([8dd2669](https://github.com/artalar/reatom/commit/8dd266971ed1c81938eda91fe4f7b8bf5cc10762))
+
 ## [3.7.1](https://github.com/artalar/reatom/compare/eslint-plugin-v3.7.0...eslint-plugin-v3.7.1) (2024-11-07)
 
 
