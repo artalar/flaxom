@@ -671,7 +671,7 @@ function onCall(this: Action, cb: Fn): Unsubscribe {
   })
 }
 
-export function atom<T>(callback: (ctx: CtxSpy) => T, name?: string): Atom<T>
+export function atom<T>(computed: (ctx: CtxSpy) => T, name?: string): Atom<T>
 export function atom<T>(initState: T, name?: string): AtomMut<T>
 export function atom<T>(
   initState: T | ((ctx: CtxSpy) => T),
