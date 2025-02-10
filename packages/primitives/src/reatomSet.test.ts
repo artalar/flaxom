@@ -143,4 +143,14 @@ test(`reatomSet.sizeAtom`, () => {
   assert.equal(ctx.get(a.sizeAtom), 0)
 })
 
+test(`reatomSet should accept set constructor as initState`, () => {
+  const ctx = createCtx()
+  const a = reatomSet(new Set([1, 2, 3]))
+  assert.equal(ctx.get(a.sizeAtom), 3)
+
+  const b = reatomSet()
+  assert.equal(ctx.get(b.sizeAtom), 0)
+})
+
+
 test.run()
