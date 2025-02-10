@@ -171,36 +171,38 @@ it(
     const valueAtom = atom('abc', 'value')
     const element = <p>{valueAtom}</p>
 
-    const Component = () => <>
-      <div id="1">
-        {element}
-      </div>
-      <div id="2">
-        {element}
-      </div>
-    </>
+    const Component = () => (
+      <>
+        <div id="1">{element}</div>
+        <div id="2">{element}</div>
+      </>
+    )
 
     const childAtom = atom<JSX.Element | undefined>(<Component></Component>, 'child')
-    const app = <div>
-      {childAtom}
-    </div>
+    const app = <div>{childAtom}</div>
 
     mount(parent, app)
     await sleep()
-    assert.is(app.innerHTML, '<!--child--><div id="1"></div><div id="2"><p><!--value-->abc</p></div>')
+    expect(app.innerHTML).toBe(
+      '<!--child--><!----><div id="1"></div><div id="2"><p><!--value-->abc<!--value--></p></div><!----><!--child-->',
+    )
 
     valueAtom(ctx, 'def')
     await sleep()
-    assert.is(app.innerHTML, '<!--child--><div id="1"></div><div id="2"><p><!--value-->def</p></div>')
+    expect(app.innerHTML).toBe(
+      '<!--child--><!----><div id="1"></div><div id="2"><p><!--value-->def<!--value--></p></div><!----><!--child-->',
+    )
 
     childAtom(ctx, undefined)
     await sleep()
-    assert.is(app.innerHTML, '<!--child-->')
+    expect(app.innerHTML).toBe('<!--child--><!--child-->')
 
     childAtom(ctx, <Component></Component>)
     valueAtom(ctx, 'ghi')
     await sleep()
-    assert.is(app.innerHTML, '<!--child--><div id="1"></div><div id="2"><p><!--value-->def</p></div>')
+    expect(app.innerHTML).toBe(
+      '<!--child--><!----><div id="1"></div><div id="2"><p><!--value-->def<!--value--></p></div><!----><!--child-->',
+    )
   }),
 )
 
@@ -547,8 +549,8 @@ it(
     mount(parent, component)
     await sleep()
 
-    assert.ok(first.dataset.reatom!.startsWith(First.name))
-    assert.ok(second.dataset.reatom!.startsWith(Second.name))
+    expect(first.dataset.reatom!.startsWith(First.name)).toBeTruthy()
+    expect(second.dataset.reatom!.startsWith(Second.name)).toBeTruthy()
   }),
 )
 
