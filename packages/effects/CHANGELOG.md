@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.11.2](https://github.com/artalar/reatom/compare/effects-v3.11.1...effects-v3.11.2) (2025-02-10)
+
+
+### Bug Fixes
+
+* **effects:** concurrent recursion ([0ced206](https://github.com/artalar/reatom/commit/0ced206e450de0830c138c055da00cad99d0b851))
+
 ## [3.11.1](https://github.com/artalar/reatom/compare/effects-v3.11.0...effects-v3.11.1) (2025-01-14)
 
 

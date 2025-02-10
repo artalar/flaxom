@@ -1,4 +1,4 @@
-import { Action, action, atom, AtomMut, Ctx } from '@reatom/core'
+import { Action, action, Atom, atom, AtomMut, Ctx } from '@reatom/core'
 import { withAssign } from './withAssign'
 
 export interface MapAtom<Key, Value> extends AtomMut<Map<Key, Value>> {
@@ -9,6 +9,7 @@ export interface MapAtom<Key, Value> extends AtomMut<Map<Key, Value>> {
   delete: Action<[key: Key], Map<Key, Value>>
   clear: Action<[], Map<Key, Value>>
   reset: Action<[], Map<Key, Value>>
+  sizeAtom: Atom<number>
 }
 
 export const reatomMap = <Key, Value>(initState = new Map<Key, Value>(), name?: string): MapAtom<Key, Value> =>
@@ -46,6 +47,7 @@ export const reatomMap = <Key, Value>(initState = new Map<Key, Value>(), name?: 
         ),
         clear: action((ctx) => target(ctx, new Map()), `${name}.clear`),
         reset: action((ctx) => target(ctx, initState), `${name}.reset`),
+        sizeAtom: atom(ctx =>  ctx.spy(target).size, `${name}.size`),
       }
 
       return actions

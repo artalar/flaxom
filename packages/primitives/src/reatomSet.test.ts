@@ -96,3 +96,15 @@ it(`reatomSet. size`, () => {
   expect(reatomSet(new Set([1, 2, 3])).size(ctx)).toEqual(3)
 })
 
+test(`reatomSet.sizeAtom`, () => {
+  const ctx = createCtx()
+  const a = reatomSet(new Set([1, 2, 3]))
+
+  assert.equal(ctx.get(a.sizeAtom), 3)
+  a.add(ctx, 4)
+  assert.equal(ctx.get(a.sizeAtom), 4)
+  a.delete(ctx, 1)
+  assert.equal(ctx.get(a.sizeAtom), 3)
+  a.clear(ctx)
+  assert.equal(ctx.get(a.sizeAtom), 0)
+})

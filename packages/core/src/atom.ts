@@ -201,7 +201,7 @@ export interface CtxOptions {
 
 const getRootCause = (cause: AtomCache): AtomCache => (cause.cause === null ? cause : getRootCause(cause.cause))
 
-const isBrowser = () => !!globalThis.navigator?.userAgent
+const isBrowser = () => typeof window === 'object' && typeof document === 'object'
 
 let initiations = 0
 
@@ -383,6 +383,7 @@ export const createCtx = ({
         subs: new Set(),
         listeners: new Set(),
       }
+      if (updating) trLogs.push(cache)
     } else if (proto.computer === null && !updating) {
       return cache!
     }
@@ -548,6 +549,8 @@ export const createCtx = ({
         logsListeners.add(cb)
         return () => logsListeners.delete(cb)
       }
+
+      throwReatomError(!isAtom(atom), `target subscriber isn't an atom`)
 
       let { __reatom: proto } = atom as Atom
 

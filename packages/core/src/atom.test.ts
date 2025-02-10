@@ -727,6 +727,22 @@ it('computed deps change during disconnection', () => {
   expect(ctx.get(subscription)).toBe(1)
 })
 
+it('extra log for init update', () => {
+  const ctx = createCtx()
+  const logger = mockFn()
+
+  ctx.subscribe(logger)
+
+  const a = atom('')
+  const b = atom('')
+
+  ctx.get(a)
+  expect(logger.lastInput().length).toBe(1)
+
+  b(ctx, '')
+  expect(logger.lastInput().length).toBe(2)
+})
+
 // it(`maximum call stack`, () => {
 //   const atoms = new Map<AtomProto, Atom>()
 //   let i = 0

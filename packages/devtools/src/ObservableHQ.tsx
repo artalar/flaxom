@@ -6,7 +6,7 @@ import { Inspector } from '@observablehq/inspector'
 import observablehqStyles from '../../../node_modules/@observablehq/inspector/dist/inspector.css'
 import { BooleanAtom, noop, parseAtoms, reatomBoolean, withComputed, withInit } from '@reatom/framework'
 
-import { buttonCss as editButtonCss, history } from './utils'
+import { buttonCss as editButtonCss, historyStates } from './utils'
 
 const buttonCss = css`
   width: 20px;
@@ -112,7 +112,7 @@ export const ObservableHQ: FC<{
   const getPatchHistory = () => {
     if (!patch) return []
 
-    const patchHistory = history.get(patch.proto)
+    const patchHistory = historyStates.get(patch.proto)
 
     // weird
     if (!patchHistory) return []

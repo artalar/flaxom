@@ -1,5 +1,5 @@
 import { it, expect } from 'vitest'
-import { Action, action, atom, Ctx, Fn } from '@reatom/core'
+import { Action, action, atom, Ctx, CtxSpy, Fn } from '@reatom/core'
 import { noop, sleep } from '@reatom/utils'
 import { createTestCtx, mockFn } from '@reatom/testing'
 import { onConnect } from '@reatom/hooks'
@@ -298,3 +298,53 @@ it('throttle example', async () => {
   expect(track.calls.length).toBe(2)
   expect(track.lastInput()).toBe(4)
 })
+
+test('concurrent recursion', async () => {
+  const ctx = createTestCtx()
+
+  const n = atom(0)
+  const doSome = action(
+    concurrent(async (ctx) => {
+      await ctx.schedule(() => {})
+      if (ctx.get(n) < 5) n(ctx, (s) => s + 1)
+    }),
+  )
+  n.onChange(doSome)
+
+  doSome(ctx).catch(noop)
+
+  await sleep()
+
+  assert.is(ctx.get(n), 5)
+})
+
+test('reaction recursion', async () => {
+  const ctx = createTestCtx()
+
+  let target = 5
+  const n = atom(0)
+  const watchSome = reaction(
+    concurrent(async (ctx: CtxSpy) => {
+      const state = ctx.spy(n)
+
+      await ctx.schedule(() => sleep())
+
+      if (state < target) n(ctx, (s) => s + 1)
+    }),
+  )
+
+  const someReaction = watchSome(ctx)
+  await sleep(10)
+  assert.is(ctx.get(n), 5)
+
+  target = 10
+  n(ctx, 6)
+  await ctx.get(someReaction)
+  assert.is(ctx.get(n), 7)
+
+  someReaction.unsubscribe()
+  await sleep(10)
+  assert.is(ctx.get(n), 7)
+})
+
+test.run()

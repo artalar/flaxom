@@ -4,16 +4,16 @@ import { css } from '@reatom/jsx'
 export const getColor = ({ proto }: AtomCache): string =>
   proto.isAction
     ? proto.name!.endsWith('.onFulfill')
-      ? '#e6ab73'
+      ? '#B37400'
       : proto.name!.endsWith('.onReject')
-      ? '#e67373'
-      : '#ffff80'
+      ? 'tomato'
+      : '#999900'
     : '#151134'
 
 export const getStartCause = (cause: AtomCache): AtomCache =>
   cause.cause?.cause == null ? cause : getStartCause(cause.cause)
 
-const idxMap = new WeakMap<AtomCache, string>()
+export const idxMap = new WeakMap<AtomCache, string>()
 let idx = 0
 export const getId = (node: AtomCache) => {
   let id = idxMap.get(node)
@@ -40,15 +40,20 @@ export const highlighted = new Set<AtomCache>()
 
 export const actionsStates = new WeakMap<AtomCache, Array<any>>()
 
-export const history = new (class extends WeakMap<AtomProto, Array<AtomCache>> {
+export const historyStates = new (class extends WeakMap<AtomProto, Array<AtomCache>> {
   add(patch: AtomCache) {
     let list = this.get(patch.proto)
     if (!list) {
       list = []
       this.set(patch.proto, list)
-    } else {
-      if (list.length > 6) list.pop()
+    } else if (list.length > 6) {
+      list.pop()
     }
+    
+    // if (list.length === 0 || !Object.is(list[0]!.state, patch.state)) {
+    //   list.unshift(patch)
+    // }
+
     list.unshift(patch)
   }
 })()

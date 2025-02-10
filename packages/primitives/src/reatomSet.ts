@@ -1,6 +1,6 @@
-import { Action, action, atom, AtomMut, Ctx } from '@reatom/core'
+import { Action, action, atom, Atom, AtomMut, Ctx } from '@reatom/core'
 import { withAssign } from './withAssign'
-
+ 
 export interface SetAtom<T> extends AtomMut<Set<T>> {
   add: Action<[el: T], Set<T>>
   delete: Action<[el: T], Set<T>>
@@ -18,6 +18,7 @@ export interface SetAtom<T> extends AtomMut<Set<T>> {
   size: (ctx: Ctx) => number
   /** @deprecated */
   set: Action<[el: T], Set<T>>
+  sizeAtom: Atom<number>
 }
 
 interface ProposalSet<T> extends Set<T> {
@@ -77,5 +78,6 @@ export const reatomSet = <T>(initState = new Set<T>(), name?: string): SetAtom<T
       isSupersetOf: (ctx: Ctx, set: Set<T>) => (ctx.get(target) as ProposalSet<T>).isSupersetOf(set),
       isDisjointFrom: (ctx: Ctx, set: Set<T>) => (ctx.get(target) as ProposalSet<T>).isDisjointFrom(set),
       size: (ctx: Ctx) => ctx.get(target).size,
+      sizeAtom: atom(ctx =>  ctx.spy(target).size, `${name}.size`),
     })),
   )

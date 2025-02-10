@@ -2,7 +2,7 @@ import { it, expect } from 'vitest'
 import { createTestCtx, mockFn } from '@reatom/testing'
 import { atom } from '@reatom/core'
 import { noop, sleep } from '@reatom/utils'
-import { isConnected, onConnect, onDisconnect } from '@reatom/hooks'
+import { isConnected, onConnect, onDisconnect, withInit } from '@reatom/hooks'
 import { reatomAsync, withAbort, withCache, withDataAtom, withErrorAtom, withRetry } from '.'
 import { reatomResource } from './reatomResource'
 import { take } from '@reatom/effects'
@@ -338,4 +338,37 @@ it('ignore abort if a subscribers exists', async () => {
   call.abort(ctx)
   await sleep()
   expect(track.lastInput()).toBe(2)
+})
+
+test('recursion and promiseAtom', async () => {
+  const ctx = createTestCtx()
+
+  const n = reatomAsync(async (ctx) => {
+    await null
+    return null
+  }).pipe(withDataAtom(1, (ctx, payload, state) => state + 1))
+
+  n.dataAtom.pipe(
+    withInit((ctx, init) => {
+      n(ctx)
+      return init(ctx)
+    }),
+  )
+
+  const r = reatomResource(async (ctx) => {
+    const value = ctx.spy(n.dataAtom)
+
+    await ctx.schedule(() => sleep())
+
+    return value
+  }, 'r')
+
+  const track = ctx.subscribeTrack(r.promiseAtom)
+  track.calls.length = 0
+
+  await sleep()
+  await sleep()
+
+  expect(track.calls.length).toBe(1)
+  expect(await track.lastInput()).toBe(2)
 })

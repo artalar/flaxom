@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.10.0](https://github.com/artalar/reatom/compare/devtools-v0.9.2...devtools-v0.10.0) (2025-02-05)
+
+
+### Features
+
+* **devtools:** stack rendering and UI improvements ([526be58](https://github.com/artalar/reatom/commit/526be58ba1137741daca142dc00bf86993559af2))
+
+
+### Bug Fixes
+
+* **devtools:** init state handling, better color, scroll fix ([8cd5de2](https://github.com/artalar/reatom/commit/8cd5de29e158c4289588a7616935339159dec990))
+* **devtools:** ui fixes ([494c065](https://github.com/artalar/reatom/commit/494c0659adc197aa5f17ccd5df2dc51c78436775))
+
 ## [0.9.2](https://github.com/artalar/reatom/compare/devtools-v0.9.1...devtools-v0.9.2) (2025-01-24)
 
 

@@ -260,6 +260,7 @@ export function withSearchParamsPersist(
 
     theAtom.__reatom.computer = (ctx, state) => {
       const currentPath = ctx.get(urlAtom).pathname
+
       ctx.spy(searchParamsAtom, (next, prev) => {
         if (key in next) {
           if (!prev || prev[key] !== next[key]) {
@@ -268,10 +269,12 @@ export function withSearchParamsPersist(
         } else {
           if (prev && key in prev) {
             if (isSubpath(currentPath, path)) {
-              const prevState = state as string
-              ctx.schedule(() => {
-                searchParamsAtom.set(ctx, key, prevState, true)
-              }, 0)
+              const prevState = serialize(state)
+              if (prevState) {
+                ctx.schedule(() => {
+                  searchParamsAtom.set(ctx, key, prevState, true)
+                }, 0)
+              }
             }
             state = initState(ctx)
           }
