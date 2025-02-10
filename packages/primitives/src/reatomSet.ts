@@ -31,11 +31,15 @@ interface ProposalSet<T> extends Set<T> {
   union(other: Set<T>): Set<T>
 }
 
+type FirstSetConstructorParam<T> = ConstructorParameters<typeof Set<T>>[0]
+
 export const reatomSet = <T>(
-  initState = new Set<T>(),
+  initState: Set<T> | FirstSetConstructorParam<T> = new Set<T>(),
   name?: string,
-): SetAtom<T> =>
-  atom(initState, name).pipe(
+): SetAtom<T> => {
+  const atomInitState = initState instanceof Set ? initState : new Set(initState);
+  
+  return atom(atomInitState, name).pipe(
     withAssign((target, name) => ({
       add: action(
         (ctx, el) =>
@@ -62,7 +66,7 @@ export const reatomSet = <T>(
           return new Set<T>()
         })
       }, `${name}.clear`),
-      reset: action((ctx) => target(ctx, initState), `${name}.reset`),
+      reset: action((ctx) => target(ctx, atomInitState), `${name}.reset`),
       intersection: action(
         (ctx, set) =>
           target(ctx, (prev) => (prev as ProposalSet<T>).intersection(set)),
@@ -104,3 +108,4 @@ export const reatomSet = <T>(
       sizeAtom: atom(ctx =>  ctx.spy(target).size, `${name}.size`),
     })),
   )
+}

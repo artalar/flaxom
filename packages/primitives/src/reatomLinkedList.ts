@@ -233,21 +233,33 @@ const toArray = <T extends Rec>(head: null | LLNode<T>, prev?: Array<LLNode<T>>)
   return arr.length === prev?.length ? prev : arr
 }
 
-export const reatomLinkedList = <Params extends any[], Node extends Rec, Key extends keyof Node = never>(
+export const reatomLinkedList = <Node extends Rec, Params extends any[] = [Node], Key extends keyof Node = never>(
   options:
+    | Array<Node>
     | ((ctx: Ctx, ...params: Params) => Node)
     | {
         create: (ctx: Ctx, ...params: Params) => Node
         initState?: Array<Node>
         key?: Key
+      }
+    | {
+        create?: (ctx: Ctx, ...params: Params) => Node,
+        initState: Array<Node>,
+        key?: Key
       },
   name = __count('reatomLinkedList'),
 ): LinkedListAtom<Params, Node, Key> => {
   const {
-    create: userCreate,
+    create: userCreate = (ctx: Ctx, ...params: Params) => params[0],
     initState = [],
     key = undefined,
-  } = typeof options === 'function' ? { create: options } : options
+  } = typeof options === 'function' ? { 
+    create: options 
+  } : Array.isArray(options) ? {
+    create: (ctx: Ctx, ...params: Params) => params[0],
+    initState: options,
+  } : options;
+
   const _name = name
 
   const isLL = (node: Node): node is LLNode<Node> => !!node && LL_NEXT in node && LL_PREV in node

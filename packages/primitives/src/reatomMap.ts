@@ -12,11 +12,15 @@ export interface MapAtom<Key, Value> extends AtomMut<Map<Key, Value>> {
   sizeAtom: Atom<number>
 }
 
+type FirstMapConstructorParam<Key, Value> = ConstructorParameters<typeof Map<Key, Value>>[0]
+
 export const reatomMap = <Key, Value>(
-  initState = new Map<Key, Value>(),
+  initState: Map<Key, Value> | FirstMapConstructorParam<Key, Value> = new Map<Key, Value>(),
   name?: string,
-): MapAtom<Key, Value> =>
-  atom(initState, name).pipe(
+): MapAtom<Key, Value> => {
+  const atomInitState = initState instanceof Map ? initState : new Map(initState);
+
+  return atom(atomInitState, name).pipe(
     withAssign((target, name) => {
       const getOrCreate = action((ctx, key: Key, value: Value) => {
         actions.set(ctx, key, value)
@@ -52,10 +56,11 @@ export const reatomMap = <Key, Value>(
           `${name}.delete`,
         ),
         clear: action((ctx) => target(ctx, new Map()), `${name}.clear`),
-        reset: action((ctx) => target(ctx, initState), `${name}.reset`),
+        reset: action((ctx) => target(ctx, atomInitState), `${name}.reset`),
         sizeAtom: atom(ctx =>  ctx.spy(target).size, `${name}.size`),
       }
 
       return actions
     }),
   )
+}

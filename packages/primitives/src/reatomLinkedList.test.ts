@@ -1,4 +1,4 @@
-import { action, atom } from '@reatom/core'
+import { action, atom, isAtom } from '@reatom/core'
 import { createTestCtx, mockFn } from '@reatom/testing'
 import { suite } from 'uvu'
 import * as assert from 'uvu/assert'
@@ -21,7 +21,7 @@ test(`should respect initState, create and remove elements properly`, () => {
     ctx.get(list.array).map((v) => ctx.get(v)),
     [1, 2, 3],
   )
-
+  
   list.remove(ctx, last)
   assert.equal(parseAtoms(ctx, list.array), [1, 2])
   list.remove(ctx, last)
@@ -177,6 +177,32 @@ test('should remove a single node', () => {
   list.remove(ctx, node)
   assert.equal(ctx.get(list.array), [])
   assert.is(ctx.get(list).size, 0)
+})
+
+test('should accept array as initState', () => {
+  const ctx = createTestCtx()
+  const list = reatomLinkedList([atom(1), atom(2)]);
+
+  assert.ok(ctx.get(list.array).every(isAtom));
+
+  list.create(ctx, atom(3));
+  assert.ok(ctx.get(list.array).every(isAtom));
+  assert.equal(ctx.get(list.array).length, 3);
+})
+
+test('should accept only initState and key optionally', () => {
+  const ctx = createTestCtx()
+  const list = reatomLinkedList({
+    initState: [{ id: atom('1') }, { id: atom('2') }],
+    key: 'id',
+  });
+
+  const track = ctx.subscribeTrack(atom((ctx) => [...ctx.spy(list.map).keys()]))
+
+  assert.equal(track.lastInput(), ['1', '2'])
+
+  ctx.get(list.map).get('1')?.id(ctx, '0')
+  assert.equal(track.lastInput(), ['0', '2'])
 })
 
 test.run()
