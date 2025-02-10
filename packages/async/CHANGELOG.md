@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.16.6](https://github.com/artalar/reatom/compare/async-v3.16.5...async-v3.16.6) (2025-02-10)
+
+
+### Bug Fixes
+
+* **async:** reatomResource recursion ([6d45161](https://github.com/artalar/reatom/commit/6d45161bfd271f9b75332da4d1eda9fa8a00adab))
+
 ## [3.16.5](https://github.com/artalar/reatom/compare/async-v3.16.4...async-v3.16.5) (2025-01-14)
 
 

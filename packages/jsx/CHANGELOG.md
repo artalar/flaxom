@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.17.1](https://github.com/artalar/reatom/compare/jsx-v3.17.0...jsx-v3.17.1) (2025-02-10)
+
+
+### Bug Fixes
+
+* **jsx:** fragment for LL ([4bb3529](https://github.com/artalar/reatom/commit/4bb35293d01344b7f5dad9b3d09a93b1a594e9e0))
+
 ## [3.17.0](https://github.com/artalar/reatom/compare/jsx-v3.16.1...jsx-v3.17.0) (2025-02-05)
 
 
