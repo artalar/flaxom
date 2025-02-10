@@ -86,7 +86,7 @@ export const unitNamingRule: Rule.RuleModule = {
             return args[1]
 
           if(args.length === 1 && args[0]?.type === 'ObjectExpression') {
-            const nameProp = args[0]!.properties.find(({ key }) => key.type === 'Identifier' && key.name === 'name')
+            const nameProp = args[0]!.properties.flat().find((p) => 'key' in p && p.key.type === 'Identifier' && p.key.name === 'name')
             if(nameProp?.type === 'Property')
               return nameProp.value;
           }

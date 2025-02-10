@@ -42,7 +42,11 @@ export const scheduleImportRule: Rule.RuleModule = {
 
         if (node.source.value === '@reatom/framework') {
           node.specifiers.forEach((specifier) => {
-            if (specifier.type === 'ImportSpecifier' && importNames.includes(specifier.imported.name)) {
+            if (
+              specifier.type === 'ImportSpecifier' &&
+              'name' in specifier.imported &&
+              importNames.includes(specifier.imported.name)
+            ) {
               hasImport = true
               exsistsImportSpecifiers.add(specifier.imported.name)
             }
@@ -72,7 +76,10 @@ export const scheduleImportRule: Rule.RuleModule = {
             if (!exsistsImportSpecifiers.has(neededImport)) {
               if (hasImport && lastImport) {
                 const exsistedSpecifier = lastImport.specifiers.find(
-                  (specifier) => specifier.type == 'ImportSpecifier' && importNames.includes(specifier.imported.name),
+                  (specifier) =>
+                    specifier.type == 'ImportSpecifier' &&
+                    'name' in specifier.imported &&
+                    importNames.includes(specifier.imported.name),
                 )
 
                 if (exsistedSpecifier) {

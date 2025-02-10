@@ -55,8 +55,8 @@
     "/package.json"
   ],
   "devDependencies": {
-    "@types/eslint": "^8.0.0",
-    "eslint": "^8.0.0"
+    "@types/eslint": "^9.0.0",
+    "eslint": "^9.0.0"
   },
   "peerDependencies": {
     "eslint": "^8.0.0 || ^9.0.0"
