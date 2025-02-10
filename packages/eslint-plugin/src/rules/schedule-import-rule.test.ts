@@ -1,12 +1,12 @@
 import { scheduleImportRule } from './schedule-import-rule.ts'
 import { RuleTester } from 'eslint'
 
-const tester = new RuleTester({
+const tester = new RuleTester(/* {
   parserOptions: {
     ecmaVersion: 2022,
     sourceType: 'module',
   },
-})
+} */)
 
 tester.run('schedule-import-rule', scheduleImportRule, {
   valid: [
@@ -15,9 +15,6 @@ tester.run('schedule-import-rule', scheduleImportRule, {
     },
     {
       code: `import { wrap } from "@reatom/framework";\nwrap(ctx, () => 'Dev')`,
-    },
-    {
-      code: `import { schedule } from "@reatom/framework";\nschedule(ctx, () => 'Dev', -1)`,
     },
     {
       code: `import { schedule } from "@reatom/framework";\nschedule(ctx, () => 'Dev', -1)`,
