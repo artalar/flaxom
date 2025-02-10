@@ -340,7 +340,7 @@ it('ignore abort if a subscribers exists', async () => {
   expect(track.lastInput()).toBe(2)
 })
 
-test('recursion and promiseAtom', async () => {
+it('recursion and promiseAtom', async () => {
   const ctx = createTestCtx()
 
   const n = reatomAsync(async (ctx) => {

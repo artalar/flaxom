@@ -1,4 +1,4 @@
-import { it, expect, describe} from 'vitest'
+import { it, expect, describe } from 'vitest'
 import { atom } from '@reatom/core'
 import { createTestCtx } from '@reatom/testing'
 import { cn } from './utils'
@@ -18,39 +18,39 @@ describe('parseClasses', () => {
   })
 
   it('handles falsy object correctly', () => {
-    expect(ctx.get(cn({
-      a: '',
-      b: 0,
-      c: NaN,
-      d: false,
-      e: null,
-      f: undefined,
-      g: atom(undefined),
-    }))).toBe('')
+    expect(
+      ctx.get(
+        cn({
+          a: '',
+          b: 0,
+          c: NaN,
+          d: false,
+          e: null,
+          f: undefined,
+          g: atom(undefined),
+        }),
+      ),
+    ).toBe('')
   })
 
   it('handles falsy array correctly', () => {
-    expect(ctx.get(cn([
-      '',
-      null,
-      undefined,
-      {},
-      [],
-      atom(undefined),
-      () => undefined,
-    ]))).toBe('')
+    expect(ctx.get(cn(['', null, undefined, {}, [], atom(undefined), () => undefined]))).toBe('')
   })
 
   it('handles object correctly', () => {
-    assert.is(ctx.get(cn({
-      a: 'a',
-      b: 1,
-      c: true,
-      d: {},
-      e: [],
-      f: atom(true),
-      g: () => undefined,
-    })), 'a b c d e f g')
+    expect(
+      ctx.get(
+        cn({
+          a: 'a',
+          b: 1,
+          c: true,
+          d: {},
+          e: [],
+          f: atom(true),
+          g: () => undefined,
+        }),
+      ),
+    ).toEqual('a b c d e f g')
   })
 
   it('handles deep array correctly', () => {

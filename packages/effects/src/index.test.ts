@@ -299,7 +299,7 @@ it('throttle example', async () => {
   expect(track.lastInput()).toBe(4)
 })
 
-test('concurrent recursion', async () => {
+it('concurrent recursion', async () => {
   const ctx = createTestCtx()
 
   const n = atom(0)
@@ -315,10 +315,10 @@ test('concurrent recursion', async () => {
 
   await sleep()
 
-  assert.is(ctx.get(n), 5)
+  expect(ctx.get(n)).toBe(5)
 })
 
-test('reaction recursion', async () => {
+it('reaction recursion', async () => {
   const ctx = createTestCtx()
 
   let target = 5
@@ -335,16 +335,14 @@ test('reaction recursion', async () => {
 
   const someReaction = watchSome(ctx)
   await sleep(10)
-  assert.is(ctx.get(n), 5)
+  expect(ctx.get(n)).toBe(5)
 
   target = 10
   n(ctx, 6)
   await ctx.get(someReaction)
-  assert.is(ctx.get(n), 7)
+  expect(ctx.get(n)).toBe(7)
 
   someReaction.unsubscribe()
   await sleep(10)
-  assert.is(ctx.get(n), 7)
+  expect(ctx.get(n)).toBe(7)
 })
-
-test.run()

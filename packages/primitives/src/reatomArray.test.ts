@@ -20,8 +20,7 @@ describe('reatomArray', () => {
 
   it('toSorted with compareFn', () => {
     const ctx = createCtx()
-    expect(
-    reatomArray([3, 1, 2]).toSorted(ctx, (a, b) => b - a)).toEqual([3, 2, 1],)
+    expect(reatomArray([3, 1, 2]).toSorted(ctx, (a, b) => b - a)).toEqual([3, 2, 1])
   })
 
   it('toSpliced', () => {
@@ -34,35 +33,35 @@ describe('reatomArray', () => {
     expect(reatomArray([3, 1, 2]).with(ctx, 1, 15)).toEqual([3, 15, 2])
   })
 
-  test(`reatomArray. push`, () => {
+  it(`push`, () => {
     const ctx = createCtx()
     const arrayAtom = reatomArray([3, 1, 2])
 
-    assert.equal(arrayAtom.push(ctx, 4), 4)
-    assert.equal(ctx.get(arrayAtom), [3, 1, 2, 4])
+    expect(arrayAtom.push(ctx, 4)).toEqual(4)
+    expect(ctx.get(arrayAtom)).toEqual([3, 1, 2, 4])
   })
 
-  test(`reatomArray. pop`, () => {
+  it(`pop`, () => {
     const ctx = createCtx()
     const arrayAtom = reatomArray([3, 1, 2])
 
-    assert.equal(arrayAtom.pop(ctx), 2)
-    assert.equal(ctx.get(arrayAtom), [3, 1])
+    expect(arrayAtom.pop(ctx)).toEqual(2)
+    expect(ctx.get(arrayAtom)).toEqual([3, 1])
   })
 
-  test(`reatomArray. shift`, () => {
+  it(`shift`, () => {
     const ctx = createCtx()
     const arrayAtom = reatomArray([3, 1, 2])
 
-    assert.equal(arrayAtom.shift(ctx), 3)
-    assert.equal(ctx.get(arrayAtom), [1, 2])
+    expect(arrayAtom.shift(ctx)).toEqual(3)
+    expect(ctx.get(arrayAtom)).toEqual([1, 2])
   })
 
-  test(`reatomArray. unshift`, () => {
+  it(`unshift`, () => {
     const ctx = createCtx()
     const arrayAtom = reatomArray([3, 1, 2])
 
-    assert.equal(arrayAtom.unshift(ctx, 4, 5), 5)
-    assert.equal(ctx.get(arrayAtom), [4, 5, 3, 1, 2])
+    expect(arrayAtom.unshift(ctx, 4, 5)).toEqual(5)
+    expect(ctx.get(arrayAtom)).toEqual([4, 5, 3, 1, 2])
   })
 })

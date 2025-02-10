@@ -6,7 +6,6 @@ import { z } from 'zod'
 import * as icons from './icons'
 import { Lines } from './reatomLines'
 import { buttonCss } from '../utils'
-import { check } from 'prettier'
 
 export const Filter = z.object({
   search: z.string(),

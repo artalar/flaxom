@@ -3,7 +3,6 @@ import { it, expect } from 'vitest'
 import { createCtx } from '@reatom/core'
 import { reatomSet } from './reatomSet'
 
-
 it(`reatomSet. init`, () => {
   const ctx = createCtx()
 
@@ -96,15 +95,15 @@ it(`reatomSet. size`, () => {
   expect(reatomSet(new Set([1, 2, 3])).size(ctx)).toEqual(3)
 })
 
-test(`reatomSet.sizeAtom`, () => {
+it(`reatomSet.sizeAtom`, () => {
   const ctx = createCtx()
   const a = reatomSet(new Set([1, 2, 3]))
 
-  assert.equal(ctx.get(a.sizeAtom), 3)
+  expect(ctx.get(a.sizeAtom)).toEqual(3)
   a.add(ctx, 4)
-  assert.equal(ctx.get(a.sizeAtom), 4)
+  expect(ctx.get(a.sizeAtom)).toEqual(4)
   a.delete(ctx, 1)
-  assert.equal(ctx.get(a.sizeAtom), 3)
+  expect(ctx.get(a.sizeAtom)).toEqual(3)
   a.clear(ctx)
-  assert.equal(ctx.get(a.sizeAtom), 0)
+  expect(ctx.get(a.sizeAtom)).toEqual(0)
 })

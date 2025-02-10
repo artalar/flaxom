@@ -113,23 +113,23 @@ it('SearchParamsAtom.lens subpath', () => {
   expect(ctx.get(urlAtom).href).toEqual('http://example.com/results/some')
 })
 
-test('SearchParamsAtom remove query from url', () => {
+it('SearchParamsAtom remove query from url', () => {
   const ctx = createTestCtx()
 
   setupUrlAtomSettings(ctx, () => new URL('http://example.com'))
 
   const testAtom = atom<number | undefined>(undefined).pipe(
     withSearchParamsPersist('test', {
-      parse: (value) => value ===  undefined ? undefined : Number(value),
-      serialize: (value) => value === undefined ? undefined : value.toString(),
+      parse: (value) => (value === undefined ? undefined : Number(value)),
+      serialize: (value) => (value === undefined ? undefined : value.toString()),
     }),
   )
 
   ctx.subscribeTrack(testAtom)
 
   urlAtom.go(ctx, '/results?test=2')
-  assert.is(ctx.get(testAtom), 2)
+  expect(ctx.get(testAtom)).toEqual(2)
 
   testAtom(ctx, undefined)
-  assert.is(ctx.get(urlAtom).href, 'http://example.com/results')
+  expect(ctx.get(urlAtom).href).toEqual('http://example.com/results')
 })

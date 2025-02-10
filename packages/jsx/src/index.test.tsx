@@ -61,7 +61,6 @@ it(
     mount(parent, element)
 
     expect(element.id).toBe('val')
-    // @ts-expect-error `dunno` can't be inferred
     expect(element.prp).toBe('prp')
     expect(element.getAttribute('atr')).toBe('atr')
 
@@ -70,7 +69,6 @@ it(
     atr(ctx, 'atr1')
 
     expect(element.id).toBe('val1')
-    // @ts-expect-error `dunno` can't be inferred
     expect(element.prp).toBe('prp1')
     expect(element.getAttribute('atr')).toBe('atr1')
   }),
@@ -159,7 +157,6 @@ it(
     expect(element.id).toBe('1')
     expect(element.getAttribute('b')).toBe('2')
     expect(clickTrack.calls.length).toBe(0)
-    // @ts-expect-error
     element.click()
     expect(clickTrack.calls.length).toBe(1)
   }),
