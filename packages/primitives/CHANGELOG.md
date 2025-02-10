@@ -1,5 +1,14 @@
 # Changelog
 
+## [3.8.0](https://github.com/artalar/reatom/compare/primitives-v3.7.3...primitives-v3.8.0) (2025-02-10)
+
+
+### Features
+
+* **primitives:** add `push`, `pop`, `shift`, `unshift`, `slice` for `reatomArray` ([#1034](https://github.com/artalar/reatom/issues/1034)) ([47fc530](https://github.com/artalar/reatom/commit/47fc530990449fdeffcc605ca6c07e8d18bce4b9))
+* **primitives:** add `sizeAtom` to `reatomMap` ([#1035](https://github.com/artalar/reatom/issues/1035)) ([2b416b3](https://github.com/artalar/reatom/commit/2b416b3d0d498ab353993d2d7803dd683001add3))
+* **primitives:** add sizeAtom for reatomSet ([0e552d7](https://github.com/artalar/reatom/commit/0e552d7e5be1c050c308a23940c922eecbb3f368))
+
 ## [3.7.3](https://github.com/artalar/reatom/compare/primitives-v3.7.2...primitives-v3.7.3) (2024-08-19)
 
 
