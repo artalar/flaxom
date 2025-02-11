@@ -7,7 +7,7 @@ jobs:
     timeout-minutes: 30
     runs-on: ubuntu-latest
     container:
-      image: node:18.15.0-alpine
+      image: node:22.13.1-alpine
     steps:
       - name: Install git
         run: apk add git
