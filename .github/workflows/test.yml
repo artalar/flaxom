@@ -7,7 +7,7 @@ jobs:
     timeout-minutes: 30
     runs-on: ubuntu-latest
     container:
-      image: node:20.18.2-alpine
+      image: node:22.13.1-alpine
     steps:
       - uses: actions/checkout@v3
       - name: Install dependencies
