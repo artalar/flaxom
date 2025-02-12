@@ -1,6 +1,7 @@
 import {
   type Action,
   type Atom,
+  AtomState,
   type Ctx,
   CtxSpy,
   type Rec,
@@ -22,15 +23,12 @@ import {
 } from '@reatom/async';
 
 import {
-  ArrayAtom,
-  SetAtom,
   LinkedListAtom,
   isLinkedListAtom,
-  isSetAtom,
-  isArrayAtom
+  reatomLinkedList,
 } from '@reatom/primitives';
 
-import { parseAtoms, type ParseAtoms } from '@reatom/lens';
+import { parseAtoms, withReset, type ParseAtoms } from '@reatom/lens';
 import { entries, isObject, isShallowEqual } from '@reatom/utils';
 
 import {
@@ -49,12 +47,7 @@ export interface FormFieldOptions<State = any, Value = State>
   initState: State;
 }
 
-export type FormFieldArray =
-  | ArrayAtom<FieldAtom>
-  | SetAtom<FieldAtom>
-  | LinkedListAtom<[], FieldAtom>;
-
-export type FormInitState = Rec<
+type FormInitStateElements =
   | string
   | number
   | boolean
@@ -64,31 +57,39 @@ export type FormInitState = Rec<
   | symbol
   | bigint
   | Date
-  | Array<any>
   // TODO contract as parsing method
   // | ((state: any) => any)
-  | FormFieldArray
   | FieldAtom
   | FormFieldOptions
-  | FormInitState
->;
+  | Rec<FormInitStateElements>
+  | Array<FormInitStateElements | Rec<FormInitStateElements>>
 
-export type FormFields<T extends FormInitState = FormInitState> = {
-  [K in keyof T]: T[K] extends FieldLikeAtom
-  ? T[K]
-  : T[K] extends Date
-  ? FieldAtom<T[K]>
-  : T[K] extends FieldOptions & { initState: infer State }
-  ? T[K] extends FieldOptions<State, State>
+export type FormInitState = Rec<FormInitStateElements | FormInitState>;
+
+type FormFieldElement<T extends FormInitStateElements = FormInitStateElements> =
+  T extends FieldLikeAtom
+  ? T
+  : T extends Date
+  ? FieldAtom<T>
+  : T extends FieldOptions & { initState: infer State }
+  ? T extends FieldOptions<State, State>
   ? FieldAtom<State>
-  : T[K] extends FieldOptions<State, infer Value>
+  : T extends FieldOptions<State, infer Value>
   ? FieldAtom<State, Value>
   : never
-  : T[K] extends FormFieldArray
-  ? T[K]
-  : T[K] extends Rec
-  ? FormFields<T[K]>
-  : FieldAtom<T[K]>;
+  : T extends Array<infer Item>
+  ?
+  Item extends FormInitStateElements
+  ? LinkedListAtom<[FormFieldElement<Item>], FormFieldElement<Item>> & {
+    reset: Action<[], AtomState<T>>
+  }
+  : never
+  : T extends Rec
+  ? { [K in keyof T]: FormFieldElement<T[K]> }
+  : FieldAtom<T>;
+
+export type FormFields<T extends FormInitState = FormInitState> = {
+  [K in keyof T]: FormFieldElement<T[K]>
 };
 
 export type FormState<T extends FormInitState = FormInitState> = ParseAtoms<
@@ -151,27 +152,38 @@ const reatomFormFields = <T extends FormInitState>(
   const fields = Array.isArray(initState)
     ? ([] as FormFields<T>)
     : ({} as FormFields<T>);
-  for (const [key, value] of Object.entries(initState)) {
-    if (isAtom(value)) {
-      // @ts-expect-error bad keys type inference
-      fields[key] = value;
-    } else if (isObject(value) && !(value instanceof Date)) {
-      if ('initState' in value) {
-        // @ts-expect-error bad keys type inference
-        fields[key] = reatomField(value.initState, {
-          name: `${name}.${key}`,
-          ...(value as FieldOptions),
-        });
-      } else {
-        // @ts-expect-error bad keys type inference
-        fields[key] = reatomFormFields(value, `${name}.${key}`);
-      }
-    } else {
-      // @ts-expect-error bad keys type inference
-      fields[key] = reatomField(value, {
-        name: `${name}.${key}`,
-      });
+
+  const createFieldElement = (element: FormInitStateElements, name: string): FormFieldElement => {
+    if (isAtom(element)) {
+      return element
     }
+    else if (isObject(element) && !(element instanceof Date)) {
+      if ('initState' in element) {
+        return reatomField(element.initState, {
+          name,
+          ...(element as FieldOptions),
+        });
+      }
+      else if (Array.isArray(element)) {
+        // @ts-expect-error bad keys type inference
+        return reatomLinkedList({
+          create: (ctx, field) => field,
+          initState: element.map((f, index) => createFieldElement(f, `${name}.${index}`))
+        }, name).pipe(withReset())
+      }
+      else {
+        // @ts-expect-error bad keys type inference
+        return reatomFormFields(element, name)
+      }
+    }
+    else {
+      return reatomField(element, { name })
+    }
+  }
+
+  for (const [key, value] of Object.entries(initState)) {
+    // @ts-expect-error bad keys type inference
+    fields[key] = createFieldElement(value, `${name}.${key}`);
   }
   return fields;
 };
@@ -181,13 +193,20 @@ const computeFieldsList = <T extends FormInitState>(
   fields: FormFields<T>,
   acc: Array<FieldAtom> = [],
 ): Array<FieldAtom> => {
-  for (const [_, field] of entries(fields)) {
-    if (isArrayAtom(field)) acc.push(...ctx.spy(field));
-    else if (isSetAtom(field)) acc.push(...ctx.spy(field));
-    else if (isLinkedListAtom(field)) acc.push(...ctx.spy(field.array));
-    else if (isAtom(field)) acc.push(field as FieldAtom);
-    else computeFieldsList(ctx, field as FormFields, acc);
+  const computeElement = (element: FormFieldElement, acc: Array<FieldAtom> = []) => {
+    if (isLinkedListAtom(element)) {
+      const elements = ctx.spy((element as LinkedListAtom<[FormFieldElement], FormFieldElement>).array);
+      acc.push(...elements.flatMap(e => computeElement(e, acc)));
+    }
+    else if (isAtom(element)) acc.push(element);
+    else computeFieldsList(ctx, element, acc);
+
+    return acc;
   }
+
+  for (const [_, field] of entries(fields))
+    acc.push(...computeElement(field));
+
   return acc;
 };
 
@@ -252,15 +271,20 @@ export const reatomForm = <T extends FormInitState>(
 
   const reinitState = (ctx: Ctx, initState: FormPartialState<T>, fields: FormFields) => {
     for (const [key, value] of Object.entries(initState as Rec)) {
-      if (
+      if (isLinkedListAtom(fields[key])) {
+        // CAUTION: Currently, resetting reatomLinkedList leads to an unconditional error
+        fields[key].reset(ctx); // TODO: add recursive reset for structures inside the default value of reatomLinkedList
+      }
+      else if (
         isObject(value) &&
         !(value instanceof Date) &&
         key in fields &&
         !isAtom(fields[key])
       ) {
         reinitState(ctx, value, fields[key] as unknown as FormFields);
-      } else {
-        fields[key]?.initState(ctx, value);
+      }
+      else if(isAtom(fields[key])) {
+        fields[key].initState(ctx, value);
       }
     }
   };
