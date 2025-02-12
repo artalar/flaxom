@@ -7,22 +7,22 @@ test(`adding and removing fields`, async () => {
 	const ctx = createCtx();
 	const form = reatomForm({
 		field: reatomField('initial', 'fieldAtom'),
-		list: reatomArray([
+		list: [
 			reatomField('initial', 'fieldAtom')
-		], 'listAtom'),
+		],
 	}, {
 		name: 'testForm',
 		onSubmit: () => { }
 	});
 
 	expect(ctx.get(form.fields.field)).toBe('initial');
-	expect(ctx.get(form.fields.list).length).toBe(1);
+	expect(ctx.get(form.fields.list).size).toBe(1);
 
-	form.fields.list(ctx, list => [...list, reatomField('initial', 'fieldAtom')]);
-	expect(ctx.get(form.fields.list).length).toBe(2);
+	form.fields.list.create(ctx, reatomField('initial', 'fieldAtom'));
+	expect(ctx.get(form.fields.list).size).toBe(2);
 
-	form.fields.list(ctx, []);
-	expect(ctx.get(form.fields.list).length).toBe(0);
+	form.fields.list.clear(ctx);
+	expect(ctx.get(form.fields.list).size).toBe(0);
 })
 
 test('focus states', () => {
@@ -30,9 +30,9 @@ test('focus states', () => {
 	const form = reatomForm({
 		field1: { initState: '', validate: () => { } },
 		field2: { initState: '', validate: () => { } },
-		list: reatomArray([
+		list: [
 			reatomField('initial', 'fieldAtom')
-		], 'listAtom')
+		]
 	}, {
 		name: 'testForm',
 		onSubmit: () => { }
@@ -56,7 +56,7 @@ test('focus states', () => {
 
 	form.reset(ctx);
 
-	const list = ctx.get(form.fields.list);
+	const list = ctx.get(form.fields.list.array);
 	list[0]?.change(ctx, 'value');
 
 	expect(ctx.get(form.focus)).toEqual({
@@ -65,7 +65,7 @@ test('focus states', () => {
 		touched: true,
 	})
 
-	form.fields.list(ctx, []);
+	form.fields.list.clear(ctx);
 
 	expect(ctx.get(form.focus)).toEqual({
 		active: false,
@@ -85,7 +85,7 @@ test('validation states', async () => {
 	const form = reatomForm({
 		field1: { initState: '', contract, validateOnChange: true },
 		field2: { initState: '', contract, validateOnChange: true },
-		rest: reatomSet<FieldAtom<string>>(new Set)
+		rest: new Array<FieldAtom<string>>()
 	}, {
 		name: 'testForm',
 		onSubmit: () => { },
@@ -121,7 +121,7 @@ test('validation states', async () => {
 	expect(ctx.get(form.submit.error)?.message).toBe('Form validation error')
 
 	const fieldNoValidationTrigger = reatomField('');
-	rest.add(ctx, fieldNoValidationTrigger);
+	rest.create(ctx, fieldNoValidationTrigger);
 
 	fieldNoValidationTrigger.change(ctx, 'value');
 
