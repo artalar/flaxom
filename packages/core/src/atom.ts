@@ -624,7 +624,7 @@ function onCall(this: Action, cb: Fn): Unsubscribe {
   })
 }
 
-export function atom<T>(initState: (ctx: CtxSpy) => T, name?: string): Atom<T>
+export function atom<T>(computed: (ctx: CtxSpy) => T, name?: string): Atom<T>
 export function atom<T>(initState: T, name?: string): AtomMut<T>
 export function atom<T>(initState: T | ((ctx: CtxSpy) => T), name = __count('_atom')): Atom<T> | AtomMut<T> {
   // TODO: it took much longer than expected in profiling
