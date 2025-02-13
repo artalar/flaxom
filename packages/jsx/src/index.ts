@@ -41,12 +41,13 @@ const walkLinkedList = (ctx: Ctx, DOM: DomApis, el: JSX.Element, list: Atom<Link
     if (state.version - 1 > lastVersion) {
       el.innerHTML = ''
       for (let { head } = state; head; head = head[LL_NEXT]) {
+        throwNativeFragment(head)
         el.append(head)
       }
     } else {
       for (const change of state.changes) {
         if (change.kind === 'create') {
-          throwReatomError(!isLiveFragment(change.node), 'native fragment is not supported')
+          throwNativeFragment(change.node)
           el.append(change.node)
         }
         if (change.kind === 'remove') {
@@ -111,8 +112,15 @@ type LiveDocumentFragment = DocumentFragment & {
 }
 
 // TODO optimize
-const isLiveFragment = (node: Node): node is LiveDocumentFragment =>
-  String(node) === '[object DocumentFragment]' && '__reatomFragment' in node
+const isLiveFragment = (node: Node): node is LiveDocumentFragment => {
+  return String(node) === '[object DocumentFragment]' && '__reatomFragment' in node
+}
+const throwNativeFragment = (element: JSX.Element) => {
+  throwReatomError(
+    String(element) === '[object DocumentFragment]' && '__reatomFragment' in element === false,
+    'native fragment is not supported',
+  )
+}
 
 const createLiveFragment = (DOM: DomApis, name: string): LiveDocumentFragment => {
   const fragment = DOM.document.createDocumentFragment()
