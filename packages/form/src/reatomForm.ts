@@ -138,16 +138,44 @@ export interface FormOptions<T extends FormInitState = any> {
   /** The callback to process valid form data */
   onSubmit?: (ctx: Ctx, state: FormState<T>) => void | Promise<void>;
 
+  /** The callback to validate form fields. */
+  validate?: (ctx: Ctx, state: FormState<T>) => any;
+
   /** Should reset the state after success submit? @default true */
   resetOnSubmit?: boolean;
 
-  /** The callback to validate form fields. */
-  validate?: (ctx: Ctx, state: FormState<T>) => any;
+  /**
+   * Defines the default reset behavior of the validation state during async validation for all fields.
+   * @default false
+   */
+  keepErrorDuringValidating?: boolean
+
+  /**
+   * Defines the default reset behavior of the validation state on field change for all fields.
+   * Useful if the validation is triggered on blur or submit only.
+   * @default !validateOnChange
+   */
+  keepErrorOnChange?: boolean
+
+  /**
+   * Defines if the validation should be triggered with every field change by default for all fields.
+   * @default false
+   */
+  validateOnChange?: boolean
+
+  /**
+   * Defines if the validation should be triggered on the field blur by default for all fields.
+   * @default false
+   */
+  validateOnBlur?: boolean
 }
 
 const reatomFormFields = <T extends FormInitState>(
   initState: T,
-  name: string,
+  { name, defaultFieldOptions }: {
+    name: string,
+    defaultFieldOptions?: FieldOptions
+  }
 ): FormFields<T> => {
   const fields = Array.isArray(initState)
     ? ([] as FormFields<T>)
@@ -161,6 +189,7 @@ const reatomFormFields = <T extends FormInitState>(
       if ('initState' in element) {
         return reatomField(element.initState, {
           name,
+          ...defaultFieldOptions,
           ...(element as FieldOptions),
         });
       }
@@ -173,11 +202,11 @@ const reatomFormFields = <T extends FormInitState>(
       }
       else {
         // @ts-expect-error bad keys type inference
-        return reatomFormFields(element, name)
+        return reatomFormFields(element, { name, defaultFieldOptions })
       }
     }
     else {
-      return reatomField(element, { name })
+      return reatomField(element, { name, ...defaultFieldOptions })
     }
   }
 
@@ -219,11 +248,23 @@ export const reatomForm = <T extends FormInitState>(
     onSubmit,
     resetOnSubmit = true,
     validate,
+    validateOnBlur = false,
+    validateOnChange = false,
+    keepErrorDuringValidating = false,
+    keepErrorOnChange = !validateOnChange,
   } = typeof options === 'string'
       ? ({ name: options } as FormOptions<T>)
       : options;
 
-  const fields = reatomFormFields(initState, `${name}.fields`);
+  const fields = reatomFormFields(initState, {
+    name: `${name}.fields`,
+    defaultFieldOptions: {
+      validateOnBlur,
+      validateOnChange,
+      keepErrorDuringValidating,
+      keepErrorOnChange
+    }
+  });
 
   const fieldsState = atom(
     (ctx) => parseAtoms(ctx, fields),
@@ -283,7 +324,7 @@ export const reatomForm = <T extends FormInitState>(
       ) {
         reinitState(ctx, value, fields[key] as unknown as FormFields);
       }
-      else if(isAtom(fields[key])) {
+      else if (isAtom(fields[key])) {
         fields[key].initState(ctx, value);
       }
     }
