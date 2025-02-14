@@ -2,7 +2,7 @@ import { __count } from '@reatom/core'
 import { Action, Atom, AtomMut, AtomState, Ctx, Fn, Rec, action, atom } from '@reatom/core'
 import { abortCauseContext } from '@reatom/effects'
 import { getRootCause, withInit } from '@reatom/hooks'
-import { noop, toAbortError } from '@reatom/utils'
+import { isShallowEqual, noop, toAbortError } from '@reatom/utils'
 
 export interface AtomUrlSettings {
   init: (ctx: Ctx, options?: { signal?: AbortSignal }) => URL
@@ -149,7 +149,10 @@ export const urlAtom: UrlAtom = Object.assign(
 )
 
 export const searchParamsAtom: SearchParamsAtom = Object.assign(
-  atom((ctx) => Object.fromEntries(ctx.spy(urlAtom).searchParams), 'searchParamsAtom'),
+  atom((ctx, state?: Rec<string>) => {
+    const newState = Object.fromEntries(ctx.spy(urlAtom).searchParams)
+    return isShallowEqual(state, newState) ? state! : newState
+  }, 'searchParamsAtom'),
   {
     set: action((ctx, key, value, replace) => {
       const url = ctx.get(urlAtom)
