@@ -2,6 +2,7 @@ import { test, expect } from 'vitest'
 import { createCtx } from '@reatom/core'
 import { FieldAtom, reatomField, reatomForm } from '.'
 import { reatomArray, reatomSet } from '@reatom/primitives';
+import exp from 'constants';
 
 test(`adding and removing fields`, async () => {
 	const ctx = createCtx();
@@ -128,7 +129,7 @@ test('validation states', async () => {
 	expect(ctx.get(form.validation)).toEqual({
 		error: undefined,
 		meta: undefined,
-		triggered: false,
+		triggered: true,
 		validating: false,
 	})
 
@@ -142,6 +143,41 @@ test('validation states', async () => {
 		validating: false,
 	})
 })
+
+test('default options for fields', async () => {
+	const ctx = createCtx()
+	const form = reatomForm({
+		field: { initState: 'initial', validate: () => { } },
+		array: ['one', 'two', 'free']
+	}, {
+		name: 'testForm',
+		validateOnChange: true,
+		onSubmit: () => { }
+	});
+
+	const { field, array } = form.fields;
+
+	field.change(ctx, 'value');
+
+	expect(ctx.get(field.validation)).toEqual({
+		error: undefined,
+		meta: undefined,
+		triggered: true,
+		validating: false,
+	})
+
+	ctx.get(array.array).forEach(field => {
+		field.change(ctx, 'value');
+
+		expect(ctx.get(field.validation)).toEqual({
+			error: undefined,
+			meta: undefined,
+			triggered: true,
+			validating: false,
+		})
+	});
+})
+
 
 test('reset', () => {
 	const ctx = createCtx()

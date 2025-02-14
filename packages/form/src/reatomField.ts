@@ -181,7 +181,7 @@ export const reatomField = <State, Value = State>(
     validateOnBlur = false,
     validateOnChange = false,
     keepErrorDuringValidating = false,
-    keepErrorOnChange = validateOnChange,
+    keepErrorOnChange = !validateOnChange,
   } = typeof options === 'string' ? ({ name: options } as FieldOptions<State, Value>) : options
 
   const initState = atom(_initState, `${name}.initState`)
