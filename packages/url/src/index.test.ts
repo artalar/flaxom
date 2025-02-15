@@ -47,6 +47,7 @@ test('SearchParamsAtom.lens', () => {
   assert.is(ctx.get(urlAtom).href, 'http://example.com/?test=3')
 
   urlAtom.go(ctx, '/path')
+  assert.is(ctx.get(urlAtom).href, 'http://example.com/path')
   assert.is(ctx.get(testAtom), 1)
   assert.is(ctx.get(urlAtom).href, 'http://example.com/path')
 })
@@ -90,6 +91,8 @@ test('SearchParamsAtom.lens subpath', () => {
     }),
   )
   const track = ctx.subscribeTrack(testAtom)
+  // this subscription is required to test some weird bug
+  ctx.subscribeTrack(searchParamsAtom)
 
   urlAtom.go(ctx, '/results?test=2')
   assert.is(ctx.get(testAtom), 2)
@@ -121,8 +124,8 @@ test('SearchParamsAtom remove query from url', () => {
 
   const testAtom = atom<number | undefined>(undefined).pipe(
     withSearchParamsPersist('test', {
-      parse: (value) => value ===  undefined ? undefined : Number(value),
-      serialize: (value) => value === undefined ? undefined : value.toString(),
+      parse: (value) => (value === undefined ? undefined : Number(value)),
+      serialize: (value) => (value === undefined ? undefined : value.toString()),
     }),
   )
 

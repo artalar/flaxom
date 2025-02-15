@@ -124,6 +124,7 @@ export const urlAtom: UrlAtom = Object.assign(
       abortCauseContext.set(urlCtx.cause, new AbortController())
       const newUrl = typeof update === 'function' ? update(url, urlCtx) : update
 
+      // TODO check `href`, instead of instance?
       if (url !== newUrl && ctx.cause.proto !== updateFromSource.__reatom) {
         urlCtx.get(settingsAtom).sync(urlCtx, newUrl, replace)
       }
@@ -210,10 +211,9 @@ const getSearchParamsOptions = (
 }
 
 const isSubpath = (currentPath: string, targetPath: string) =>
-  !targetPath ||
-  (targetPath[targetPath.length - 1] === '*'
+  !targetPath || targetPath[targetPath.length - 1] === '*'
     ? `${currentPath}/`.startsWith(targetPath.slice(0, -1))
-    : `${currentPath}/` === targetPath)
+    : `${currentPath}/` === targetPath
 
 export function withSearchParamsPersist<T = string>(
   key: string,
@@ -265,21 +265,28 @@ export function withSearchParamsPersist(
       const currentPath = ctx.get(urlAtom).pathname
 
       ctx.spy(searchParamsAtom, (next, prev) => {
+        // init, already parsed in `withInit`
+        if (!prev) return
+
+        if (!isSubpath(currentPath, path)) {
+          if (key in prev) state = initState(ctx)
+          return
+        }
+
         if (key in next) {
-          if (!prev || prev[key] !== next[key]) {
-            state = parse(next[key])
-          }
+          if (next[key] !== prev[key]) state = parse(next[key])
         } else {
-          if (prev && key in prev) {
-            if (isSubpath(currentPath, path)) {
-              const prevState = serialize(state)
-              if (prevState) {
-                ctx.schedule(() => {
-                  searchParamsAtom.set(ctx, key, prevState, true)
-                }, 0)
-              }
-            }
+          const prevUrl = ctx.cause.pubs[0]!.cause!.state as URL
+          if (path === '' && currentPath !== prevUrl.pathname) {
             state = initState(ctx)
+            return
+          }
+
+          const prevState = serialize(state)
+          if (prevState !== undefined) {
+            ctx.schedule(() => {
+              searchParamsAtom.set(ctx, key, prevState, true)
+            }, 0)
           }
         }
       })
@@ -316,11 +323,18 @@ export function withSearchParamsPersist(
     }
 
     theAtom.onChange((ctx, state) => {
-      if (ctx.cause === theAtom.__reatom.patch) {
+      if (
+        // process only the last update
+        ctx.cause === theAtom.__reatom.patch &&
+        // process only mutation or computed update
+        ctx.cause.cause?.proto !== searchParamsAtom.__reatom &&
+        isSubpath(ctx.get(urlAtom).pathname, path)
+      ) {
         const value = serialize(state)
+        const sp = ctx.get(searchParamsAtom)
         if (value === undefined) {
-          searchParamsAtom.del(ctx, key, replace)
-        } else if (isSubpath(ctx.get(urlAtom).pathname, path)) {
+          if (key in sp) searchParamsAtom.del(ctx, key, replace)
+        } else if (sp[key] !== value) {
           searchParamsAtom.set(ctx, key, value, replace)
         }
       }
