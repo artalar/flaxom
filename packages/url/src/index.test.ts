@@ -138,4 +138,30 @@ test('SearchParamsAtom remove query from url', () => {
   assert.is(ctx.get(urlAtom).href, 'http://example.com/results')
 })
 
+test('inactive subpath should not affect mutated atoms', () => {
+  const ctx = createTestCtx()
+
+  setupUrlAtomSettings(ctx, () => new URL('http://example.com/some?test=10'))
+
+  const testAtom = atom(1).pipe(
+    withSearchParamsPersist('test', {
+      parse: (value = '1') => Number(value),
+      path: '/some',
+    }),
+  )
+
+  ctx.subscribeTrack(testAtom)
+  assert.is(ctx.get(testAtom), 10)
+
+  urlAtom.go(ctx, '/other?test=2')
+  assert.is(ctx.get(testAtom), 1)
+
+  testAtom(ctx, 123)
+  assert.is(ctx.get(testAtom), 123)
+  assert.is(ctx.get(urlAtom).href, 'http://example.com/other?test=2')
+
+  urlAtom.go(ctx, '/other?test=3')
+  assert.is(ctx.get(testAtom), 123)
+})
+
 test.run()

@@ -268,15 +268,16 @@ export function withSearchParamsPersist(
         // init, already parsed in `withInit`
         if (!prev) return
 
+        const prevUrl = ctx.cause.pubs[0]!.cause!.state as URL
+
         if (!isSubpath(currentPath, path)) {
-          if (key in prev) state = initState(ctx)
+          if (key in prev && isSubpath(prevUrl.pathname, path)) state = initState(ctx)
           return
         }
 
         if (key in next) {
           if (next[key] !== prev[key]) state = parse(next[key])
         } else {
-          const prevUrl = ctx.cause.pubs[0]!.cause!.state as URL
           if (path === '' && currentPath !== prevUrl.pathname) {
             state = initState(ctx)
             return
