@@ -166,7 +166,19 @@ const patchStyleProperty = (style: CSSStyleDeclaration, key: string, value: any)
   else style.setProperty(key, value)
 }
 
-export const reatomJsx = (ctx: Ctx, DOM: DomApis = globalThis.window) => {
+export const reatomJsx = (
+  ctx: Ctx,
+  DOM: DomApis = globalThis.window,
+  {
+    stylesheetContainer = DOM.document.head,
+  }: {
+    /**
+     * The container to which the styles will be added.
+     * @default DOM.document.head
+     */
+    stylesheetContainer?: HTMLElement
+  } = {},
+) => {
   const StylesheetId = 'reatom-jsx-styles'
   let styles: Rec<string> = {}
   let stylesheet: HTMLStyleElement | undefined
@@ -187,7 +199,7 @@ export const reatomJsx = (ctx: Ctx, DOM: DomApis = globalThis.window) => {
       if (!stylesheet) {
         stylesheet = DOM.document.createElement('style')
         stylesheet.id = StylesheetId
-        DOM.document.head.appendChild(stylesheet)
+        stylesheetContainer.appendChild(stylesheet)
       }
 
       const prefix = name ? name + '_' : ''
