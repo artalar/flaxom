@@ -1,6 +1,6 @@
 {
   "name": "@reatom/framework",
-  "version": "3.4.59",
+  "version": "3.4.60",
   "private": false,
   "sideEffects": false,
   "description": "Reatom for framework",
@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@reatom/async": "^3.16.6",
-    "@reatom/core": "^3.10.0",
+    "@reatom/core": "^3.10.1",
     "@reatom/effects": "^3.11.2",
     "@reatom/hooks": "^3.6.0",
     "@reatom/lens": "^3.11.6",
