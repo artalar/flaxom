@@ -171,12 +171,12 @@ export const reatomJsx = (
   DOM: DomApis = globalThis.window,
   {
     stylesheetContainer = DOM.document.head,
-  }: {
+  }: {  
     /**
      * The container to which the styles will be added.
      * @default DOM.document.head
      */
-    stylesheetContainer?: HTMLElement
+    stylesheetContainer?: Node
   } = {},
 ) => {
   const StylesheetId = 'reatom-jsx-styles'
