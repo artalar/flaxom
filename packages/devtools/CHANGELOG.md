@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.0](https://github.com/artalar/reatom/compare/devtools-v0.10.0...devtools-v0.11.0) (2025-02-16)
+
+
+### Features
+
+* **devtools:** add visual diff, shadow root, and many more small improvements ([24080cc](https://github.com/artalar/reatom/commit/24080cc45b9998de20f99aeafe0fac09f7ed68d8))
+
 ## [0.10.0](https://github.com/artalar/reatom/compare/devtools-v0.9.2...devtools-v0.10.0) (2025-02-05)
 
 
