@@ -1,5 +1,19 @@
 # Changelog
 
+## [3.9.0](https://github.com/artalar/reatom/compare/url-v3.8.1...url-v3.9.0) (2025-02-16)
+
+
+### Features
+
+* **url:** remove umd build ([2516fd4](https://github.com/artalar/reatom/commit/2516fd4bb932837ebadd4ae88789b8df25eca287))
+
+
+### Bug Fixes
+
+* **url:** searchParamsAtom memoization ([ea1c575](https://github.com/artalar/reatom/commit/ea1c5750971067786bd046723da7a3b7a657a955))
+* **url:** some bug ([c824199](https://github.com/artalar/reatom/commit/c8241998cc36cf60b7786efbca0fd5b4b53a4ae3))
+* **url:** subpath ([fcb62d0](https://github.com/artalar/reatom/commit/fcb62d0fb31adadd8f1d6043d40f5394049048cf))
+
 ## [3.8.1](https://github.com/artalar/reatom/compare/url-v3.8.0...url-v3.8.1) (2025-02-10)
 
 
