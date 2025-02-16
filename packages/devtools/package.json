@@ -21,7 +21,6 @@
     "test": "tsx src/index.test.ts",
     "test:watch": "tsx watch src/index.test.ts"
   },
-  "dependencies": {},
   "author": {
     "name": "artalar",
     "url": "https://github.com/artalar"
@@ -58,6 +57,7 @@
     "@observablehq/inspector": "^5.0.0",
     "@reatom/framework": "latest",
     "@reatom/jsx": "latest",
+    "jsondiffpatch": "^0.6.0",
     "zod": "^3.23.8"
   }
 }
