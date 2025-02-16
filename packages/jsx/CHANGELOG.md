@@ -1,5 +1,18 @@
 # Changelog
 
+## [3.18.0](https://github.com/artalar/reatom/compare/jsx-v3.17.1...jsx-v3.18.0) (2025-02-16)
+
+
+### Features
+
+* **jsx:** add stylesheetContainer option ([dcf0ed9](https://github.com/artalar/reatom/commit/dcf0ed9263afebaf1a2bc9a9a67155039e4b94d2))
+
+
+### Bug Fixes
+
+* **jsx:** fragments for LL ([32f387f](https://github.com/artalar/reatom/commit/32f387f2215465770daa59dd5ed0acd9cc103856))
+* **jsx:** stylesheetContainer types ([2e92e98](https://github.com/artalar/reatom/commit/2e92e981e32480762d2446b3d3c53834a329c075))
+
 ## [3.17.1](https://github.com/artalar/reatom/compare/jsx-v3.17.0...jsx-v3.17.1) (2025-02-10)
 
 

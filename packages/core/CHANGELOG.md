@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.10.1](https://github.com/artalar/reatom/compare/core-v3.10.0...core-v3.10.1) (2025-02-16)
+
+
+### Bug Fixes
+
+* **core:** rename initState to computed in atom overload ([#822](https://github.com/artalar/reatom/issues/822)) ([b96bf36](https://github.com/artalar/reatom/commit/b96bf364bbb2c851513d20e70bbb60d29267a2ef))
+
 ## [3.10.0](https://github.com/artalar/reatom/compare/core-v3.9.3...core-v3.10.0) (2025-02-05)
 
 
