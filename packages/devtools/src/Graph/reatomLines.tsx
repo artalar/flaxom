@@ -10,7 +10,7 @@ import {
   sleep,
   batch,
 } from '@reatom/framework'
-import { h, hf, JSX } from '@reatom/jsx'
+import { h, hf, JSX, ROOT } from '../jsx'
 import { followingsMap, getId, getStartCause, highlighted } from '../utils'
 import { reatomLinkedList } from '@reatom/primitives'
 
@@ -37,8 +37,8 @@ export const reatomLines = (name: string): Lines => {
         const calc = (target: AtomCache, cause: AtomCache): undefined | null | AtomCache => {
           if (highlighted.has(target)) return null
 
-          const toRec = document.getElementById(getId(target))?.getBoundingClientRect()
-          const fromEl = document.getElementById(getId(cause))
+          const toRec = ROOT.getElementById(getId(target))?.getBoundingClientRect()
+          const fromEl = ROOT.getElementById(getId(cause))
           const fromRec = fromEl?.getBoundingClientRect()
 
           if (!toRec || !fromRec) {

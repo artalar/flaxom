@@ -1,12 +1,20 @@
-import { Atom, AtomCache, AtomMut, Ctx, __count, atom, isAction, isAtom, type Rec } from '@reatom/core'
-import { FC, h, mount, JSX, css } from '@reatom/jsx'
+import { Atom, AtomCache, Ctx, __count, atom, isAtom } from '@reatom/core'
+import { ctx, FC, h, mount, JSX, css, ROOT } from './jsx'
+
 // @ts-expect-error TODO write types
 import { Inspector } from '@observablehq/inspector'
 // @ts-expect-error
 import observablehqStyles from '../../../node_modules/@observablehq/inspector/dist/inspector.css'
-import { BooleanAtom, noop, parseAtoms, reatomBoolean, withComputed, withInit } from '@reatom/framework'
 
-import { buttonCss as editButtonCss, historyStates } from './utils'
+import * as jsondiffpatch from 'jsondiffpatch'
+// @ts-expect-error
+import * as htmlFormatter from 'jsondiffpatch/formatters/html'
+// @ts-expect-error
+import jsondiffpatchStyles from '../../../node_modules/jsondiffpatch/lib/formatters/styles/html.css'
+
+import { BooleanAtom, noop, parseAtoms, reatomBoolean, take, withComputed, withInit } from '@reatom/framework'
+
+import { HISTORY_LENGTH, buttonCss as editButtonCss, historyStates, idxMap } from './utils'
 
 const buttonCss = css`
   width: 20px;
@@ -79,6 +87,44 @@ const EditForm = ({
   )
 }
 
+const getHTMLDiff = (a: AtomCache, b: AtomCache) => {
+  const delta = jsondiffpatch.diff(a.state, b.state)
+
+  if (!delta) return null
+
+  const causeId = idxMap.get(a)
+  const causeEl = causeId && ROOT.getElementById(causeId)
+
+  return (
+    <div
+      css={`
+        border-bottom: 1px solid black;
+        margin: 10px 0;
+      `}
+    >
+      {causeEl && (
+        <a
+          href={`#${causeId}`}
+          on:click={(ctx, e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            causeEl.scrollIntoView()
+            causeEl.focus()
+          }}
+          // @ts-expect-error
+          style:color={atom((ctx) => (ctx.spy(causeEl.styleAtom).display === 'none' ? 'black' : undefined))}
+          css={`
+            padding-left: 12px;
+          `}
+        >
+          {a.proto.name}
+        </a>
+      )}
+      <div ref={(ctx, e) => (e.innerHTML = htmlFormatter.format(delta, a.state))} />
+    </div>
+  )
+}
+
 export const ObservableHQ: FC<{
   snapshot: Atom | {}
   subscribe?: boolean
@@ -109,6 +155,11 @@ export const ObservableHQ: FC<{
 
   const showHistory = reatomBoolean(false, `${name}.history`)
 
+  // lazy append this styles
+  take(ctx, showHistory, (ctx, state, SKIP) => state || SKIP).then(() => {
+    ROOT.append(<style>{jsondiffpatchStyles}</style>)
+  })
+
   const getPatchHistory = () => {
     if (!patch) return []
 
@@ -122,6 +173,25 @@ export const ObservableHQ: FC<{
     if (idx === -1) return [patch]
 
     return patchHistory.slice(idx)
+  }
+
+  const getHTMLDiffs = () => {
+    const history = getPatchHistory()
+
+    if (!history.length) return null
+
+    let result = new Array<JSX.Element>()
+
+    let next = patch!
+    for (const patch of getPatchHistory()) {
+      const diff = getHTMLDiff(patch, next)
+      if (diff) {
+        result.push(diff)
+        next = patch
+      }
+    }
+
+    return result
   }
 
   const setup = (target: Atom | {}) => (ctx: Ctx, observableContainer: HTMLDivElement) => {
@@ -243,15 +313,9 @@ export const ObservableHQ: FC<{
                   margin: 0 16px;
                 `}
               >
-                History
+                History (max {HISTORY_LENGTH})
               </h2>
-              <div
-                class="observablehq-container"
-                css={`
-                  display: var(--display);
-                `}
-                ref={setup(getPatchHistory())}
-              />
+              {getHTMLDiffs()}
             </article>
           ) : (
             <div />
