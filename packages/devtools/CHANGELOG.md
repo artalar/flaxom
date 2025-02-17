@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.1](https://github.com/artalar/reatom/compare/devtools-v0.11.0...devtools-v0.11.1) (2025-02-17)
+
+
+### Bug Fixes
+
+* **devtools:** support functions in state diff ([7960a71](https://github.com/artalar/reatom/commit/7960a71131401133d4dd0d9330f4f70eb4844e31))
+
 ## [0.11.0](https://github.com/artalar/reatom/compare/devtools-v0.10.0...devtools-v0.11.0) (2025-02-16)
 
 
