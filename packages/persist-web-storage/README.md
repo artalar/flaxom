@@ -59,7 +59,6 @@ myChannel.onmessage((event) => {
 
 const withMyBroadcastChannel = reatomPersistBroadcastChannel(myChannel)
 
-
 export const isAuthedAtom = atom('', 'isAuthedAtom').pipe(
   withMyBroadcastChannel('isAuthedAtom'),
 )
@@ -115,7 +114,7 @@ onConnect(listResource, async (ctx) => {
 
 ### withCookie
 
-Synchronizes atom state to the `document.cookie` with a given name. 
+Synchronizes atom state to the `document.cookie` with a given name.
 
 When using `withCookie`, the first argument it takes is an options object that allows you to configure various aspects of cookie behavior.
 
@@ -132,9 +131,9 @@ interface CookieAttributes {
   sameSite?: 'strict' | 'lax' | 'none'
 }
 
-export const tokenAtom = atom("", "tokenAtom").pipe(
+export const tokenAtom = atom('', 'tokenAtom').pipe(
   withCookie({
     maxAge: 3600, // 1 hour
-  })("token"),
-);
+  })('token'),
+)
 ```

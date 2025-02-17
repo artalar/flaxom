@@ -99,7 +99,7 @@ test('allow start from passed time', async () => {
   const start = Date.now()
   const promise = timerAtom.startTimer(ctx, delay, passed)
   assert.is(ctx.get(timerAtom.progressAtom), passed / delay)
-  
+
   await promise
 
   const duration = Date.now() - start

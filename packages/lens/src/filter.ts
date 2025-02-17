@@ -27,20 +27,23 @@ export const filter: {
     predicate ??= isAction ? () => true : (ctx, a, b) => !isShallowEqual(a, b)
 
     // @ts-expect-error
-    const theAtom: LensAtom & LensAction = atom((ctx, prevState?: any) => {
-      const isInit = ctx.cause.pubs.length === 0
-      const state = ctx.spy(anAtom)
+    const theAtom: LensAtom & LensAction = atom(
+      (ctx, prevState?: any) => {
+        const isInit = ctx.cause.pubs.length === 0
+        const state = ctx.spy(anAtom)
 
-      return isAction
-        ? state.reduce(
-            (acc: any, call: any) =>
-              predicate!(ctx, call.payload, call.params) ? [call] : acc,
-            prevState ?? [],
-          )
-        : isInit || predicate!(ctx, state, prevState)
-        ? state
-        : prevState
-    }, mapName(anAtom, 'filter', name))
+        return isAction
+          ? state.reduce(
+              (acc: any, call: any) =>
+                predicate!(ctx, call.payload, call.params) ? [call] : acc,
+              prevState ?? [],
+            )
+          : isInit || predicate!(ctx, state, prevState)
+          ? state
+          : prevState
+      },
+      mapName(anAtom, 'filter', name),
+    )
     theAtom.deps = [anAtom]
     theAtom.__reatom.isAction = isAction
 

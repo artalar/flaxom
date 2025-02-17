@@ -6,7 +6,13 @@ import { onConnect } from '@reatom/hooks'
 import { createTestCtx, mockFn } from '@reatom/testing'
 import { noop, random, sleep } from '@reatom/utils'
 
-import { reatomAsync, withAbort, withDataAtom, withRetry, withErrorAtom } from './'
+import {
+  reatomAsync,
+  withAbort,
+  withDataAtom,
+  withRetry,
+  withErrorAtom,
+} from './'
 
 test(`base API`, async () => {
   const fetchData = reatomAsync(async (ctx, v: number) => {
@@ -108,7 +114,9 @@ test('withAbort', async () => {
 
   const ctx = createTestCtx()
 
-  const valueTrack = ctx.subscribeTrack(a1.pipe(mapPayloadAwaited((ctx, v) => v)))
+  const valueTrack = ctx.subscribeTrack(
+    a1.pipe(mapPayloadAwaited((ctx, v) => v)),
+  )
   const errorTrack = ctx.subscribeTrack(a1.onReject)
   const abortTrack = ctx.subscribeTrack(a1.onAbort)
 
@@ -147,7 +155,9 @@ test('withAbort user abort', async () => {
 
   const ctx = createTestCtx()
 
-  const valueSubscriber = ctx.subscribeTrack(a1.pipe(mapPayloadAwaited((ctx, v) => v)))
+  const valueSubscriber = ctx.subscribeTrack(
+    a1.pipe(mapPayloadAwaited((ctx, v) => v)),
+  )
   valueSubscriber.calls.length = 0
   const errorSubscriber = ctx.subscribeTrack(a1.onReject)
   errorSubscriber.calls.length = 0
@@ -177,13 +187,15 @@ test('withAbort and real fetch', async () => {
   const handleError = mockFn((e) => {
     throw e
   })
-  const fetchData = reatomAsync((ctx) => fetch('https://www.google.ru/404', ctx.controller).catch(handleError)).pipe(
-    withAbort(),
-  )
+  const fetchData = reatomAsync((ctx) =>
+    fetch('https://www.google.ru/404', ctx.controller).catch(handleError),
+  ).pipe(withAbort())
 
   const ctx = createTestCtx()
 
-  const cb = ctx.subscribeTrack(fetchData.pipe(mapPayloadAwaited((ctx, resp) => resp.status)))
+  const cb = ctx.subscribeTrack(
+    fetchData.pipe(mapPayloadAwaited((ctx, resp) => resp.status)),
+  )
 
   expect(cb.calls.length).toBe(1)
   expect(handleError.calls.length).toBe(0)
@@ -199,7 +211,9 @@ test('withAbort and real fetch', async () => {
   expect(cb.calls.length).toBe(2)
   expect(cb.lastInput().at(-1)?.payload).toBe(404)
   expect(handleError.calls.length).toBe(2)
-  expect(handleError.calls.every(({ o }: any) => o.name === 'AbortError')).toBeTruthy()
+  expect(
+    handleError.calls.every(({ o }: any) => o.name === 'AbortError'),
+  ).toBeTruthy()
 })
 
 test('withAbort strategy first-in-win', async () => {
@@ -210,7 +224,9 @@ test('withAbort strategy first-in-win', async () => {
 
   const ctx = createTestCtx()
 
-  const valueTrack = ctx.subscribeTrack(anAsync.pipe(mapPayloadAwaited((ctx, v) => v)))
+  const valueTrack = ctx.subscribeTrack(
+    anAsync.pipe(mapPayloadAwaited((ctx, v) => v)),
+  )
   const errorTrack = ctx.subscribeTrack(anAsync.onReject)
   const abortTrack = ctx.subscribeTrack(anAsync.onAbort)
 
@@ -269,7 +285,9 @@ test('hooks', async () => {
 })
 
 test('onConnect', async () => {
-  const fetchData = reatomAsync(async (ctx, payload: number) => payload).pipe(withDataAtom(0))
+  const fetchData = reatomAsync(async (ctx, payload: number) => payload).pipe(
+    withDataAtom(0),
+  )
   const ctx = createTestCtx()
   onConnect(fetchData.dataAtom, (ctx) => fetchData(ctx, 123))
   const track = ctx.subscribeTrack(fetchData.dataAtom)
@@ -282,7 +300,10 @@ test('withErrorAtom resetTrigger', async () => {
   const effect = reatomAsync(async () => {
     if (1) throw 42
     return 42
-  }).pipe(withDataAtom(), withErrorAtom(undefined, { resetTrigger: 'dataAtom' }))
+  }).pipe(
+    withDataAtom(),
+    withErrorAtom(undefined, { resetTrigger: 'dataAtom' }),
+  )
   const ctx = createTestCtx()
 
   await effect(ctx).catch(noop)
@@ -396,7 +417,9 @@ test('handle error correctly', async () => {
   const ctx = createTestCtx()
 
   expect(await doSome(ctx).catch((e: Error) => e.message)).toBe('test error')
-  expect(await doSomeAsync(ctx).catch((e: Error) => e.message)).toBe('test error')
+  expect(await doSomeAsync(ctx).catch((e: Error) => e.message)).toBe(
+    'test error',
+  )
 })
 
 test('withRetry abort', async () => {

@@ -1,4 +1,13 @@
-import { Action, action, ActionParams, atom, Atom, AtomState, Ctx, Fn } from '@reatom/core'
+import {
+  Action,
+  action,
+  ActionParams,
+  atom,
+  Atom,
+  AtomState,
+  Ctx,
+  Fn,
+} from '@reatom/core'
 import { MapAtom, reatomMap, withAssign } from '@reatom/primitives'
 import { isDeepEqual, MAX_SAFE_TIMEOUT, setTimeout } from '@reatom/utils'
 import { type WithPersistOptions } from '@reatom/persist'
@@ -12,7 +21,13 @@ import {
 } from '@reatom/effects'
 
 import { handleEffect } from './handleEffect'
-import { AsyncAction, AsyncCtx, AsyncDataAtom, AsyncResp, ControlledPromise } from '.'
+import {
+  AsyncAction,
+  AsyncCtx,
+  AsyncDataAtom,
+  AsyncResp,
+  ControlledPromise,
+} from '.'
 
 export interface CacheRecord<T = any, Params extends any[] = unknown[]> {
   clearTimeoutId: ReturnType<typeof setTimeout>
@@ -29,7 +44,8 @@ export interface CacheRecord<T = any, Params extends any[] = unknown[]> {
   version: number
 }
 
-export interface CacheAtom<T = any, Params extends any[] = unknown[]> extends MapAtom<unknown, CacheRecord<T, Params>> {
+export interface CacheAtom<T = any, Params extends any[] = unknown[]>
+  extends MapAtom<unknown, CacheRecord<T, Params>> {
   /** Clear all records and call the effect with the last params. */
   invalidate: Action<[], null | ControlledPromise<T>>
   setWithParams: Action<[params: Params, value: T]>
@@ -37,7 +53,9 @@ export interface CacheAtom<T = any, Params extends any[] = unknown[]> extends Ma
   options: WithCacheOptions
 }
 
-type CacheMapRecord<T extends AsyncAction = AsyncAction> = undefined | CacheRecord<AsyncResp<T>, ActionParams<T>>
+type CacheMapRecord<T extends AsyncAction = AsyncAction> =
+  | undefined
+  | CacheRecord<AsyncResp<T>, ActionParams<T>>
 
 export type WithCacheOptions<T extends AsyncAction = AsyncAction> = {
   /** Define if the effect should be prevented from abort.
@@ -97,8 +115,12 @@ export type WithCacheOptions<T extends AsyncAction = AsyncAction> = {
 
   /** Persist adapter, which will used with predefined optimal parameters */
   withPersist?: (
-    options: WithPersistOptions<AtomState<CacheAtom<AsyncResp<T>, ActionParams<T>>>>,
-  ) => (anAsync: CacheAtom<AsyncResp<T>, ActionParams<T>>) => CacheAtom<AsyncResp<T>, ActionParams<T>>
+    options: WithPersistOptions<
+      AtomState<CacheAtom<AsyncResp<T>, ActionParams<T>>>
+    >,
+  ) => (
+    anAsync: CacheAtom<AsyncResp<T>, ActionParams<T>>,
+  ) => CacheAtom<AsyncResp<T>, ActionParams<T>>
 } & (
   | {
       /** Convert params to stable string and use as a map key.
@@ -112,12 +134,20 @@ export type WithCacheOptions<T extends AsyncAction = AsyncAction> = {
        * Alternative to `paramsToKey`.
        * @default `isDeepEqual` from @reatom/utils
        */
-      isEqual?: (ctx: Ctx, prev: ActionParams<T>, next: ActionParams<T>) => boolean
+      isEqual?: (
+        ctx: Ctx,
+        prev: ActionParams<T>,
+        next: ActionParams<T>,
+      ) => boolean
     }
 )
 
 type Find<T extends AsyncAction> = Fn<
-  [ctx: Ctx, params: ActionParams<T>, state?: AtomState<CacheAtom<AsyncResp<T>, ActionParams<T>>>],
+  [
+    ctx: Ctx,
+    params: ActionParams<T>,
+    state?: AtomState<CacheAtom<AsyncResp<T>, ActionParams<T>>>,
+  ],
   { cached?: CacheMapRecord<T>; key: unknown }
 >
 
@@ -165,7 +195,8 @@ export const withCache =
         // @ts-expect-error valid and correct JS
         shouldReject = false,
       } = swrOptions
-      if (staleTime !== Infinity) staleTime = Math.min(MAX_SAFE_TIMEOUT, staleTime)
+      if (staleTime !== Infinity)
+        staleTime = Math.min(MAX_SAFE_TIMEOUT, staleTime)
 
       const find: Find<T> = paramsToKey
         ? (ctx, params, state = ctx.get(cacheAtom)) => {
@@ -181,7 +212,10 @@ export const withCache =
 
       const findLatestWithValue = (ctx: Ctx, state = ctx.get(cacheAtom)) => {
         for (const cached of state.values()) {
-          if (cached.version > 0 && (!latestCached || cached.lastUpdate > latestCached.lastUpdate)) {
+          if (
+            cached.version > 0 &&
+            (!latestCached || cached.lastUpdate > latestCached.lastUpdate)
+          ) {
             var latestCached: undefined | ThisCacheRecord = cached
           }
         }
@@ -206,7 +240,9 @@ export const withCache =
           staleTime === Infinity
             ? NOOP_TIMEOUT_ID
             : setTimeout(() => {
-                if (cacheAtom.get(ctx, key)?.clearTimeoutId === clearTimeoutId) {
+                if (
+                  cacheAtom.get(ctx, key)?.clearTimeoutId === clearTimeoutId
+                ) {
                   cacheAtom.delete(ctx, key)
                 }
               }, time)
@@ -217,24 +253,29 @@ export const withCache =
         return clearTimeoutId
       }
 
-      const cacheAtom = (anAsync.cacheAtom = reatomMap(new Map(), `${anAsync.__reatom.name}._cacheAtom`).pipe(
+      const cacheAtom = (anAsync.cacheAtom = reatomMap(
+        new Map(),
+        `${anAsync.__reatom.name}._cacheAtom`,
+      ).pipe(
         withAssign((target, name) => ({
-          setWithParams: action((ctx, params: ThisParams, value: AsyncResp<T>) => {
-            const { cached, key } = find(ctx, params)
+          setWithParams: action(
+            (ctx, params: ThisParams, value: AsyncResp<T>) => {
+              const { cached, key } = find(ctx, params)
 
-            cacheAtom.set(ctx, key, {
-              clearTimeoutId: planCleanup(ctx, key),
-              promise: undefined,
-              value,
-              version: cached ? cached.version + 1 : 1,
-              controller: new AbortController(),
-              lastUpdate: Date.now(),
-              params,
-            })
+              cacheAtom.set(ctx, key, {
+                clearTimeoutId: planCleanup(ctx, key),
+                promise: undefined,
+                value,
+                version: cached ? cached.version + 1 : 1,
+                controller: new AbortController(),
+                lastUpdate: Date.now(),
+                params,
+              })
 
-            // TODO ?
-            // cached?.controller.abort()
-          }),
+              // TODO ?
+              // cached?.controller.abort()
+            },
+          ),
           deleteWithParams: action((ctx, params: ThisParams) => {
             const { cached, key } = find(ctx, params)
             if (cached) cacheAtom.delete(ctx, key)
@@ -275,7 +316,11 @@ export const withCache =
           withPersist({
             key: cacheAtom.__reatom.name!,
             // @ts-expect-error snapshot unknown type
-            fromSnapshot: (ctx, snapshot: Array<[unknown, ThisCacheRecord]>, state = new Map()) => {
+            fromSnapshot: (
+              ctx,
+              snapshot: Array<[unknown, ThisCacheRecord]>,
+              state = new Map(),
+            ) => {
               if (
                 snapshot.length <= state?.size &&
                 snapshot.every(([, { params, value }]) => {
@@ -293,7 +338,11 @@ export const withCache =
                 if (restStaleTime <= 0) {
                   newState.delete(key)
                 } else {
-                  rec.clearTimeoutId = planCleanup(ctx, key, staleTime - (Date.now() - rec.lastUpdate))
+                  rec.clearTimeoutId = planCleanup(
+                    ctx,
+                    key,
+                    staleTime - (Date.now() - rec.lastUpdate),
+                  )
                 }
               }
 
@@ -311,17 +360,27 @@ export const withCache =
               return newState
             },
             time: Math.min(staleTime, MAX_SAFE_TIMEOUT),
-            toSnapshot: (ctx, cache) => [...cache].filter(([, rec]) => !rec.promise),
+            toSnapshot: (ctx, cache) =>
+              [...cache].filter(([, rec]) => !rec.promise),
           }),
         )
       }
 
-      const swrPendingAtom = (anAsync.swrPendingAtom = atom(0, `${anAsync.__reatom.name}.swrPendingAtom`))
+      const swrPendingAtom = (anAsync.swrPendingAtom = atom(
+        0,
+        `${anAsync.__reatom.name}.swrPendingAtom`,
+      ))
 
-      const handlePromise = (ctx: Ctx, key: unknown, cached: ThisCacheRecord, swr: boolean) => {
+      const handlePromise = (
+        ctx: Ctx,
+        key: unknown,
+        cached: ThisCacheRecord,
+        swr: boolean,
+      ) => {
         cached.clearTimeoutId = planCleanup(ctx, key)
         // the case: the whole cache was cleared and a new fetching was started
-        const isSame = () => cacheAtom.get(ctx, key)?.clearTimeoutId === cached.clearTimeoutId
+        const isSame = () =>
+          cacheAtom.get(ctx, key)?.clearTimeoutId === cached.clearTimeoutId
 
         // @ts-expect-error could be reassigned by the testing package
         const { unstable_fn } = anAsync.__reatom
@@ -333,7 +392,11 @@ export const withCache =
             const value = await (ignoreAbort
               ? spawn(
                   a[0],
-                  (ctx, ...a) => unstable_fn({ ...ctx, controller: getTopController(ctx.cause) }, ...a),
+                  (ctx, ...a) =>
+                    unstable_fn(
+                      { ...ctx, controller: getTopController(ctx.cause) },
+                      ...a,
+                    ),
                   a.slice(1),
                 )
               : unstable_fn(...a))
@@ -379,7 +442,10 @@ export const withCache =
           const controller = getTopController(ctx.cause.cause!)!
           abortCauseContext.set(ctx.cause, (ctx.controller = controller))
 
-          const paramsKey = params.slice(1, 1 + (paramsLength ?? params.length)) as ThisParams
+          const paramsKey = params.slice(
+            1,
+            1 + (paramsLength ?? params.length),
+          ) as ThisParams
 
           let {
             cached = {
@@ -410,7 +476,10 @@ export const withCache =
           const cache = cacheAtom.set(ctx, key, cached)
           if (cache.size > length) deleteOldest(cache)
 
-          if ((cached.version === 0 && !cached.promise) || (cached.promise && prevController.signal.aborted)) {
+          if (
+            (cached.version === 0 && !cached.promise) ||
+            (cached.promise && prevController.signal.aborted)
+          ) {
             return handleEffect(anAsync, params, {
               effect: handlePromise(ctx, key, cached, false),
             })
@@ -456,7 +525,9 @@ export const withCache =
 
       // TODO handle it in dataAtom too to not couple to the order of operations
       if (withPersist && 'dataAtom' in anAsync) {
-        onConnect(anAsync.dataAtom!, (ctx) => ctx.subscribe(cacheAtom, () => {}))
+        onConnect(anAsync.dataAtom!, (ctx) =>
+          ctx.subscribe(cacheAtom, () => {}),
+        )
       }
     }
 

@@ -251,7 +251,7 @@ it(
 it(
   'linked list',
   setup(async (ctx, h, hf, mount, parent) => {
-    const list = reatomLinkedList((ctx, n: number) => atom(n))
+    const list = reatomLinkedList((ctx, value: any) => atom(value))
     const jsxList = list.reatomMap((ctx, n) => <span>{n}</span>)
     const one = list.create(ctx, 1)
     const two = list.create(ctx, 2)
@@ -270,6 +270,9 @@ it(
     await sleep()
     expect(isConnected(ctx, one)).toBeTruthy()
     expect(isConnected(ctx, two)).toBeFalsy()
+
+    list.create(ctx, <>3</>)
+
   }),
 )
 

@@ -5,7 +5,6 @@ description: General introduction to state management and reactive programming
 
 ## The disunity
 
-
 The term "state" has become widely discussed, with numerous articles and libraries offering various interpretations of "state management". Some approaches separate network cache and local state into distinct categories, while others view all data sources as interconnected, focusing instead on reactivity.
 
 This article aims to distill insights from the industry to identify the foundations of Functional Reactive Programming (FRP), Object-Oriented Reactive Programming (OORP), cache invalidation strategies, and data management principles. Purposefully concise and definition-focused, it omits examples to keep the content brief, highlighting only the essential concepts.
@@ -75,7 +74,7 @@ The last condition is very important - computational resources are limited, so w
 
 You can talk about the state as data related by some meaning, although often we are talking about some specific cache. For example, traffic light data contains information about three light bulbs, their colors and which one is on. Semantics follows from the subject area and represents the meaning of the data: only one light bulb can be turned on at a time, and the order of their switching is strictly regulated, this information is described not by the data structure, but by the code, therefore less explicit, although no less important.
 
-The traffic light example deduced an important distinguishing feature of state as a phenomenon, is the need for data consistency: we cannot turn on one light without turning off the other, otherwise we would get erroneous data with their unpredictable impact on the user. The property of a state to be always consistent, i.e. to contain non-contradictory data, is called [atomicity](https://en.wikipedia.org/wiki/Atomicity_(database_systems)) in database theory.
+The traffic light example deduced an important distinguishing feature of state as a phenomenon, is the need for data consistency: we cannot turn on one light without turning off the other, otherwise we would get erroneous data with their unpredictable impact on the user. The property of a state to be always consistent, i.e. to contain non-contradictory data, is called [atomicity](<https://en.wikipedia.org/wiki/Atomicity_(database_systems)>) in database theory.
 
 > [Here is the test of atomicity for a few state managers](https://github.com/artalar/state-management-specification/blob/master/src/index.test.js). Btw, React.js throws all your app away from screen if uncaught error occurs in render function, there is no way to get inconsistent state during render.
 

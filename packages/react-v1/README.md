@@ -1,5 +1,3 @@
-
-
 This is compatible package which allow you to use `@reatom/core-v1` with react. All docs is [here](https://www.reatom.dev/package/npm-react/).
 
 ## Setup batching for old React

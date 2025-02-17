@@ -14,11 +14,15 @@ type OnlineAtom = Atom<boolean> & {
  * @note https://issues.chromium.org/issues/338514113
  */
 export const createOnlineAtom = (): OnlineAtom => {
-  const onlineAtom = atom(navigator.onLine, 'onLine')
-    .pipe(withAssign(() => ({
-      offlineAtAtom: atom<number | undefined>(undefined, 'onLine.offlineAtAtom'),
+  const onlineAtom = atom(navigator.onLine, 'onLine').pipe(
+    withAssign(() => ({
+      offlineAtAtom: atom<number | undefined>(
+        undefined,
+        'onLine.offlineAtAtom',
+      ),
       onlineAtAtom: atom<number | undefined>(undefined, 'onLine.onlineAtAtom'),
-    })))
+    })),
+  )
 
   onConnect(onlineAtom, (ctx) => {
     onlineAtom(ctx, navigator.onLine)

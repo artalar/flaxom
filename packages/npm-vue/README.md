@@ -1,6 +1,7 @@
 Reatom integration for Vue Composition API.
 
 Vue has simple and powerful enough primitives for state processing out of the box, refs can be created outside the component and most of the tasks are solved by it. But there are a number of issues that reatom covers better.
+
 - Atoms has lifecycle hooks, usefull for states used in many components. It allows you to init a resource on the first subscription and dispose the resource on the last unsubscription.
 - Actions help you group and better log and debug your logic. Reatom allows you to trace the entire chain of data transformations through all sync and async actions and atoms.
 - Reatom is a perfect solution as a multi frontend core as it is small, powerful and already has adapters for vue, react, solid, svelte (lit and angular adapters in development).

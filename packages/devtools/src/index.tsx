@@ -12,8 +12,8 @@ import {
   bind,
   BooleanAtom,
 } from '@reatom/framework'
-import { h, mount, ctx } from '@reatom/jsx'
 import { withLocalStorage } from '@reatom/persist-web-storage'
+import { h, mount, ctx, Bind, CONTAINER, ROOT } from './jsx'
 import { Graph, update } from './Graph'
 import { getColor } from './utils'
 import { States } from './States'
@@ -114,8 +114,8 @@ export const _connectDevtools = async (
           const rect = containerEl.getBoundingClientRect()
           const { width: w, height: h } = rect
           if (w + h < 400) {
-            width(ctx, `${window.innerWidth / 1.5}px`)
-            height(ctx, `${window.innerHeight * 0.9}px`)
+            width(ctx, `${Math.min(window.innerWidth * 0.8, 800)}px`)
+            height(ctx, `${window.innerHeight + 40}px`)
           } else {
             folded = { width: `${w}px`, height: `${h}px` }
             width(ctx, '0px')
@@ -171,6 +171,7 @@ export const _connectDevtools = async (
     <div
       id={name}
       css:devtools-bg="hsl(244deg 20% 90%)"
+      // @ts-ignore
       css:width={width}
       css:height={height}
       css={`
@@ -211,13 +212,15 @@ export const _connectDevtools = async (
     </div>
   )
 
-  if (ctx.get(visible)) mount(document.body, containerEl)
+  ROOT.append(containerEl)
+
+  if (ctx.get(visible)) mount(document.body, CONTAINER)
 
   visible.onChange((ctx, state) => {
     if (state) {
-      mount(document.body, containerEl)
+      mount(document.body, CONTAINER)
     } else {
-      containerEl.remove()
+      CONTAINER.remove()
     }
   })
 }
@@ -254,14 +257,14 @@ export const createDevtools = ({
   const state: Devtools['state'] = (name, initState) => {
     let target = cache.get(name) as AtomMut | undefined
     if (!target) {
-      cache.set(name, (target = atom(123, name)))
-      target(clientCtx, initState)
+      cache.set(name, (target = atom(undefined, name)))
+      target(clientCtx, () => initState)
     } else if (ctx.get(target) !== initState) {
-      target(clientCtx, initState)
+      target(clientCtx, () => initState)
     }
 
     // memoize the reference to the atom
-    const result = bind(clientCtx, target) as DevtoolsState
+    const result = bind(clientCtx, (ctx, state) => target(ctx, () => state)) as DevtoolsState
 
     const subscribe: DevtoolsState['subscribe'] = (cb) =>
       target.onChange((ctx, state) => {

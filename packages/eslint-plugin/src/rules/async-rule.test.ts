@@ -1,12 +1,12 @@
 import { RuleTester } from 'eslint'
 import { asyncRule } from './async-rule'
 
-const tester = new RuleTester({
+const tester = new RuleTester(/* {
   parserOptions: {
     ecmaVersion: 2022,
     sourceType: 'module',
   },
-})
+} */)
 
 tester.run('async-rule', asyncRule, {
   valid: [

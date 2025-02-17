@@ -115,7 +115,10 @@ createReatomFetch.defaults = {
   headersBase: { accept: 'application/json' },
   method: 'get',
   serializeBody: (body) =>
-    body && typeof body === 'object' && Reflect.getPrototypeOf(body) && !Array.isArray(body)
+    body &&
+    typeof body === 'object' &&
+    Reflect.getPrototypeOf(body) &&
+    !Array.isArray(body)
       ? (body as BodyInit)
       : JSON.stringify(body),
   parseResponse: (resp) => {

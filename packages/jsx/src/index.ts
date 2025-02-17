@@ -1,11 +1,29 @@
-import { action, Atom, AtomMut, createCtx, Ctx, Fn, isAtom, Rec, throwReatomError, Unsubscribe } from '@reatom/core'
+import {
+  action,
+  Atom,
+  AtomMut,
+  createCtx,
+  Ctx,
+  Fn,
+  isAtom,
+  Rec,
+  throwReatomError,
+  Unsubscribe,
+} from '@reatom/core'
 import { noop, random } from '@reatom/utils'
-import { type LinkedList, type LLNode, isLinkedListAtom, LL_NEXT } from '@reatom/primitives'
+import {
+  type LinkedList,
+  type LLNode,
+  isLinkedListAtom,
+  LL_NEXT,
+} from '@reatom/primitives'
 import type { AttributesAtomMaybe, JSX } from './jsx'
 
 declare type JSXElement = JSX.Element
 
-export type FC<Props = {}> = (props: Props & { children?: JSXElement }) => JSXElement
+export type FC<Props = {}> = (
+  props: Props & { children?: JSXElement },
+) => JSXElement
 
 export type { JSXElement, JSX }
 
@@ -13,7 +31,13 @@ export { type ClassNameValue, cn } from './utils'
 
 type DomApis = Pick<
   typeof window,
-  'document' | 'Node' | 'Text' | 'Element' | 'MutationObserver' | 'HTMLElement' | 'DocumentFragment'
+  | 'document'
+  | 'Node'
+  | 'Text'
+  | 'Element'
+  | 'MutationObserver'
+  | 'HTMLElement'
+  | 'DocumentFragment'
 >
 
 const isSkipped = (value: unknown): value is boolean | '' | null | undefined =>
@@ -27,26 +51,35 @@ let unlink = (parent: Node, un: Unsubscribe) => {
   Promise.resolve().then(() => {
     if (!parent.isConnected) un()
     else {
-      while (parent.parentElement && !unsubscribesMap.get(parent)?.push(() => parent.isConnected || un())) {
+      while (
+        parent.parentElement &&
+        !unsubscribesMap.get(parent)?.push(() => parent.isConnected || un())
+      ) {
         parent = parent.parentElement
       }
     }
   })
 }
 
-const walkLinkedList = (ctx: Ctx, DOM: DomApis, el: JSX.Element, list: Atom<LinkedList<LLNode<JSX.Element>>>) => {
+const walkLinkedList = (
+  ctx: Ctx,
+  DOM: DomApis,
+  el: JSX.Element,
+  list: Atom<LinkedList<LLNode<JSX.Element>>>,
+) => {
   let lastVersion = -1
 
   const cb = (state: LinkedList<LLNode<JSX.Element>>) => {
     if (state.version - 1 > lastVersion) {
       el.innerHTML = ''
       for (let { head } = state; head; head = head[LL_NEXT]) {
+        throwNativeFragment(head)
         el.append(head)
       }
     } else {
       for (const change of state.changes) {
         if (change.kind === 'create') {
-          throwReatomError(!isLiveFragment(change.node), 'native fragment is not supported')
+          throwNativeFragment(change.node)
           el.append(change.node)
         }
         if (change.kind === 'remove') {
@@ -111,10 +144,23 @@ type LiveDocumentFragment = DocumentFragment & {
 }
 
 // TODO optimize
-const isLiveFragment = (node: Node): node is LiveDocumentFragment =>
-  String(node) === '[object DocumentFragment]' && '__reatomFragment' in node
+const isLiveFragment = (node: Node): node is LiveDocumentFragment => {
+  return (
+    String(node) === '[object DocumentFragment]' && '__reatomFragment' in node
+  )
+}
+const throwNativeFragment = (element: JSX.Element) => {
+  throwReatomError(
+    String(element) === '[object DocumentFragment]' &&
+      '__reatomFragment' in element === false,
+    'native fragment is not supported',
+  )
+}
 
-const createLiveFragment = (DOM: DomApis, name: string): LiveDocumentFragment => {
+const createLiveFragment = (
+  DOM: DomApis,
+  name: string,
+): LiveDocumentFragment => {
   const fragment = DOM.document.createDocumentFragment()
   const start = DOM.document.createComment(name)
   const end = start.cloneNode() as Comment
@@ -128,7 +174,9 @@ const createLiveFragment = (DOM: DomApis, name: string): LiveDocumentFragment =>
     if (element instanceof DOM.Node) {
       start.after(element)
     } else if (!isSkipped(element)) {
-      const node = isAtom(element) ? walkAtom(ctx, DOM, element) : DOM.document.createTextNode(String(element))
+      const node = isAtom(element)
+        ? walkAtom(ctx, DOM, element)
+        : DOM.document.createTextNode(String(element))
       start.after(node)
     }
   }
@@ -142,7 +190,11 @@ const createLiveFragment = (DOM: DomApis, name: string): LiveDocumentFragment =>
   })
 }
 
-const walkAtom = (ctx: Ctx, DOM: DomApis, anAtom: Atom<JSX.ElementPrimitiveChildren>): DocumentFragment => {
+const walkAtom = (
+  ctx: Ctx,
+  DOM: DomApis,
+  anAtom: Atom<JSX.ElementPrimitiveChildren>,
+): DocumentFragment => {
   const fragment = createLiveFragment(DOM, anAtom.__reatom.name!)
 
   const un = ctx.subscribe(anAtom, fragment.__reatomFragment.update)
@@ -153,12 +205,28 @@ const walkAtom = (ctx: Ctx, DOM: DomApis, anAtom: Atom<JSX.ElementPrimitiveChild
   return fragment
 }
 
-const patchStyleProperty = (style: CSSStyleDeclaration, key: string, value: any): void => {
+const patchStyleProperty = (
+  style: CSSStyleDeclaration,
+  key: string,
+  value: any,
+): void => {
   if (value == null) style.removeProperty(key)
   else style.setProperty(key, value)
 }
 
-export const reatomJsx = (ctx: Ctx, DOM: DomApis = globalThis.window) => {
+export const reatomJsx = (
+  ctx: Ctx,
+  DOM: DomApis = globalThis.window,
+  {
+    stylesheetContainer = DOM.document.head,
+  }: {
+    /**
+     * The container to which the styles will be added.
+     * @default DOM.document.head
+     */
+    stylesheetContainer?: Node
+  } = {},
+) => {
   const StylesheetId = 'reatom-jsx-styles'
   let styles: Rec<string> = {}
   let stylesheet: HTMLStyleElement | undefined
@@ -179,7 +247,7 @@ export const reatomJsx = (ctx: Ctx, DOM: DomApis = globalThis.window) => {
       if (!stylesheet) {
         stylesheet = DOM.document.createElement('style')
         stylesheet.id = StylesheetId
-        DOM.document.head.appendChild(stylesheet)
+        stylesheetContainer.appendChild(stylesheet)
       }
 
       const prefix = name ? name + '_' : ''
@@ -211,7 +279,8 @@ export const reatomJsx = (ctx: Ctx, DOM: DomApis = globalThis.window) => {
          * @see https://measurethat.net/Benchmarks/Show/54
          * @see https://measurethat.net/Benchmarks/Show/31249
          */
-        if (key === 'class' && element instanceof HTMLElement) element.className = val
+        if (key === 'class' && element instanceof HTMLElement)
+          element.className = val
         else element.setAttribute(key, val)
       }
     }
@@ -256,7 +325,10 @@ export const reatomJsx = (ctx: Ctx, DOM: DomApis = globalThis.window) => {
       }
     } else {
       element = tag.startsWith('svg:')
-        ? DOM.document.createElementNS('http://www.w3.org/2000/svg', tag.slice(4))
+        ? DOM.document.createElementNS(
+            'http://www.w3.org/2000/svg',
+            tag.slice(4),
+          )
         : DOM.document.createElement(tag)
     }
 
@@ -278,7 +350,12 @@ export const reatomJsx = (ctx: Ctx, DOM: DomApis = globalThis.window) => {
           if (k.startsWith('model:')) {
             let name = (k = k.slice(6)) as 'value' | 'valueAsNumber' | 'checked'
             set(element, 'on:input', (ctx: Ctx, event: any) => {
-              ;(prop as AtomMut)(ctx, name === 'valueAsNumber' ? +event.target.value : event.target[name])
+              ;(prop as AtomMut)(
+                ctx,
+                name === 'valueAsNumber'
+                  ? +event.target.value
+                  : event.target[name],
+              )
             })
             if (k === 'valueAsNumber') {
               k = 'value'
@@ -383,5 +460,7 @@ export const css = (strings: TemplateStringsArray, ...values: any[]) => {
 }
 
 export const Bind = <T extends Element>(
-  props: { element: T } & AttributesAtomMaybe<Partial<Omit<T, 'children'>> & JSX.DOMAttributes<T>>,
+  props: { element: T } & AttributesAtomMaybe<
+    Partial<Omit<T, 'children'>> & JSX.DOMAttributes<T>
+  >,
 ): T => props.element
