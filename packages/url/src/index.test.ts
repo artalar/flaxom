@@ -106,7 +106,9 @@ it('SearchParamsAtom.lens subpath', () => {
   expect(ctx.get(urlAtom).href).toEqual('http://example.com/results?test=3')
 
   urlAtom.go(ctx, '/results/some')
-  expect(ctx.get(urlAtom).href).toEqual('http://example.com/results/some?test=3')
+  expect(ctx.get(urlAtom).href).toEqual(
+    'http://example.com/results/some?test=3',
+  )
 
   urlAtom.go(ctx, '/some')
   expect(ctx.get(testAtom)).toEqual(1)
@@ -158,15 +160,15 @@ it('inactive subpath should not affect mutated atoms', () => {
   )
 
   ctx.subscribeTrack(testAtom)
-  assert.is(ctx.get(testAtom), 10)
+  expect(ctx.get(testAtom)).toBe(10)
 
   urlAtom.go(ctx, '/other?test=2')
-  assert.is(ctx.get(testAtom), 1)
+  expect(ctx.get(testAtom)).toBe(1)
 
   testAtom(ctx, 123)
-  assert.is(ctx.get(testAtom), 123)
-  assert.is(ctx.get(urlAtom).href, 'http://example.com/other?test=2')
+  expect(ctx.get(testAtom)).toBe(123)
+  expect(ctx.get(urlAtom).href).toBe('http://example.com/other?test=2')
 
   urlAtom.go(ctx, '/other?test=3')
-  assert.is(ctx.get(testAtom), 123)
+  expect(ctx.get(testAtom)).toBe(123)
 })

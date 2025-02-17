@@ -90,8 +90,9 @@ it(`linking`, () => {
 
   ctx.subscribe((logs) => {
     logs.forEach((patch) => {
-      expect(patch.cause).not.toBe(null, `"${patch.proto.name}" cause is null`)
-      // if (patch.cause === null) throw new Error(`"${patch.proto.name}" cause is null`)
+      if (patch.cause === null)
+        throw new Error(`"${patch.proto.name}" cause is null`)
+      expect(patch.cause).not.toBe(null)
     })
   })
 
@@ -125,25 +126,29 @@ it(`nested deps`, () => {
 
   ctx.subscribe((logs) => {
     logs.forEach((patch) => {
-      // expect(patch.cause).not.toBe(null)
-      expect(patch.cause).not.toBe(null, `"${patch.proto.name}" cause is null`)
-
-      // if (patch.cause === null) throw new Error(`"${patch.proto.name}" cause is null`)
+      if (patch.cause === null)
+        throw new Error(`"${patch.proto.name}" cause is null`)
+      expect(patch.cause).not.toBe(null)
     })
   })
 
   const un = ctx.subscribe(a6, fn)
   for (const a of [a1, a2, a3, a4, a5, a6]) {
-    expect(
-      isConnected(ctx, a)).toBe(true)
-    if (!isConnected(ctx, a)) throw new Error(`"${a.__reatom.name}" should not be stale`,
-    )
+    expect(isConnected(ctx, a)).toBe(true)
+    if (!isConnected(ctx, a))
+      throw new Error(`"${a.__reatom.name}" should not be stale`)
   }
 
   expect(fn.calls.length).toBe(1)
-  expect(ctx.get((read) => read(a1.__reatom))!.subs).toEqual(new Set([a2.__reatom, a3.__reatom]))
-  expect(ctx.get((read) => read(a2.__reatom))!.subs).toEqual(new Set([a4.__reatom, a5.__reatom]))
-  expect(ctx.get((read) => read(a3.__reatom))!.subs).toEqual(new Set([a4.__reatom, a5.__reatom]))
+  expect(ctx.get((read) => read(a1.__reatom))!.subs).toEqual(
+    new Set([a2.__reatom, a3.__reatom]),
+  )
+  expect(ctx.get((read) => read(a2.__reatom))!.subs).toEqual(
+    new Set([a4.__reatom, a5.__reatom]),
+  )
+  expect(ctx.get((read) => read(a3.__reatom))!.subs).toEqual(
+    new Set([a4.__reatom, a5.__reatom]),
+  )
 
   ctx.subscribe((logs) => logs.forEach(({ proto }) => touchedAtoms.push(proto)))
 
@@ -155,10 +160,9 @@ it(`nested deps`, () => {
   un()
 
   for (const a of [a1, a2, a3, a4, a5, a6]) {
-    expect(
-      isConnected(ctx, a)).toBe(false)
-    if (isConnected(ctx, a)) throw new Error(`"${a.__reatom.name}" should be stale`,
-    )
+    expect(isConnected(ctx, a)).toBe(false)
+    if (isConnected(ctx, a))
+      throw new Error(`"${a.__reatom.name}" should be stale`)
   }
 })
 
@@ -305,6 +309,7 @@ it(// this test written is more just for example purposes
   expect(sumListener).toHaveBeenCalledTimes(5)
   expect(sumListener).toHaveBeenLastCalledWith(4)
 })
+
 it('no uncaught errors from schedule promise', () => {
   const doTest = action((ctx) => {
     ctx.schedule(() => {})
@@ -320,7 +325,7 @@ it('async cause track', () => {
   const act1 = action((ctx) => ctx.schedule(() => act2(ctx)), 'act1')
   const act2 = action((ctx) => a1(ctx, (s) => ++s), 'act2')
   const ctx = createCtx()
-  const track = vi.fn()
+  const track = mockFn()
 
   ctx.subscribe(track)
 
@@ -328,19 +333,10 @@ it('async cause track', () => {
 
   act1(ctx)
 
-  // expect(
+  expect(
     track.lastInput().find((patch: AtomCache) => patch.proto.name === 'a1')
-      ?.cause.proto.name).toBe('act2',
-  )
-  const lastCallArgs = track.mock.calls[track.mock.calls.length - 1]
-
-  expect(lastCallArgs).toBeDefined()
-
-  if (lastCallArgs) {
-    const patch = lastCallArgs[0].find((patch: AtomCache) => patch.proto.name === 'a1')
-
-    expect(patch?.cause.proto.name).toBe('act2')
-  }
+      ?.cause.proto.name,
+  ).toBe('act2')
 })
 
 it('disconnect tail deps', () => {
@@ -383,6 +379,7 @@ it('deps shift', () => {
   deps.shift()!(ctx, (s) => s + 1)
   expect(track).toHaveBeenCalledTimes(1)
 })
+
 it('subscribe to cached atom', () => {
   const a1 = atom(0)
   const a2 = atom((ctx) => ctx.spy(a1))
