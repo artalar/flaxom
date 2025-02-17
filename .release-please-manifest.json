@@ -32,5 +32,5 @@
   "packages/url": "3.9.0",
   "packages/utils": "3.11.2",
   "packages/web": "3.6.0",
-  "packages/devtools": "0.11.1"
+  "packages/devtools": "0.11.2"
 }
