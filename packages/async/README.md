@@ -446,7 +446,7 @@ export const fetchList = reatomAsync(
   'fetchList',
 ).pipe(withCache(), withDataAtom())
 
-export const updateList = reatomAction(async () => {
+export const updateList = reatomAsync(async () => {
   /*  */
 }, 'updateList')
 updateList.onFulfill.onCall(fetchList.cacheAtom.reset)
