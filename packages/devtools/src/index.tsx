@@ -258,13 +258,13 @@ export const createDevtools = ({
     let target = cache.get(name) as AtomMut | undefined
     if (!target) {
       cache.set(name, (target = atom(undefined, name)))
-      target(clientCtx, initState)
+      target(clientCtx, () => initState)
     } else if (ctx.get(target) !== initState) {
-      target(clientCtx, initState)
+      target(clientCtx, () => initState)
     }
 
     // memoize the reference to the atom
-    const result = bind(clientCtx, target) as DevtoolsState
+    const result = bind(clientCtx, (ctx, state) => target(ctx, () => state)) as DevtoolsState
 
     const subscribe: DevtoolsState['subscribe'] = (cb) =>
       target.onChange((ctx, state) => {
