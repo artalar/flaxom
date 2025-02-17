@@ -6,7 +6,7 @@ import { Inspector } from '@observablehq/inspector'
 // @ts-expect-error
 import observablehqStyles from '../../../node_modules/@observablehq/inspector/dist/inspector.css'
 
-import * as jsondiffpatch from 'jsondiffpatch'
+import { create, type DiffContext } from 'jsondiffpatch'
 // @ts-expect-error
 import * as htmlFormatter from 'jsondiffpatch/formatters/html'
 // @ts-expect-error
@@ -16,17 +16,27 @@ import { BooleanAtom, noop, parseAtoms, reatomBoolean, take, withComputed, withI
 
 import { HISTORY_LENGTH, buttonCss as editButtonCss, historyStates, idxMap } from './utils'
 
-const differ = jsondiffpatch.create()
+const differ = create()
 
 differ.processor.pipes.diff.before(
   'trivial',
-  // @ts-ignore
-  (context) => {
-    if (typeof context.left === 'function' || typeof context.right === 'function') {
-      // @ts-ignore
-      context.setResult([context.left.toString(), context.right.toString()]).exit()
-    }
-  },
+  Object.assign(
+    function functionIgnoring(context: DiffContext) {
+      if (typeof context.left === 'function' || typeof context.right === 'function') {
+        if (context.left === context.right) {
+          context.setResult(undefined).exit()
+        }
+
+        context
+          .setResult([
+            typeof context.left === 'function' ? context.left.toString() : context.left,
+            typeof context.right === 'function' ? context.right.toString() : context.right,
+          ])
+          .exit()
+      }
+    },
+    { filterName: 'functionIgnoring' },
+  ),
 )
 
 const buttonCss = css`
