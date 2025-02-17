@@ -1,5 +1,17 @@
-import { parseAtoms, assign, LinkedListAtom, Action, atom, Fn, Ctx, action, AtomMut } from '@reatom/framework'
-import { JSX } from '@reatom/jsx'
+import {
+  parseAtoms,
+  assign,
+  LinkedListAtom,
+  Action,
+  atom,
+  Fn,
+  Ctx,
+  action,
+  AtomMut,
+  concurrent,
+  sleep,
+} from '@reatom/framework'
+import { h, hf, JSX, css } from '../jsx'
 import { reatomZod, ZodAtomization } from '@reatom/npm-zod'
 import { z } from 'zod'
 
@@ -171,7 +183,12 @@ const FilterView = ({ filter, remove }: { filter: Filter; remove?: Fn<[Ctx]> }) 
       >
         <input
           placeholder="RegExp"
-          model:value={filter.search}
+          value={filter.search}
+          on:input={concurrent(async (ctx, event) => {
+            const { value } = event.currentTarget
+            await ctx.schedule(() => sleep(250))
+            filter.search(ctx, value)
+          })}
           css={`
             border: 1px solid #151134;
             height: 30px;
@@ -398,9 +415,12 @@ export const reatomFilters = (
         <form
           on:submit={(ctx, e) => {
             e.preventDefault()
+            const active = ctx.get(filters.search.active)
             const search = ctx.get(filters.search.search)
             const type = ctx.get(filters.search.type)
-            filters.list.create(ctx, { search, type })
+            const color = ctx.get(filters.search.color)
+            filters.list.create(ctx, { active, search, type, color })
+            filters.search.active(ctx, true)
             filters.search.search(ctx, '')
             filters.search.type.reset(ctx)
             filters.search.color(ctx, HIGHLIGHT_COLOR)

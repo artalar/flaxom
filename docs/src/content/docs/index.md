@@ -28,7 +28,7 @@ description: Reatom - tiny and powerful reactive system with immutable nature
 - **smallest bundle** size: [2 KB](https://bundlejs.com/?q=%40reatom%2Fcore) gzipped
   <small>With the power of base primitives, the whole ecosystem with <strong>A&nbsp;LOT</strong> of enterprise-level helpers takes only [~15KB](https://bundlejs.com/?q=%40reatom%2Fframework%2C%40reatom%2Fnpm-react%2C%40reatom%2Fpersist-web-storage%2C%40reatom%2Fundo%2C%40reatom%2Fform-web&config=%7B%22esbuild%22%3A%7B%22external%22%3A%5B%22react%22%2C%22use-sync-external-store%22%5D%7D%7D). Insane!</small>
 - **the best TypeScript** experience
-  <small>[Type inference](/recipes/typescript/)  is one of the main priorities for Reatom.</small>
+  <small>[Type inference](/recipes/typescript/) is one of the main priorities for Reatom.</small>
 
 [The core package](/package/core) includes most of these features and, due to its minimal overhead, can be used in any project, from small libraries to large applications.
 
@@ -221,7 +221,7 @@ export const Search = () => {
 }
 ```
 
-The logic definition consists of only about 15 lines of code and is entirely independent from the view part (React in our case).  It makes it easy to test.
+The logic definition consists of only about 15 lines of code and is entirely independent from the view part (React in our case). It makes it easy to test.
 Imagine the line count in other libraries!
 The most impressive part is that the overhead is [less than 4KB (gzip)](https://bundlejs.com/?q=%28import%29%40reatom%2Fframework%2C%28import%29%40reatom%2Fnpm-react&treeshake=%5B%7B%0A++atom%2CcreateCtx%2ConUpdate%2CreatomAsync%2Csleep%2CwithAbort%2CwithDataAtom%2CwithRetry%2C%7D%5D%2C%5B%7B+useAtom+%7D%5D&share=MYewdgzgLgBBCmBDATsAFgQSiAtjAvDItjgBQBE5ANDOQiulruQJQDcAUKJLAGbxR0ASQgQArvAgEYyJCQwQAnmGClESlTFLAoADxoBHCckUAuOFGQBLMAHMWBAHwwA3hxhEA7oiuwIAG3h4AAdSACYAVgAGdhgAejiYABN4ACMQMRV4dxhuaFcYX3gcKQBfaURvXyJgqwA6fkE0EXFJUiN4ExodXTruSxB-QOR2HNkoMWQwQqhiiE5SmnJG4VEJCFY62uD4UhzPXzQAEWJEJjIAbQBdFip9w4x05ChSFwtkYnhbM1p-dSgALQ2AEHMDkGClW73KBoABKAhMrxyHnA8IAVvAdNo9DROsgQMhzIgwIoaONrJIHG4PDT4olxpNpik-opCtMSjACTAAQBGGDYGDBWQAN3gYFg5KskmRNIZUxgeIJAH46jhJBBELZ4HUbMB-GIUhAKB9ZjB-FYcL5WDLaUqYDyolEYAAqGAAWWIaFVNlI0SiZIRUqkztdYRYNpp5l5nFpixykLuowSMkyMBWzTWkk503gopMcCQqEwJBgYmCSU%2BHHAAFVy59SPQi%2BcaOmWutRlxZJ8AMJ6UijMQIc6kVuZiB1CtQM4kFhAA&config=%7B%22esbuild%22%3A%7B%22external%22%3A%5B%22react%22%2C%22use-sync-external-store%22%5D%7D%7D). Amazing, right?
 On top of that, you’re not limited to network cache. Reatom is powerful and expressive enough to manage any state.
@@ -261,7 +261,7 @@ While this can be more predictable, it is certainly not optimal.
 Effector's hot connections make it unfriendly for factory creation, which prevents the use of [atomization](/recipes/atomization/) patterns necessary for efficient immutability handling.
 Additionally, Effector's [bundle size is 2-3 times more significant](https://bundlejs.com/?q=effector&treeshake=%5B%7BcraeteStore%2CcreateEvent%2Ccombine%7D%5D) with [worse performance](https://github.com/artalar/reactive-computed-bench).
 
-[Zustand](https://github.com/pmndrs/zustand), [nanostores](https://github.com/nanostores/nanostores), [xstate](https://xstate.js.org), and [many other](https://gist.github.com/artalar/e5e8a7274dfdfbe9d36c9e5ec22fc650) state managers do not offer the same exceptional combination of type  inference, features, bundle size, and performance that Reatom provides.
+[Zustand](https://github.com/pmndrs/zustand), [nanostores](https://github.com/nanostores/nanostores), [xstate](https://xstate.js.org), and [many other](https://gist.github.com/artalar/e5e8a7274dfdfbe9d36c9e5ec22fc650) state managers do not offer the same exceptional combination of type inference, features, bundle size, and performance that Reatom provides.
 
 ### Why immutability?
 
@@ -299,6 +299,7 @@ Also, remember to check out our [atomization guide](/recipes/atomization).
 ### Limitations
 
 No software is perfect, and Reatom is no exception. Here are some limitations you should be aware of:
+
 - **Immutable Data**: While immutable data structures are great, they can impact performance. In critical situations, think carefully about your data structures. The good news is you [don't have to use normalization](/recipes/atomization).
 - **Laziness**: Laziness is less obvious sometimes and might lead to missed updates. However, debugging a missing update is straightforward and often easier than dealing with hot observables' memory leaks and performance issues. We also have [hooks](/package/hooks) for hot linking.
 - **Error Handling**: Currently, you can't subscribe to errors from any dependency, but we're working on it. In [reatomAsync](/package/async), passed effects are wrapped in an error handler, allowing you to manage errors, but you need to wrap them explicitly.

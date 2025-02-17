@@ -1,7 +1,18 @@
 import { it, expect, vi } from 'vitest'
 import { mockFn } from '@reatom/testing'
 
-import { action, Atom, atom, AtomProto, AtomMut, createCtx as _createCtx, Ctx, CtxSpy, Fn, AtomCache } from './atom'
+import {
+  action,
+  Atom,
+  atom,
+  AtomProto,
+  AtomMut,
+  createCtx as _createCtx,
+  Ctx,
+  CtxSpy,
+  Fn,
+  AtomCache,
+} from './atom'
 
 const callSafelySilent = (fn: Fn, ...a: any[]) => {
   try {
@@ -79,8 +90,8 @@ it(`linking`, () => {
 
   ctx.subscribe((logs) => {
     logs.forEach((patch) => {
-      expect(patch.cause).not.toBe(null)
-      if (patch.cause === null) throw new Error(`"${patch.proto.name}" cause is null`)
+      expect(patch.cause).not.toBe(null, `"${patch.proto.name}" cause is null`)
+      // if (patch.cause === null) throw new Error(`"${patch.proto.name}" cause is null`)
     })
   })
 
@@ -114,15 +125,19 @@ it(`nested deps`, () => {
 
   ctx.subscribe((logs) => {
     logs.forEach((patch) => {
-      expect(patch.cause).not.toBe(null)
-      if (patch.cause === null) throw new Error(`"${patch.proto.name}" cause is null`)
+      // expect(patch.cause).not.toBe(null)
+      expect(patch.cause).not.toBe(null, `"${patch.proto.name}" cause is null`)
+
+      // if (patch.cause === null) throw new Error(`"${patch.proto.name}" cause is null`)
     })
   })
 
   const un = ctx.subscribe(a6, fn)
   for (const a of [a1, a2, a3, a4, a5, a6]) {
-    expect(isConnected(ctx, a)).toBe(true)
-    if (!isConnected(ctx, a)) throw new Error(`"${a.__reatom.name}" should not be stale`)
+    expect(
+      isConnected(ctx, a)).toBe(true)
+    if (!isConnected(ctx, a)) throw new Error(`"${a.__reatom.name}" should not be stale`,
+    )
   }
 
   expect(fn.calls.length).toBe(1)
@@ -140,8 +155,10 @@ it(`nested deps`, () => {
   un()
 
   for (const a of [a1, a2, a3, a4, a5, a6]) {
-    expect(isConnected(ctx, a)).toBe(false)
-    if (isConnected(ctx, a)) throw new Error(`"${a.__reatom.name}" should be stale`)
+    expect(
+      isConnected(ctx, a)).toBe(false)
+    if (isConnected(ctx, a)) throw new Error(`"${a.__reatom.name}" should be stale`,
+    )
   }
 })
 
@@ -210,10 +227,19 @@ it(`late effects batch`, async () => {
 it(`display name`, () => {
   const firstNameAtom = atom(`John`, `firstName`)
   const lastNameAtom = atom(`Doe`, `lastName`)
-  const isFirstNameShortAtom = atom((ctx) => ctx.spy(firstNameAtom).length < 10, `isFirstNameShort`)
-  const fullNameAtom = atom((ctx) => `${ctx.spy(firstNameAtom)} ${ctx.spy(lastNameAtom)}`, `fullName`)
+  const isFirstNameShortAtom = atom(
+    (ctx) => ctx.spy(firstNameAtom).length < 10,
+    `isFirstNameShort`,
+  )
+  const fullNameAtom = atom(
+    (ctx) => `${ctx.spy(firstNameAtom)} ${ctx.spy(lastNameAtom)}`,
+    `fullName`,
+  )
   const displayNameAtom = atom(
-    (ctx) => (ctx.spy(isFirstNameShortAtom) ? ctx.spy(fullNameAtom) : ctx.spy(firstNameAtom)),
+    (ctx) =>
+      ctx.spy(isFirstNameShortAtom)
+        ? ctx.spy(fullNameAtom)
+        : ctx.spy(firstNameAtom),
     `displayName`,
   )
   const effect = vi.fn()
@@ -255,7 +281,9 @@ it(`display name`, () => {
 it(// this test written is more just for example purposes
 `dynamic lists`, () => {
   const listAtom = atom(new Array<AtomMut<number>>())
-  const sumAtom = atom((ctx) => ctx.spy(listAtom).reduce((acc, a) => acc + ctx.spy(a), 0))
+  const sumAtom = atom((ctx) =>
+    ctx.spy(listAtom).reduce((acc, a) => acc + ctx.spy(a), 0),
+  )
   const ctx = createCtx()
   const sumListener = vi.fn((sum: number) => {})
 
@@ -300,7 +328,10 @@ it('async cause track', () => {
 
   act1(ctx)
 
-  // expect(track.lastInput().find((patch: AtomCache) => patch.proto.name === 'a1')?.cause.proto.name).toBe('act2')
+  // expect(
+    track.lastInput().find((patch: AtomCache) => patch.proto.name === 'a1')
+      ?.cause.proto.name).toBe('act2',
+  )
   const lastCallArgs = track.mock.calls[track.mock.calls.length - 1]
 
   expect(lastCallArgs).toBeDefined()
@@ -317,7 +348,9 @@ it('disconnect tail deps', () => {
   const track = vi.fn((ctx: CtxSpy) => ctx.spy(aAtom))
   const bAtom = atom(track, 'bAtom')
   const isActiveAtom = atom(true, 'isActiveAtom')
-  const bAtomControlled = atom((ctx, state?: any) => (ctx.spy(isActiveAtom) ? ctx.spy(bAtom) : state))
+  const bAtomControlled = atom((ctx, state?: any) =>
+    ctx.spy(isActiveAtom) ? ctx.spy(bAtom) : state,
+  )
   const ctx = createCtx()
 
   ctx.subscribe(bAtomControlled, () => {})
@@ -334,7 +367,9 @@ it('deps shift', () => {
   const deps = [atom(0), atom(0), atom(0)]
   const track = vi.fn()
 
-  deps.forEach((dep, i) => (dep.__reatom.disconnectHooks ??= new Set()).add(() => track(i)))
+  deps.forEach((dep, i) =>
+    (dep.__reatom.disconnectHooks ??= new Set()).add(() => track(i)),
+  )
 
   const a = atom((ctx) => deps.forEach((dep) => ctx.spy(dep)))
   const ctx = createCtx()
@@ -474,7 +509,9 @@ it('no extra tick by schedule', async () => {
 
   let isDoneAsyncInTr = false
   const ctx = createCtx()
-  ctx.get(() => ctx.schedule(async () => {}).then(() => (isDoneAsyncInTr = true)))
+  ctx.get(() =>
+    ctx.schedule(async () => {}).then(() => (isDoneAsyncInTr = true)),
+  )
 
   await null
   await null

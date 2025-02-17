@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest'
+
 import { isDeepEqual, toAbortError, toStringKey, mockRandom } from './'
 
 describe('Utility Functions Tests', () => {
@@ -10,62 +11,32 @@ describe('Utility Functions Tests', () => {
   it('isDeepEqual Map', () => {
     expect(
       isDeepEqual(
-        new Map([
-          [{ a: 1 }, 1],
-          [{ a: 2 }, 2],
-        ]),
-        new Map([
-          [{ a: 1 }, 1],
-          [{ a: 2 }, 2],
-        ]),
+        new Map([[{ a: 1 }, 1], [{ a: 2 }, 2]]) /* prettier-ignore */,
+        new Map([[{ a: 1 }, 1], [{ a: 2 }, 2]]) /* prettier-ignore */,
       ),
     ).toBe(true)
     expect(
       isDeepEqual(
-        new Map([
-          [{ a: 1 }, 1],
-          [{ a: 2 }, 2],
-        ]),
-        new Map([
-          [{ a: 2 }, 2],
-          [{ a: 1 }, 1],
-        ]),
+        new Map([[{ a: 1 }, 1], [{ a: 2 }, 2]]) /* prettier-ignore */,
+        new Map([[{ a: 2 }, 2], [{ a: 1 }, 1]]) /* prettier-ignore */,
       ),
     ).toBe(false)
     expect(
       isDeepEqual(
-        new Map([
-          [{ a: 1 }, 1],
-          [{ a: 2 }, 2],
-        ]),
-        new Map([
-          [{ a: 1 }, 1],
-          [{ a: 2 }, 2],
-        ]),
+        new Map([[{ a: 1 }, 1], [{ a: 2 }, 2]]) /* prettier-ignore */,
+        new Map([[{ a: 1 }, 1], [{ a: 2 }, 2]]) /* prettier-ignore */,
       ),
     ).toBe(true)
     expect(
       isDeepEqual(
-        new Map([
-          [1, { a: 1 }],
-          [2, { a: 2 }],
-        ]),
-        new Map([
-          [2, { a: 2 }],
-          [1, { a: 1 }],
-        ]),
+        new Map([[1, { a: 1 }], [2, { a: 2 }]]) /* prettier-ignore */,
+        new Map([[2, { a: 2 }], [1, { a: 1 }]]) /* prettier-ignore */,
       ),
     ).toBe(false)
     expect(
       isDeepEqual(
-        new Map([
-          [1, { a: 1 }],
-          [2, { a: 2 }],
-        ]),
-        new Map([
-          [1, { a: 1 }],
-          [2, { a: 2 }],
-        ]),
+        new Map([[1, { a: 1 }], [2, { a: 2 }]]) /* prettier-ignore */,
+        new Map([[1, { a: 1 }], [2, { a: 2 }]]) /* prettier-ignore */,
       ),
     ).toBe(true)
   })

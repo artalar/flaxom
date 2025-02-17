@@ -35,16 +35,27 @@ export interface ZodAtom<T> {}
 export interface AtomMut<T = any> extends ZodAtom<T>, ReatomAtomMut<T> {}
 export interface BooleanAtom extends ZodAtom<boolean>, ReatomBooleanAtom {}
 export interface NumberAtom extends ZodAtom<number>, ReatomNumberAtom {}
-type EnumAtom<T extends string, Format extends 'camelCase' | 'snake_case' = 'camelCase'> = ZodAtom<T> &
-  ReatomEnumAtom<T, Format>
-export interface RecordAtom<T extends Rec> extends ZodAtom<T>, ReatomRecordAtom<T> {}
-export interface MapAtom<Key, Element> extends ZodAtom<[Key, Element]>, ReatomMapAtom<Key, Element> {}
+type EnumAtom<
+  T extends string,
+  Format extends 'camelCase' | 'snake_case' = 'camelCase',
+> = ZodAtom<T> & ReatomEnumAtom<T, Format>
+export interface RecordAtom<T extends Rec>
+  extends ZodAtom<T>,
+    ReatomRecordAtom<T> {}
+export interface MapAtom<Key, Element>
+  extends ZodAtom<[Key, Element]>,
+    ReatomMapAtom<Key, Element> {}
 export interface SetAtom<T> extends ZodAtom<[T]>, ReatomSetAtom<T> {}
-export interface LinkedListAtom<Params extends any[] = any[], Model extends Rec = Rec>
-  extends ZodAtom<Array<Model>>,
+export interface LinkedListAtom<
+  Params extends any[] = any[],
+  Model extends Rec = Rec,
+> extends ZodAtom<Array<Model>>,
     ReatomLinkedListAtom<Params, Model> {}
 
-export type ZodAtomization<T extends z.ZodFirstPartySchemaTypes, Union = never> = T extends z.ZodAny
+export type ZodAtomization<
+  T extends z.ZodFirstPartySchemaTypes,
+  Union = never,
+> = T extends z.ZodAny
   ? AtomMut<any | Union>
   : T extends z.ZodUnknown
   ? AtomMut<unknown | Union>
@@ -149,7 +160,9 @@ export const silentUpdate = action((ctx, cb: Fn<[Ctx]>) => {
   cb(ctx)
 })
 
-export const EXTENSIONS = new Array<Fn<[AtomMut, z.ZodFirstPartyTypeKind], AtomMut>>()
+export const EXTENSIONS = new Array<
+  Fn<[AtomMut, z.ZodFirstPartyTypeKind], AtomMut>
+>()
 
 export const reatomZod = <Schema extends z.ZodFirstPartySchemaTypes>(
   { _def: def }: Schema,
@@ -236,7 +249,8 @@ export const reatomZod = <Schema extends z.ZodFirstPartySchemaTypes>(
       // TODO @artalar generate a better name, instead of using `__count`
       theAtom = reatomLinkedList(
         {
-          create: (ctx, initState) => reatomZod(def.type, { sync, initState, name: __count(name) }),
+          create: (ctx, initState) =>
+            reatomZod(def.type, { sync, initState, name: __count(name) }),
           initState: (initState as any[] | undefined)?.map((initState: any) =>
             reatomZod(def.type, { sync, initState, name: __count(name) }),
           ),
@@ -266,20 +280,25 @@ export const reatomZod = <Schema extends z.ZodFirstPartySchemaTypes>(
       break
     }
     case z.ZodFirstPartyTypeKind.ZodUnion: {
-      state = def.options.find((type: z.ZodDefault<any>) => type._def.defaultValue?.()) ?? initState
+      state =
+        def.options.find(
+          (type: z.ZodDefault<any>) => type._def.defaultValue?.(),
+        ) ?? initState
       break
     }
     case z.ZodFirstPartyTypeKind.ZodDiscriminatedUnion: {
       const getState = (initState: any) => {
-        const state = def.options.find((type: z.ZodDiscriminatedUnionOption<string>) => {
-          try {
-            type.parse(initState)
-          } catch {
-            return undefined
-          }
+        const state = def.options.find(
+          (type: z.ZodDiscriminatedUnionOption<string>) => {
+            try {
+              type.parse(initState)
+            } catch {
+              return undefined
+            }
 
-          return type
-        })
+            return type
+          },
+        )
 
         throwReatomError(!state, 'Missed init state for discriminated union')
 
@@ -332,5 +351,8 @@ export const reatomZod = <Schema extends z.ZodFirstPartySchemaTypes>(
     sync?.(ctx)
   })
 
-  return EXTENSIONS.reduce((anAtom, ext) => ext(anAtom as AtomMut, def.typeName), theAtom) as ZodAtomization<Schema>
+  return EXTENSIONS.reduce(
+    (anAtom, ext) => ext(anAtom as AtomMut, def.typeName),
+    theAtom,
+  ) as ZodAtomization<Schema>
 }

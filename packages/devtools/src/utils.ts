@@ -1,5 +1,5 @@
-import { AtomCache, AtomProto } from '@reatom/framework'
-import { css } from '@reatom/jsx'
+import { __root, AtomCache, AtomProto } from '@reatom/framework'
+import { css } from './jsx'
 
 export const getColor = ({ proto }: AtomCache): string =>
   proto.isAction
@@ -23,7 +23,10 @@ export const getId = (node: AtomCache) => {
   return id
 }
 
-export const followingsMap = new (class extends Map<AtomCache, Array<AtomCache>> {
+export const followingsMap = new (class extends Map<
+  AtomCache,
+  Array<AtomCache>
+> {
   add(patch: AtomCache) {
     while (patch.cause?.cause) {
       let followings = this.get(patch.cause)
@@ -40,19 +43,23 @@ export const highlighted = new Set<AtomCache>()
 
 export const actionsStates = new WeakMap<AtomCache, Array<any>>()
 
-export const historyStates = new (class extends WeakMap<AtomProto, Array<AtomCache>> {
+// TODO: parametrize
+export const HISTORY_LENGTH = 10
+
+export const historyStates = new (class extends WeakMap<
+  AtomProto,
+  Array<AtomCache>
+> {
   add(patch: AtomCache) {
     let list = this.get(patch.proto)
     if (!list) {
       list = []
       this.set(patch.proto, list)
-    } else if (list.length > 6) {
+    } else if (list.length >= HISTORY_LENGTH) {
       list.pop()
+    } else if (list.length > 0 && Object.is(patch.state, list[0]!.state)) {
+      return
     }
-    
-    // if (list.length === 0 || !Object.is(list[0]!.state, patch.state)) {
-    //   list.unshift(patch)
-    // }
 
     list.unshift(patch)
   }

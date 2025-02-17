@@ -8,7 +8,9 @@ import { onConnect } from '@reatom/hooks'
 import { reatomAsync, withAbort, withDataAtom, withCache, AsyncCtx } from './'
 
 it('withCache', async () => {
-  const fetchData = reatomAsync(async (ctx, { a, b }: { a: number; b: number }) => a).pipe(withDataAtom(0), withCache())
+  const fetchData = reatomAsync(
+    async (ctx, { a, b }: { a: number; b: number }) => a,
+  ).pipe(withDataAtom(0), withCache())
   const ctx = createTestCtx()
 
   await fetchData(ctx, { a: 400, b: 0 })
@@ -50,7 +52,10 @@ it('withCache dataAtom mapper', async () => {
 
 it('withCache swr true (default)', async () => {
   let i = 0
-  const fetchData = reatomAsync((ctx) => Promise.resolve(++i)).pipe(withDataAtom(0), withCache())
+  const fetchData = reatomAsync((ctx) => Promise.resolve(++i)).pipe(
+    withDataAtom(0),
+    withCache(),
+  )
 
   const ctx = createTestCtx()
   const track = ctx.subscribeTrack(fetchData.dataAtom)
@@ -126,7 +131,11 @@ it('withCache withAbort vary params', async () => {
 
     return n
   })
-  const fetchData = reatomAsync(effect).pipe(withDataAtom(0), withCache(), withAbort())
+  const fetchData = reatomAsync(effect).pipe(
+    withDataAtom(0),
+    withCache(),
+    withAbort(),
+  )
 
   const ctx = createTestCtx()
   const track = ctx.subscribeTrack(fetchData.dataAtom)
@@ -179,7 +188,11 @@ it('withCache withAbort same params', async () => {
 
 it('withCache and action mocking', async () => {
   const effect = mockFn(async (ctx: any, n: number) => n)
-  const fetchData = reatomAsync(effect).pipe(withDataAtom(0), withCache(), withAbort())
+  const fetchData = reatomAsync(effect).pipe(
+    withDataAtom(0),
+    withCache(),
+    withAbort(),
+  )
   const ctx = createTestCtx()
 
   ctx.mockAction(fetchData, async (ctx, n) => n * 10)
@@ -229,7 +242,10 @@ it('do not cache aborted promise', async () => {
     ctx.controller.signal.throwIfAborted()
     return 1
   })
-  const fetchData = reatomAsync(effect).pipe(withDataAtom(0), withCache({ ignoreAbort: false }))
+  const fetchData = reatomAsync(effect).pipe(
+    withDataAtom(0),
+    withCache({ ignoreAbort: false }),
+  )
   onConnect(fetchData.dataAtom, fetchData)
   const ctx = createTestCtx()
 
@@ -249,7 +265,10 @@ it('do not cache aborted promise', async () => {
 
 it('should be able to manage cache manually', async () => {
   const effect = mockFn(async (ctx: any, n: number) => n)
-  const fetchData = reatomAsync(effect).pipe(withDataAtom(0), withCache({ swr: false }))
+  const fetchData = reatomAsync(effect).pipe(
+    withDataAtom(0),
+    withCache({ swr: false }),
+  )
   const ctx = createTestCtx()
 
   fetchData(ctx, 1)
@@ -275,7 +294,10 @@ it('should be able to manage cache manually', async () => {
 
 it('Infinity cache invalidation', async () => {
   const effect = mockFn(async (ctx: any, n: number) => n)
-  const fetchData = reatomAsync(effect).pipe(withDataAtom(0), withCache({ swr: false, staleTime: Infinity }))
+  const fetchData = reatomAsync(effect).pipe(
+    withDataAtom(0),
+    withCache({ swr: false, staleTime: Infinity }),
+  )
   const ctx = createTestCtx()
 
   await fetchData(ctx, 1)

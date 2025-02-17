@@ -11,7 +11,12 @@ export const sample: {
   <T extends Atom>(
     signal: Atom,
     name?: string,
-  ): Fn<[T], T extends Action<infer Params, infer Payload> ? LensAction<[], Payload> : LensAtom<AtomState<T>>>
+  ): Fn<
+    [T],
+    T extends Action<infer Params, infer Payload>
+      ? LensAction<[], Payload>
+      : LensAtom<AtomState<T>>
+  >
 } =
   <T>(signal: Atom, name?: string) =>
   // @ts-ignore

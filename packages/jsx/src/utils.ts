@@ -9,11 +9,15 @@ export type ClassNameValue = AtomMaybe<
   | undefined
   | Array<ClassNameValue>
   | Atom<ClassNameValue>
-  | Record<string, AtomMaybe<string | number | boolean | null | undefined | object>>
+  | Record<
+      string,
+      AtomMaybe<string | number | boolean | null | undefined | object>
+    >
   | ((ctx: CtxSpy) => ClassNameValue)
 >
 
-export const cn = (value: ClassNameValue): Atom<string> => atom((ctx) => parseClasses(ctx, value))
+export const cn = (value: ClassNameValue): Atom<string> =>
+  atom((ctx) => parseClasses(ctx, value))
 
 const parseClasses = (ctx: CtxSpy, value: ClassNameValue): string => {
   let className = ''

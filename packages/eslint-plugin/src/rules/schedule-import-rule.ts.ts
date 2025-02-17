@@ -8,7 +8,10 @@ const importsMap = {
 const importNames = Object.keys(importsMap)
 type TImport = keyof typeof importsMap
 
-const getTextToReplace = (numberArgumentText: string, callbackArgumentText: string) => {
+const getTextToReplace = (
+  numberArgumentText: string,
+  callbackArgumentText: string,
+) => {
   if (Boolean(numberArgumentText)) {
     return `schedule(ctx, ${callbackArgumentText}, ${numberArgumentText})`
   }
@@ -42,7 +45,11 @@ export const scheduleImportRule: Rule.RuleModule = {
 
         if (node.source.value === '@reatom/framework') {
           node.specifiers.forEach((specifier) => {
-            if (specifier.type === 'ImportSpecifier' && importNames.includes(specifier.imported.name)) {
+            if (
+              specifier.type === 'ImportSpecifier' &&
+              'name' in specifier.imported &&
+              importNames.includes(specifier.imported.name)
+            ) {
               hasImport = true
               exsistsImportSpecifiers.add(specifier.imported.name)
             }
@@ -62,21 +69,38 @@ export const scheduleImportRule: Rule.RuleModule = {
           fix(fixer) {
             const fixes = [] as Rule.Fix[]
             const sourceCode = context.sourceCode
-            const callbackArgumentText = callbackArgument ? sourceCode.getText(callbackArgument) : '() => {}'
-            const numberArgumentText = numberArgument ? sourceCode.getText(numberArgument) : ''
+            const callbackArgumentText = callbackArgument
+              ? sourceCode.getText(callbackArgument)
+              : '() => {}'
+            const numberArgumentText = numberArgument
+              ? sourceCode.getText(numberArgument)
+              : ''
 
-            fixes.push(fixer.replaceText(node, getTextToReplace(numberArgumentText, callbackArgumentText)))
+            fixes.push(
+              fixer.replaceText(
+                node,
+                getTextToReplace(numberArgumentText, callbackArgumentText),
+              ),
+            )
 
             const neededImport = numberArgument ? 'schedule' : 'wrap'
 
             if (!exsistsImportSpecifiers.has(neededImport)) {
               if (hasImport && lastImport) {
                 const exsistedSpecifier = lastImport.specifiers.find(
-                  (specifier) => specifier.type == 'ImportSpecifier' && importNames.includes(specifier.imported.name),
+                  (specifier) =>
+                    specifier.type == 'ImportSpecifier' &&
+                    'name' in specifier.imported &&
+                    importNames.includes(specifier.imported.name),
                 )
 
                 if (exsistedSpecifier) {
-                  fixes.push(fixer.insertTextAfter(exsistedSpecifier, `, ${neededImport}`))
+                  fixes.push(
+                    fixer.insertTextAfter(
+                      exsistedSpecifier,
+                      `, ${neededImport}`,
+                    ),
+                  )
                 }
               } else {
                 const importToAdd = importsMap[neededImport]

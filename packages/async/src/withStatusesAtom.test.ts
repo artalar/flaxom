@@ -1,4 +1,4 @@
-import { it, expect } from 'vitest'
+import { test, expect } from 'vitest'
 import { createTestCtx } from '@reatom/testing'
 
 import { reatomAsync, withAbort, withCache } from './'
@@ -86,7 +86,7 @@ const anotherPending: AsyncStatusesAnotherPending = {
   // isNeverSettled: false,
 }
 
-it('withStatusesAtom', async () => {
+test('withStatusesAtom', async () => {
   const fetchData = reatomAsync(async (ctx, shouldTrow = false) => {
     if (shouldTrow) throw new Error('withStatusesAtom test error')
   }).pipe(withStatusesAtom())
@@ -111,7 +111,7 @@ it('withStatusesAtom', async () => {
   expect(ctx.get(fetchData.statusesAtom)).toEqual(rejected)
 })
 
-it('withCache and withStatusesAtom', async () => {
+test('withCache and withStatusesAtom', async () => {
   const fetchData = reatomAsync(async (ctx, shouldTrow = false) => {
     if (shouldTrow) throw new Error('withStatusesAtom test error')
   }).pipe(withStatusesAtom(), withCache())
@@ -144,7 +144,7 @@ it('withCache and withStatusesAtom', async () => {
   expect(track.lastInput()).toEqual(rejected)
 })
 
-it('withStatusesAtom parallel requests', async () => {
+test('withStatusesAtom parallel requests', async () => {
   const fetchData = reatomAsync(() => sleep(10)).pipe(withStatusesAtom())
   const ctx = createTestCtx()
   const track = ctx.subscribeTrack(fetchData.statusesAtom)
@@ -169,7 +169,7 @@ it('withStatusesAtom parallel requests', async () => {
   expect(track.lastInput()).toEqual(fulfilled)
 })
 
-it('reset during pending', async () => {
+test('reset during pending', async () => {
   const fetchData = reatomAsync(async () => {}).pipe(withStatusesAtom())
   const ctx = createTestCtx()
 
@@ -184,8 +184,11 @@ it('reset during pending', async () => {
   expect(ctx.get(fetchData.statusesAtom).isEverPending).toBe(false)
 })
 
-it('do not reject on abort', async () => {
-  const fetchData = reatomAsync(async () => sleep()).pipe(withAbort(), withStatusesAtom())
+test('do not reject on abort', async () => {
+  const fetchData = reatomAsync(async () => sleep()).pipe(
+    withAbort(),
+    withStatusesAtom(),
+  )
   const ctx = createTestCtx()
 
   expect(ctx.get(fetchData.statusesAtom)).toBe(asyncStatusesInitState)
@@ -205,8 +208,11 @@ it('do not reject on abort', async () => {
   } satisfies AsyncStatusesAbortedPending)
 })
 
-it('isEverSettled after abort', async () => {
-  const fetchData = reatomAsync(async () => sleep()).pipe(withAbort(), withStatusesAtom())
+test('isEverSettled after abort', async () => {
+  const fetchData = reatomAsync(async () => sleep()).pipe(
+    withAbort(),
+    withStatusesAtom(),
+  )
   const ctx = createTestCtx()
 
   expect(ctx.get(fetchData.statusesAtom)).toBe(asyncStatusesInitState)
@@ -238,7 +244,7 @@ it('isEverSettled after abort', async () => {
   } satisfies AsyncStatusesAbortedPending)
 })
 
-it('do not reject on resource abort', async () => {
+test('do not reject on resource abort', async () => {
   const fetchData = reatomResource(async (ctx) => {}).pipe(withStatusesAtom())
   const ctx = createTestCtx()
 
@@ -257,8 +263,11 @@ it('do not reject on resource abort', async () => {
   } satisfies AsyncStatusesAbortedPending)
 })
 
-it('restore isFulfilled after abort', async () => {
-  const fetchData = reatomAsync(async (ctx) => {}).pipe(withAbort(), withStatusesAtom())
+test('restore isFulfilled after abort', async () => {
+  const fetchData = reatomAsync(async (ctx) => {}).pipe(
+    withAbort(),
+    withStatusesAtom(),
+  )
   const ctx = createTestCtx()
 
   await fetchData(ctx)

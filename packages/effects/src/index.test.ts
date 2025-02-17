@@ -94,7 +94,10 @@ it('await transaction', async () => {
 })
 
 it('withAbortableSchedule', async () => {
-  const asyncAction = <I extends any[], O>(cb: Fn<[Ctx, ...I], O>, name: string): Action<I, O> =>
+  const asyncAction = <I extends any[], O>(
+    cb: Fn<[Ctx, ...I], O>,
+    name: string,
+  ): Action<I, O> =>
     action((ctx, ...a) => cb(withAbortableSchedule(ctx), ...a), name)
 
   const track = mockFn()

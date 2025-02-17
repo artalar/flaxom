@@ -52,10 +52,10 @@ For example, in React you should manage abort strategy by yourself by `useEffect
 import { reatomAsync, withAbort, withDataAtom } from '@reatom/async'
 import { useAtom, useAction } from '@reatom/npm-react'
 
-export const fetchList = reatomAsync((ctx) => request('api/list', ctx.controller), 'fetchList').pipe(
-  withAbort(),
-  withDataAtom([]),
-)
+export const fetchList = reatomAsync(
+  (ctx) => request('api/list', ctx.controller),
+  'fetchList',
+).pipe(withAbort(), withDataAtom([]))
 
 export const List = () => {
   const [list] = useAtom(fetchList.dataAtom)
@@ -77,7 +77,10 @@ With Reatom, you can simplify it and make it more readable.
 import { reatomAsync, onConnect, withDataAtom } from '@reatom/framework'
 import { useAtom } from '@reatom/npm-react'
 
-export const fetchList = reatomAsync((ctx) => request('api/list', ctx.controller), 'fetchList').pipe(withDataAtom([]))
+export const fetchList = reatomAsync(
+  (ctx) => request('api/list', ctx.controller),
+  'fetchList',
+).pipe(withDataAtom([]))
 onConnect(fetchList.dataAtom, fetchList)
 
 export const List = () => {
@@ -102,7 +105,11 @@ import { atom } from '@reatom/core'
 import { withInit } from '@reatom/hooks'
 
 export const langAtom = atom('', 'langAtom').pipe(
-  withInit(() => navigator.languages?.[0] ?? (navigator.language || navigator.userLanguage)),
+  withInit(
+    () =>
+      navigator.languages?.[0] ??
+      (navigator.language || navigator.userLanguage),
+  ),
 )
 ```
 
@@ -114,7 +121,9 @@ import { withInit } from '@reatom/hooks'
 
 export const pageTitleAtom = atom('', 'pageTitleAtom')
 
-export const searchAtom = atom('', 'searchAtom').pipe(withInit((ctx) => ctx.get(pageTitleAtom)))
+export const searchAtom = atom('', 'searchAtom').pipe(
+  withInit((ctx) => ctx.get(pageTitleAtom)),
+)
 ```
 
 Also, you can use it to do a side effects in rare cases.

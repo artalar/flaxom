@@ -34,7 +34,8 @@ export const filter: {
 
         return isAction
           ? state.reduce(
-              (acc: any, call: any) => (predicate!(ctx, call.payload, call.params) ? [call] : acc),
+              (acc: any, call: any) =>
+                predicate!(ctx, call.payload, call.params) ? [call] : acc,
               prevState ?? [],
             )
           : isInit || predicate!(ctx, state, prevState)

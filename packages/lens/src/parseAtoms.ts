@@ -1,5 +1,9 @@
 import { Action, Atom, Ctx, isAction, isAtom, Rec } from '@reatom/core'
-import { isLinkedListAtom, LinkedList, LinkedListLikeAtom } from '@reatom/primitives'
+import {
+  isLinkedListAtom,
+  LinkedList,
+  LinkedListLikeAtom,
+} from '@reatom/primitives'
 import { isRec } from '@reatom/utils'
 
 type Primitive = string | number | boolean | null | undefined
@@ -22,12 +26,17 @@ export type ParseAtoms<T> = T extends Primitive | Builtin
   ? Array<ParseAtoms<T>>
   : T extends object
   ? {
-      [K in keyof T]: T[K] extends object & { constructor: Function } ? T[K] : ParseAtoms<T[K]>
+      [K in keyof T]: T[K] extends object & { constructor: Function }
+        ? T[K]
+        : ParseAtoms<T[K]>
       // [K in keyof T]: ParseAtoms<T[K]>
     }
   : T
 
-export const parseAtoms = <Value>(ctx: Ctx, value: Value): ParseAtoms<Value> => {
+export const parseAtoms = <Value>(
+  ctx: Ctx,
+  value: Value,
+): ParseAtoms<Value> => {
   if (isAction(value)) return value as ParseAtoms<Value>
 
   if (isLinkedListAtom(value)) value = value.array as any

@@ -32,7 +32,12 @@ export const delay: {
   <T extends Atom>(
     options: DelayOptions,
     name?: string,
-  ): Fn<[T], T extends Action<infer Params, infer Payload> ? LensAction<Params, Payload> : LensAtom<AtomState<T>>>
+  ): Fn<
+    [T],
+    T extends Action<infer Params, infer Payload>
+      ? LensAction<Params, Payload>
+      : LensAtom<AtomState<T>>
+  >
 } = (options, name) => (anAtom: Atom) => {
   // listeners is a unique object for each atom instance
   const running = new WeakMap<AtomCache['listeners'], number>()
@@ -105,7 +110,12 @@ export const debounce: {
   <T extends Atom>(
     wait: DelayOptions['min'],
     name?: string,
-  ): Fn<[T], T extends Action<infer Params, infer Payload> ? LensAction<Params, Payload> : LensAtom<AtomState<T>>>
+  ): Fn<
+    [T],
+    T extends Action<infer Params, infer Payload>
+      ? LensAction<Params, Payload>
+      : LensAtom<AtomState<T>>
+  >
 } =
   (min = 1, name) =>
   (anAtom) =>
@@ -118,7 +128,12 @@ export const throttle: {
   <T extends Atom>(
     wait: DelayOptions['max'],
     name?: string,
-  ): Fn<[T], T extends Action<infer Params, infer Payload> ? LensAction<Params, Payload> : LensAtom<AtomState<T>>>
+  ): Fn<
+    [T],
+    T extends Action<infer Params, infer Payload>
+      ? LensAction<Params, Payload>
+      : LensAtom<AtomState<T>>
+  >
 } =
   (max = 1, name) =>
   (anAtom) =>

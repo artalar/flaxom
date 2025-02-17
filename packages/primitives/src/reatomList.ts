@@ -20,13 +20,18 @@ const readonly = <T extends Atom>(
   ...anAtom,
 })
 
-interface ListMapAtom<Model extends Rec = Rec, Key = any> extends Atom<Map<Key, Model>> {
+interface ListMapAtom<Model extends Rec = Rec, Key = any>
+  extends Atom<Map<Key, Model>> {
   get: (ctx: Ctx, key: Key) => Model
   has: (ctx: CtxSpy, key: Key) => boolean
   spy: (ctx: CtxSpy, key: Key) => Model
 }
 
-export interface ListAtom<Params extends any[] = any[], Model extends Rec = Rec, Key = any> extends Atom<Array<Model>> {
+export interface ListAtom<
+  Params extends any[] = any[],
+  Model extends Rec = Rec,
+  Key = any,
+> extends Atom<Array<Model>> {
   create: Action<Params, Model>
   createMany: Action<Array<Params>, Array<Model>>
   remove: Action<[Key], undefined | Model>
@@ -36,7 +41,10 @@ export interface ListAtom<Params extends any[] = any[], Model extends Rec = Rec,
 
   map: ListMapAtom<Model, Key>
 
-  reatomMap: <T>(cb: (ctx: CtxSpy, el: Model) => T, name?: string) => Atom<Array<Atom<T>>>
+  reatomMap: <T>(
+    cb: (ctx: CtxSpy, el: Model) => T,
+    name?: string,
+  ) => Atom<Array<Atom<T>>>
 }
 
 export const reatomList: {
@@ -153,7 +161,12 @@ export const reatomList: {
 
   const map = Object.assign(
     atom(new Map(), `${name}.map`).pipe(
-      withInit((ctx) => new Map(ctx.get(list).map((model, i) => [KEY ? model[KEY] : i, model]))),
+      withInit(
+        (ctx) =>
+          new Map(
+            ctx.get(list).map((model, i) => [KEY ? model[KEY] : i, model]),
+          ),
+      ),
     ),
     {
       get: (ctx: Ctx, key: any) => {
@@ -178,7 +191,9 @@ export const reatomList: {
     cb: (ctx: CtxSpy, el: any) => T,
     mapName = __count(`${name}.reatomMap`),
   ): Atom<Array<Atom<T>>> => {
-    const atomsMap = atom(new WeakMap<any, any>(), `${mapName}._atomsMap`).pipe(withInit(() => new WeakMap()))
+    const atomsMap = atom(new WeakMap<any, any>(), `${mapName}._atomsMap`).pipe(
+      withInit(() => new WeakMap()),
+    )
 
     return atom(
       (ctx, state: any[] = []) =>

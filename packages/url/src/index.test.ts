@@ -1,6 +1,13 @@
 import { it, expect } from 'vitest'
 import { createTestCtx, mockFn } from '@reatom/testing'
-import { searchParamsAtom, setupUrlAtomSettings, updateFromSource, urlAtom, withSearchParamsPersist } from './'
+
+import {
+  searchParamsAtom,
+  setupUrlAtomSettings,
+  updateFromSource,
+  urlAtom,
+  withSearchParamsPersist,
+} from './'
 import { atom } from '@reatom/core'
 
 it('direct updateFromSource call should be ignored', async () => {
@@ -45,6 +52,7 @@ it('SearchParamsAtom.lens', () => {
   expect(ctx.get(urlAtom).href).toBe('http://example.com/?test=3')
 
   urlAtom.go(ctx, '/path')
+  expect(ctx.get(urlAtom).href).toBe('http://example.com/path')
   expect(ctx.get(testAtom)).toBe(1)
   expect(ctx.get(urlAtom).href).toBe('http://example.com/path')
 })
@@ -88,6 +96,8 @@ it('SearchParamsAtom.lens subpath', () => {
     }),
   )
   const track = ctx.subscribeTrack(testAtom)
+  // this subscription is required to test some weird bug
+  ctx.subscribeTrack(searchParamsAtom)
 
   urlAtom.go(ctx, '/results?test=2')
   expect(ctx.get(testAtom)).toEqual(2)
@@ -121,7 +131,8 @@ it('SearchParamsAtom remove query from url', () => {
   const testAtom = atom<number | undefined>(undefined).pipe(
     withSearchParamsPersist('test', {
       parse: (value) => (value === undefined ? undefined : Number(value)),
-      serialize: (value) => (value === undefined ? undefined : value.toString()),
+      serialize: (value) =>
+        value === undefined ? undefined : value.toString(),
     }),
   )
 
@@ -132,4 +143,30 @@ it('SearchParamsAtom remove query from url', () => {
 
   testAtom(ctx, undefined)
   expect(ctx.get(urlAtom).href).toEqual('http://example.com/results')
+})
+
+it('inactive subpath should not affect mutated atoms', () => {
+  const ctx = createTestCtx()
+
+  setupUrlAtomSettings(ctx, () => new URL('http://example.com/some?test=10'))
+
+  const testAtom = atom(1).pipe(
+    withSearchParamsPersist('test', {
+      parse: (value = '1') => Number(value),
+      path: '/some',
+    }),
+  )
+
+  ctx.subscribeTrack(testAtom)
+  assert.is(ctx.get(testAtom), 10)
+
+  urlAtom.go(ctx, '/other?test=2')
+  assert.is(ctx.get(testAtom), 1)
+
+  testAtom(ctx, 123)
+  assert.is(ctx.get(testAtom), 123)
+  assert.is(ctx.get(urlAtom).href, 'http://example.com/other?test=2')
+
+  urlAtom.go(ctx, '/other?test=3')
+  assert.is(ctx.get(testAtom), 123)
 })

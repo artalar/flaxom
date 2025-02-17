@@ -170,11 +170,20 @@ export const pageAtom = atom(0, 'pageAtom').pipe(
 An operator that makes it easier to attach properties such as computed atoms, reducer actions etc. It is just a better code organization pattern to have `thingAtom`, `thingAtom.doSome`, instead of `thingAtom` and `doSomeThing`.
 
 ```ts
-import { atom, withAssign, action, reatomResource, withRetry } from '@reatom/framework'
+import {
+  atom,
+  withAssign,
+  action,
+  reatomResource,
+  withRetry,
+} from '@reatom/framework'
 
 const pageAtom = atom(1).pipe(
   withAssign((pageAtom, name) => ({
-    prev: action((ctx) => pageAtom(ctx, (prev) => Math.max(1, prev - 1)), `${name}.prev`),
+    prev: action(
+      (ctx) => pageAtom(ctx, (prev) => Math.max(1, prev - 1)),
+      `${name}.prev`,
+    ),
     next: action((ctx) => pageAtom(ctx, (prev) => prev + 1), `${name}.next`),
   })),
 )
@@ -187,7 +196,10 @@ const list = reatomResource(async (ctx) => {
     onReject: (ctx, error, retries) => 100 * Math.min(200, retries ** 3),
   }),
   withAssign((list, name) => ({
-    loadingAtom: atom((ctx) => ctx.spy(list.pendingAtom) > 0 || ctx.spy(list.retriesAtom) > 0, `${name}.loadingAtom`),
+    loadingAtom: atom(
+      (ctx) => ctx.spy(list.pendingAtom) > 0 || ctx.spy(list.retriesAtom) > 0,
+      `${name}.loadingAtom`,
+    ),
   })),
 )
 ```

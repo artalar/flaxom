@@ -16,7 +16,7 @@ import {
   isShallowEqual,
   CtxSpy,
 } from '@reatom/framework'
-import { h, hf, ctx, Bind } from '@reatom/jsx'
+import { h, hf, ctx, Bind, ROOT } from './jsx'
 import { actionsStates, followingsMap, getColor, getId, historyStates, idxMap } from './utils'
 import { Filter, reatomFilters } from './Graph/reatomFilters'
 import { reatomLines } from './Graph/reatomLines'
@@ -62,7 +62,7 @@ const Stack = ({ patch }: { patch: AtomCache }) => {
   let cause = patch.cause
   while (cause && cause.proto.name !== 'root') {
     const causeId = idxMap.get(cause)
-    const causeEl = causeId && document.getElementById(causeId)
+    const causeEl = causeId && ROOT.getElementById(causeId)
 
     stackEl.append(
       <span>
@@ -291,7 +291,12 @@ export const Graph = ({ clientCtx, getColor, width, height, initSize }: Props) =
             {atom((ctx) =>
               ctx.spy(filters.preview) || ctx.spy(preview) ? (
                 <ObservableHQ
-                  snapshot={state}
+                  snapshot={
+                    // do not show extra info for "identity" actions
+                    isAction && state.params.length === 1 && Object.is(state.params[0], state.payload)
+                      ? state.payload
+                      : state
+                  }
                   update={isAction ? undefined : update.bind(null, clientCtx, patch.proto)}
                   patch={isAction ? undefined : patch}
                 />
@@ -337,6 +342,8 @@ export const Graph = ({ clientCtx, getColor, width, height, initSize }: Props) =
     return `${listEl.getBoundingClientRect().height}px`
   }, `${name}.listHeight`).pipe(withDataAtom('0px')).dataAtom
 
+  let lastTimestamp = 0
+
   const read = clientCtx.get((read) => read)
   clientCtx.subscribe(async (logs) => {
     // sort causes and insert only from this transaction
@@ -357,7 +364,7 @@ export const Graph = ({ clientCtx, getColor, width, height, initSize }: Props) =
 
     await null
 
-    let isTimeStampWritten = !ctx.get(filters.time)
+    let isTimeStampWritten = !ctx.get(filters.time) || lastTimestamp === Date.now()
 
     const isPass = (patch: AtomCache): boolean => {
       if (inits.get(patch.proto) === patch || (patch.proto.isAction && !actionsStates.get(patch)?.length)) {
@@ -374,6 +381,7 @@ export const Graph = ({ clientCtx, getColor, width, height, initSize }: Props) =
         (!exclude || !new RegExp(`.*${exclude}.*`, 'i').test(patch.proto.name!))
 
       if (result && !isTimeStampWritten) {
+        lastTimestamp = Date.now()
         isTimeStampWritten = true
         list.create(ctx, null)
       }

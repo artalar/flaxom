@@ -31,7 +31,7 @@ All methods reuse `WithUndo` interface which includes the following atoms and ac
 All methods accepts the optional properties:
 
 - `length` is the max amount of state records, **30** by default
-- `shouldUpdate` function allows you to ignore some updates, by default it skips state updates which is equal to the last history record  
+- `shouldUpdate` function allows you to ignore some updates, by default it skips state updates which is equal to the last history record
 - `shouldReplace` function allows you define what to do with the new update, replace the last history record (`true`) or add a new record (`false` - by default)
 - `withPersist` - `WithPersist` instance from one of the adapter of [@reatom/persist](/package/persist). It will persist data from `historyAtom` and `persistAtom`, the target atom init state may be derived from the history, if it preserve.
 

@@ -1,4 +1,13 @@
-import { Atom, Ctx, CtxSpy, Fn, __count, atom, isAtom, throwReatomError } from '@reatom/core'
+import {
+  Atom,
+  Ctx,
+  CtxSpy,
+  Fn,
+  __count,
+  atom,
+  isAtom,
+  throwReatomError,
+} from '@reatom/core'
 import { isRec, isShallowEqual, merge } from '@reatom/utils'
 
 type Primitive = null | undefined | string | number | boolean | symbol | bigint
@@ -15,25 +24,40 @@ export type PartialDeep<T> = T extends BuiltIns
       }
   : unknown
 
-interface Match<Expression = any, State = never, Default = undefined> extends Atom<State | Default> {
+interface Match<Expression = any, State = never, Default = undefined>
+  extends Atom<State | Default> {
   is<T, const MatchedExpression extends Expression = Expression>(
-    clause: MatchedExpression | Atom<MatchedExpression> | ((ctx: Ctx, expression: Expression) => boolean),
-    statement: T | Atom<T> | ((ctx: CtxSpy, expression: MatchedExpression) => T),
+    clause:
+      | MatchedExpression
+      | Atom<MatchedExpression>
+      | ((ctx: Ctx, expression: Expression) => boolean),
+    statement:
+      | T
+      | Atom<T>
+      | ((ctx: CtxSpy, expression: MatchedExpression) => T),
   ): Match<Expression, State | T, Default>
   with<T, Part extends PartialDeep<Expression>>(
     part: Part,
-    statement?: T | Atom<T> | ((ctx: CtxSpy, expression: Part & Expression) => T),
+    statement?:
+      | T
+      | Atom<T>
+      | ((ctx: CtxSpy, expression: Part & Expression) => T),
   ): Match<Exclude<Expression, Part>, T>
   truthy<T>(
     statement: T | Atom<T> | ((ctx: CtxSpy, expression: Expression) => T),
   ): Match<Expression, State | T, Default>
-  falsy<T>(statement: T | Atom<T> | ((ctx: CtxSpy, expression: Expression) => T)): Match<Expression, State | T, Default>
+  falsy<T>(
+    statement: T | Atom<T> | ((ctx: CtxSpy, expression: Expression) => T),
+  ): Match<Expression, State | T, Default>
   default<T = never>(
     statement?: T | Atom<T> | ((ctx: CtxSpy, expression: Expression) => T),
   ): Match<Expression, State, T>
 }
 
-export function match<T>(expression: T | Atom<T> | ((ctx: CtxSpy) => T), name = __count('match')): Match<T> {
+export function match<T>(
+  expression: T | Atom<T> | ((ctx: CtxSpy) => T),
+  name = __count('match'),
+): Match<T> {
   type Case = {
     clause: (ctx: CtxSpy, expression: T) => boolean
     statement: {} | Atom | ((ctx: Ctx, expression: T) => any)

@@ -1,5 +1,5 @@
 import { atom, type AtomProto, type Ctx, type Rec, Atom, Action } from '@reatom/framework'
-import { h, mount, ctx } from '@reatom/jsx'
+import { h, mount, ctx } from './jsx'
 import { ObservableHQ } from './ObservableHQ'
 import { type DevtoolsOptions } from '.'
 

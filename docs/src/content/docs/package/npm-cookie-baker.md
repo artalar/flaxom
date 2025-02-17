@@ -46,8 +46,8 @@ npm install @cookie-baker/node
 ```
 
 ## Example
-[codesandbox](https://codesandbox.io/s/reatom-cookie-baker-ec6h63-ec6h63?file=/src/App.tsx)
 
+[codesandbox](https://codesandbox.io/s/reatom-cookie-baker-ec6h63-ec6h63?file=/src/App.tsx)
 
 ```ts
 import {
