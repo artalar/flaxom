@@ -52,7 +52,13 @@ import { reatomComponent } from '@reatom/npm-react'
 
 export const countAtom = atom(0)
 export const Counter = reatomComponent(
-  ({ ctx }) => <input type="number" value={ctx.spy(count)} onChange={(e) => countAtom(ctx, e.target.valueAsNumber)} />,
+  ({ ctx }) => (
+    <input
+      type="number"
+      value={ctx.spy(count)}
+      onChange={(e) => countAtom(ctx, e.target.valueAsNumber)}
+    />
+  ),
   'Counter',
 )
 ```
@@ -66,7 +72,12 @@ import { reatomComponent } from '@reatom/npm-react'
 export const Counter = reatomComponent<{
   atom: Atom<number>
   onChange: Action
-}>(({ ctx, atom, onChange }) => <input type="number" value={ctx.spy(atom)} onChange={ctx.bind(onChange)} />, 'Counter')
+}>(
+  ({ ctx, atom, onChange }) => (
+    <input type="number" value={ctx.spy(atom)} onChange={ctx.bind(onChange)} />
+  ),
+  'Counter',
+)
 ```
 
 One of the most powerful features of `reatomComponent` is that you are not bound by react hooks rules, you could use `ctx.spy` in any order, right in your template.
@@ -108,10 +119,14 @@ import { useAction, useAtom } from '@reatom/npm-react'
 // base mutable atom
 const inputAtom = atom('', 'inputAtom')
 // computed readonly atom
-const greetingAtom = atom((ctx) => `Hello, ${ctx.spy(inputAtom)}!`, 'greetingAtom')
+const greetingAtom = atom(
+  (ctx) => `Hello, ${ctx.spy(inputAtom)}!`,
+  'greetingAtom',
+)
 // action to do things
 const onChange = action(
-  (ctx, event: React.ChangeEvent<HTMLInputElement>) => inputAtom(ctx, event.currentTarget.value),
+  (ctx, event: React.ChangeEvent<HTMLInputElement>) =>
+    inputAtom(ctx, event.currentTarget.value),
   'onChange',
 )
 
@@ -153,7 +168,10 @@ import { useAtom } from '@reatom/npm-react'
 import { activeAtom, goodsAtom } from '~/goods/model'
 
 export const GoodsItem = ({ idx }: { idx: number }) => {
-  const [element] = useAtom((ctx) => (ctx.spy(activeAtom) === idx ? ctx.spy(listAtom)[idx] : null), [idx])
+  const [element] = useAtom(
+    (ctx) => (ctx.spy(activeAtom) === idx ? ctx.spy(listAtom)[idx] : null),
+    [idx],
+  )
 
   if (!element) return null
 
@@ -168,11 +186,20 @@ Check this out!
 ```js
 export const Greeting = ({ initialGreeting = '' }) => {
   const [input, setInput, inputAtom] = useAtom(initialGreeting)
-  const [greeting] = useAtom((ctx) => `Hello, ${ctx.spy(inputAtom)}!`, [inputAtom])
+  const [greeting] = useAtom(
+    (ctx) => `Hello, ${ctx.spy(inputAtom)}!`,
+    [inputAtom],
+  )
   // you could do this
-  const handleChange = useCallback((event) => setInput(event.currentTarget.value), [setInput])
+  const handleChange = useCallback(
+    (event) => setInput(event.currentTarget.value),
+    [setInput],
+  )
   // OR this
-  const handleChange = useAction((ctx, event) => inputAtom(ctx, event.currentTarget.value), [inputAtom])
+  const handleChange = useAction(
+    (ctx, event) => inputAtom(ctx, event.currentTarget.value),
+    [inputAtom],
+  )
 
   return (
     <>
@@ -200,21 +227,30 @@ Here is a standard react code, `handleSubmit` reference is recreating on each `i
 
 ```js
 const [input, setInput] = useState('')
-const handleSubmit = useCallback(() => props.onSubmit(input), [props.onSubmit, input])
+const handleSubmit = useCallback(
+  () => props.onSubmit(input),
+  [props.onSubmit, input],
+)
 ```
 
 Here `handleSubmit` reference is stable and doesn't depend on `input`, but have access to it last value.
 
 ```js
 const [input, setInput, inputAtom, ctx] = useAtom('')
-const handleSubmit = useCallback(() => props.onSubmit(ctx.get(inputAtom)), [props.onSubmit, inputAtom, ctx])
+const handleSubmit = useCallback(
+  () => props.onSubmit(ctx.get(inputAtom)),
+  [props.onSubmit, inputAtom, ctx],
+)
 ```
 
 Btw, you could use `useAction`.
 
 ```js
 const [input, setInput, inputAtom] = useAtom('')
-const handleSubmit = useAction((ctx) => props.onChange(ctx.get(inputAtom)), [props.onChange, inputAtom])
+const handleSubmit = useAction(
+  (ctx) => props.onChange(ctx.get(inputAtom)),
+  [props.onChange, inputAtom],
+)
 ```
 
 ### Prevent rerenders
@@ -253,8 +289,14 @@ Here is another example of in-render computations which could be archived withou
 ```js
 // this component will not rerender by `inputAtom` change, only by `numbers` change
 const [, , inputAtom] = useAtom('', [], false)
-const handleChange = useAction((ctx, event) => inputAtom(ctx, event.currentTarget.value), [inputAtom])
-const [numbers] = useAtom((ctx) => ctx.spy(inputAtom).replace(/\D/g, ''), [inputAtom])
+const handleChange = useAction(
+  (ctx, event) => inputAtom(ctx, event.currentTarget.value),
+  [inputAtom],
+)
+const [numbers] = useAtom(
+  (ctx) => ctx.spy(inputAtom).replace(/\D/g, ''),
+  [inputAtom],
+)
 
 return (
   <>
@@ -276,7 +318,10 @@ To bind your actions to relative context you need to use `useAction`, it will ju
 ```tsx
 const pageAtom = atom(0, 'pageAtom')
 const next = action((ctx) => pageAtom(ctx, (page) => page + 1), 'pageAtom.next')
-const prev = action((ctx) => pageAtom(ctx, (page) => Math.max(1, page - 1)), 'pageAtom.prev')
+const prev = action(
+  (ctx) => pageAtom(ctx, (page) => Math.max(1, page - 1)),
+  'pageAtom.prev',
+)
 
 export const Paging = () => {
   const [page] = useAtom(pageAtom)
@@ -299,7 +344,9 @@ export const Paging = () => {
 export const Paging = ({ pageAtom }: { pageAtom: Atom<number> }) => {
   const [page] = useAtom(pageAtom)
   const handleNext = useAction((ctx) => pageAtom(ctx, (page) => page + 1))
-  const handlePrev = useAction((ctx) => pageAtom(ctx, (page) => Math.max(1, page - 1)))
+  const handlePrev = useAction((ctx) =>
+    pageAtom(ctx, (page) => Math.max(1, page - 1)),
+  )
 
   return (
     <>
@@ -319,7 +366,9 @@ export const PagingAction = ({ pageAtom }: { pageAtom: Atom<number> }) => {
 
   return (
     <>
-      <button onClick={() => setPage((page) => Math.max(1, page - 1))}>prev</button>
+      <button onClick={() => setPage((page) => Math.max(1, page - 1))}>
+        prev
+      </button>
       <button onClick={() => setPage((page) => page + 1)}>next</button>
     </>
   )
@@ -376,7 +425,9 @@ export const Item = ({ itemAtom }) => {
     return cleanup
   }, [itemAtom])
 
-  return <input value={value} onChange={(e) => setValue(e.currentTarget.value)} />
+  return (
+    <input value={value} onChange={(e) => setValue(e.currentTarget.value)} />
+  )
 }
 ```
 
@@ -388,7 +439,9 @@ export const Item = ({ itemAtom }) => {
 
   useUpdate((ctx, state) => setValue(state), [itemAtom])
 
-  return <input value={value} onChange={(e) => setValue(e.currentTarget.value)} />
+  return (
+    <input value={value} onChange={(e) => setValue(e.currentTarget.value)} />
+  )
 }
 ```
 
@@ -410,7 +463,9 @@ const listReaction = reatomResource(async (ctx) => {
 
 export const List = () => {
   const [page] = useAtom(pageAtom)
-  const prev = useAction((ctx) => pageAtom(ctx, (state) => Math.max(1, state - 1)))
+  const prev = useAction((ctx) =>
+    pageAtom(ctx, (state) => Math.max(1, state - 1)),
+  )
   const next = useAction((ctx) => pageAtom(ctx, (state) => state + 1))
   const list = useAtomPromise(listReaction.promiseAtom)
 

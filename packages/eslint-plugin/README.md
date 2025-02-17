@@ -92,7 +92,13 @@ const atomsRec = {
 When creating units within `reatom*`-named factory functions, you can also specify the "namespaces" of unit names before period. The fragment before period is called the domain. Domain value must be equal to the name of the factory function excluding the `reatom` prefix:
 
 ```ts
-const reatomFood = (config: { name: string; calories: number; fat: number; carbs: number; protein: number }) => {
+const reatomFood = (config: {
+  name: string
+  calories: number
+  fat: number
+  carbs: number
+  protein: number
+}) => {
   const { name } = config
   const calories = atom(config.calories, `Food.calories`)
   const fat = atom(config.fat, `Food.fat`)
@@ -105,7 +111,13 @@ const reatomFood = (config: { name: string; calories: number; fat: number; carbs
 If a factory function defines a parameter or a variable named `name`, names of units created in the function must be template literals that derive their domain fragments from the value of `name`:
 
 ```ts
-const reatomFood = (config: { name: string; calories: number; fat: number; carbs: number; protein: number }) => {
+const reatomFood = (config: {
+  name: string
+  calories: number
+  fat: number
+  carbs: number
+  protein: number
+}) => {
   const { name } = config
   const calories = atom(config.calories, `${name}.calories`)
   const fat = atom(config.fat, `${name}.fat`)

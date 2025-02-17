@@ -14,9 +14,10 @@ The base template project includes Vite, TypeScript, React and Reatom ecosystem.
 You can check in out [here](https://github.com/artalar/reatom-react-ts)
 
 You can also try it online:
- - [codesandbox](https://codesandbox.io/p/sandbox/github/artalar/reatom-react-ts/tree/main)
- - [stackblitz](https://githubblitz.com/artalar/reatom-react-ts)
- - [gitpod](https://gitpod.io/#https://github.com/artalar/reatom-react-ts)
+
+- [codesandbox](https://codesandbox.io/p/sandbox/github/artalar/reatom-react-ts/tree/main)
+- [stackblitz](https://githubblitz.com/artalar/reatom-react-ts)
+- [gitpod](https://gitpod.io/#https://github.com/artalar/reatom-react-ts)
 
 To setup it in your machine you can use the [degit](https://github.com/Rich-Harris/degit) package.
 

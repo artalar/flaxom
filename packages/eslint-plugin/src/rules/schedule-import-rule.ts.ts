@@ -8,7 +8,10 @@ const importsMap = {
 const importNames = Object.keys(importsMap)
 type TImport = keyof typeof importsMap
 
-const getTextToReplace = (numberArgumentText: string, callbackArgumentText: string) => {
+const getTextToReplace = (
+  numberArgumentText: string,
+  callbackArgumentText: string,
+) => {
   if (Boolean(numberArgumentText)) {
     return `schedule(ctx, ${callbackArgumentText}, ${numberArgumentText})`
   }
@@ -66,10 +69,19 @@ export const scheduleImportRule: Rule.RuleModule = {
           fix(fixer) {
             const fixes = [] as Rule.Fix[]
             const sourceCode = context.sourceCode
-            const callbackArgumentText = callbackArgument ? sourceCode.getText(callbackArgument) : '() => {}'
-            const numberArgumentText = numberArgument ? sourceCode.getText(numberArgument) : ''
+            const callbackArgumentText = callbackArgument
+              ? sourceCode.getText(callbackArgument)
+              : '() => {}'
+            const numberArgumentText = numberArgument
+              ? sourceCode.getText(numberArgument)
+              : ''
 
-            fixes.push(fixer.replaceText(node, getTextToReplace(numberArgumentText, callbackArgumentText)))
+            fixes.push(
+              fixer.replaceText(
+                node,
+                getTextToReplace(numberArgumentText, callbackArgumentText),
+              ),
+            )
 
             const neededImport = numberArgument ? 'schedule' : 'wrap'
 
@@ -83,7 +95,12 @@ export const scheduleImportRule: Rule.RuleModule = {
                 )
 
                 if (exsistedSpecifier) {
-                  fixes.push(fixer.insertTextAfter(exsistedSpecifier, `, ${neededImport}`))
+                  fixes.push(
+                    fixer.insertTextAfter(
+                      exsistedSpecifier,
+                      `, ${neededImport}`,
+                    ),
+                  )
                 }
               } else {
                 const importToAdd = importsMap[neededImport]

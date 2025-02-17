@@ -53,7 +53,7 @@ export const reatomMap = <Key, Value>(
         ),
         clear: action((ctx) => target(ctx, new Map()), `${name}.clear`),
         reset: action((ctx) => target(ctx, initState), `${name}.reset`),
-        sizeAtom: atom(ctx =>  ctx.spy(target).size, `${name}.size`),
+        sizeAtom: atom((ctx) => ctx.spy(target).size, `${name}.size`),
       }
 
       return actions

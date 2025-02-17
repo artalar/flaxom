@@ -1,9 +1,13 @@
 import type * as estree from 'estree'
 
 export const reatomFactoryList = ['atom', 'action', 'reaction'] as const
-export const reatomFactoryPattern = new RegExp(`^(reatom\\w+|${reatomFactoryList.join('|')})$`)
+export const reatomFactoryPattern = new RegExp(
+  `^(reatom\\w+|${reatomFactoryList.join('|')})$`,
+)
 
-export const patternNames = (pattern: estree.Pattern | null): estree.Identifier[] => {
+export const patternNames = (
+  pattern: estree.Pattern | null,
+): estree.Identifier[] => {
   if (!pattern) {
     return []
   }
@@ -20,7 +24,9 @@ export const patternNames = (pattern: estree.Pattern | null): estree.Identifier[
 
   if (pattern.type === 'ObjectPattern') {
     return pattern.properties.flatMap((property) =>
-      property.type === 'Property' && property.key.type === 'Identifier' ? property.key : [],
+      property.type === 'Property' && property.key.type === 'Identifier'
+        ? property.key
+        : [],
     )
   }
   return []

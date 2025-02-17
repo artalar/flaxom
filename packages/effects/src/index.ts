@@ -14,7 +14,14 @@ import {
   throwReatomError,
   Unsubscribe,
 } from '@reatom/core'
-import { AbortError, isAbort, merge, noop, throwIfAborted, toAbortError } from '@reatom/utils'
+import {
+  AbortError,
+  isAbort,
+  merge,
+  noop,
+  throwIfAborted,
+  toAbortError,
+} from '@reatom/utils'
 
 export class CauseContext<T> extends WeakMap<AtomCache, T> {
   has(cause: AtomCache): boolean {
@@ -30,16 +37,21 @@ export class CauseContext<T> extends WeakMap<AtomCache, T> {
 
 export const abortCauseContext = new CauseContext<AbortController | undefined>()
 
-export const getTopController = (patch: AtomCache & { controller?: AbortController }): null | AbortController =>
-  abortCauseContext.get(patch) ?? null
+export const getTopController = (
+  patch: AtomCache & { controller?: AbortController },
+): null | AbortController => abortCauseContext.get(patch) ?? null
 
 /** Handle abort signal from a cause */
-export const onCtxAbort = (ctx: Ctx, cb: Fn<[AbortError]>): undefined | Unsubscribe => {
+export const onCtxAbort = (
+  ctx: Ctx,
+  cb: Fn<[AbortError]>,
+): undefined | Unsubscribe => {
   const controller = getTopController(ctx.cause)
 
   if (controller) {
     const handler = () => cb(toAbortError(controller.signal.reason))
-    const cleanup = () => controller.signal.removeEventListener('abort', handler)
+    const cleanup = () =>
+      controller.signal.removeEventListener('abort', handler)
 
     if (controller.signal.aborted) handler()
     else {
@@ -73,11 +85,15 @@ export const __thenReatomed = <T>(
   if (!chain) {
     const promise = origin.then(
       (value: any) => {
-        ctx.get((read, actualize) => chain!.then.forEach((cb) => cb(value, read, actualize)))
+        ctx.get((read, actualize) =>
+          chain!.then.forEach((cb) => cb(value, read, actualize)),
+        )
         return value
       },
       (error: any) => {
-        ctx.get((read, actualize) => chain!.catch.forEach((cb) => cb(error, read, actualize)))
+        ctx.get((read, actualize) =>
+          chain!.catch.forEach((cb) => cb(error, read, actualize)),
+        )
         // prevent Uncaught DOMException for aborts
         if (isAbort(error)) promise.catch(noop)
         throw error
@@ -146,7 +162,8 @@ type skip = typeof skip
 export const take = <T extends Atom, Res = AtomReturn<T>>(
   ctx: Ctx,
   anAtom: T,
-  mapper: Fn<[Ctx, Awaited<AtomReturn<T>>, skip], Res | skip> = (ctx, v: any) => v,
+  mapper: Fn<[Ctx, Awaited<AtomReturn<T>>, skip], Res | skip> = (ctx, v: any) =>
+    v,
   name?: string,
 ): Promise<Awaited<Res>> => {
   name &&= `${ctx.cause.proto.name}.${name}`
@@ -179,7 +196,11 @@ export const take = <T extends Atom, Res = AtomReturn<T>>(
   }).finally(() => cleanups.forEach((cb) => cb()))
 }
 
-export const takeNested = <I extends any[]>(ctx: Ctx, cb: Fn<[Ctx, ...I]>, ...params: I): Promise<void> =>
+export const takeNested = <I extends any[]>(
+  ctx: Ctx,
+  cb: Fn<[Ctx, ...I]>,
+  ...params: I
+): Promise<void> =>
   new Promise<void>((resolve, reject) => {
     const unabort = onCtxAbort(ctx, reject)
 
@@ -221,16 +242,27 @@ export const takeNested = <I extends any[]>(ctx: Ctx, cb: Fn<[Ctx, ...I]>, ...pa
   })
 
 const _isCausedBy = (cause: AtomCache, proto: AtomProto): boolean =>
-  cause.cause !== null && (cause.cause.proto === proto || isCausedBy(cause.cause, proto))
+  cause.cause !== null &&
+  (cause.cause.proto === proto || isCausedBy(cause.cause, proto))
 
-export const isCausedBy = (caused: Ctx | AtomCache, by: Atom | AtomProto): boolean =>
-  _isCausedBy('subscribe' in caused ? caused.cause : caused, '__reatom' in by ? by.__reatom : by)
+export const isCausedBy = (
+  caused: Ctx | AtomCache,
+  by: Atom | AtomProto,
+): boolean =>
+  _isCausedBy(
+    'subscribe' in caused ? caused.cause : caused,
+    '__reatom' in by ? by.__reatom : by,
+  )
 
 export const withAbortableSchedule = <T extends Ctx>(ctx: T): T => {
   const { schedule } = ctx
 
   return merge(ctx, {
-    schedule(this: Ctx, cb: Parameters<typeof schedule>[0], step: Parameters<typeof schedule>[1] = 1) {
+    schedule(
+      this: Ctx,
+      cb: Parameters<typeof schedule>[0],
+      step: Parameters<typeof schedule>[1] = 1,
+    ) {
       if (step < 1) return schedule.call(this, cb, step)
 
       let resolve: Fn
@@ -272,14 +304,29 @@ export const withAbortableSchedule = <T extends Ctx>(ctx: T): T => {
   })
 }
 
-export const concurrentControllers = new WeakMap<Fn, Atom<null | AbortController>>()
+export const concurrentControllers = new WeakMap<
+  Fn,
+  Atom<null | AbortController>
+>()
 export const concurrent: {
   <T extends (ctx: Ctx, ...a: any[]) => any>(fn: T, strategy?: 'last-in-win'): T
-  <T extends (ctx: CtxSpy, ...a: any[]) => any>(fn: T, strategy?: 'last-in-win'): T
-  <T extends (ctx: Ctx, ...a: any[]) => Promise<any>>(fn: T, strategy: 'first-in-win'): T
-  <T extends (ctx: CtxSpy, ...a: any[]) => Promise<any>>(fn: T, strategy: 'first-in-win'): T
+  <T extends (ctx: CtxSpy, ...a: any[]) => any>(
+    fn: T,
+    strategy?: 'last-in-win',
+  ): T
+  <T extends (ctx: Ctx, ...a: any[]) => Promise<any>>(
+    fn: T,
+    strategy: 'first-in-win',
+  ): T
+  <T extends (ctx: CtxSpy, ...a: any[]) => Promise<any>>(
+    fn: T,
+    strategy: 'first-in-win',
+  ): T
 } = (fn: Fn, strategy: 'last-in-win' | 'first-in-win' = 'last-in-win'): Fn => {
-  const abortControllerAtom = atom<null | AbortController>(null, `${__count('_concurrent')}.abortControllerAtom`)
+  const abortControllerAtom = atom<null | AbortController>(
+    null,
+    `${__count('_concurrent')}.abortControllerAtom`,
+  )
 
   const target = action(
     (ctx: Ctx, topCtx: Ctx, ...a: any[]) => {
@@ -313,7 +360,10 @@ export const concurrent: {
 
       abortCauseContext.set(ctx.cause, controller)
 
-      var result = fn(withAbortableSchedule({ ...ctx, spy: topCtx.spy }) as CtxSpy, ...a)
+      var result = fn(
+        withAbortableSchedule({ ...ctx, spy: topCtx.spy }) as CtxSpy,
+        ...a,
+      )
       if (result instanceof Promise) {
         result = result.finally(() => {
           if (strategy === 'first-in-win') {
@@ -329,7 +379,10 @@ export const concurrent: {
           result.catch(noop)
         })
       } else {
-        throwReatomError(strategy === 'first-in-win', 'can\'t apply "first-in-win" strategy for non-async function')
+        throwReatomError(
+          strategy === 'first-in-win',
+          'can\'t apply "first-in-win" strategy for non-async function',
+        )
       }
       return result
     },
@@ -350,17 +403,22 @@ export const concurrent: {
 
 export const withConcurrency: {
   <T extends Action>(strategy?: 'last-in-win'): (target: T) => T
-  <T extends Action<any[], Promise<any>>>(strategy: 'first-in-win'): (target: T) => T
+  <T extends Action<any[], Promise<any>>>(
+    strategy: 'first-in-win',
+  ): (target: T) => T
 } =
   (strategy?: 'last-in-win' | 'first-in-win') =>
   (target: Action): Action =>
     concurrent(target, strategy as any)
 
 /** Internal spawn action which is used to redefine the cause abort controller */
-export const _spawn = action((ctx, fn: Fn, controller: AbortController, ...args: any[]) => {
-  abortCauseContext.set(ctx.cause, controller)
-  return fn(ctx, ...args)
-}, '_spawn')
+export const _spawn = action(
+  (ctx, fn: Fn, controller: AbortController, ...args: any[]) => {
+    abortCauseContext.set(ctx.cause, controller)
+    return fn(ctx, ...args)
+  },
+  '_spawn',
+)
 
 export const spawn = <Args extends any[], Payload>(
   ctx: Ctx,
@@ -375,7 +433,8 @@ export interface ReactionAtom<Payload> extends Atom<Payload> {
   unsubscribe: Unsubscribe
 }
 
-export interface Reaction<Params extends any[], Payload> extends Action<Params, ReactionAtom<Payload>> {}
+export interface Reaction<Params extends any[], Payload>
+  extends Action<Params, ReactionAtom<Payload>> {}
 
 export const reaction = <Params extends any[], Payload>(
   cb: (ctx: CtxSpy, ...params: Params) => Payload,

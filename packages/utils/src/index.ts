@@ -1,6 +1,7 @@
 import { SetTimeout } from './setTimeout'
 
-export type UndefinedToOptional<T extends object> = Partial<T> & PickValues<T, {} | null>
+export type UndefinedToOptional<T extends object> = Partial<T> &
+  PickValues<T, {} | null>
 
 // We don't have type literal for NaN but other values are presented here
 // https://stackoverflow.com/a/51390763
@@ -8,7 +9,9 @@ export type Falsy = false | 0 | '' | null | undefined
 
 // TODO infer `Atom` and `AtomMut` signature
 /** Remove named generics, show plain type. */
-export type Plain<Intersection> = Intersection extends (...a: infer I) => infer O
+export type Plain<Intersection> = Intersection extends (
+  ...a: infer I
+) => infer O
   ? ((...a: I) => O) & {
       [Key in keyof Intersection]: Intersection[Key]
     }
@@ -44,7 +47,9 @@ export const sleep = (ms = 0) => new Promise((r) => setTimeout(r, ms))
 export const isObject = <T>(
   thing: T,
   // @ts-expect-error
-): thing is T extends Record<string | number | symbol, unknown> ? T : Record<string | number | symbol, unknown> =>
+): thing is T extends Record<string | number | symbol, unknown>
+  ? T
+  : Record<string | number | symbol, unknown> =>
   typeof thing === 'object' && thing !== null
 
 export const isRec = (thing: unknown): thing is Record<string, unknown> => {
@@ -62,12 +67,18 @@ export const isRec = (thing: unknown): thing is Record<string, unknown> => {
 export const isShallowEqual = (a: any, b: any, is = Object.is) => {
   if (Object.is(a, b)) return true
 
-  if (!isObject(a) || !isObject(b) || a.__proto__ !== b.__proto__ || a instanceof Error) {
+  if (
+    !isObject(a) ||
+    !isObject(b) ||
+    a.__proto__ !== b.__proto__ ||
+    a instanceof Error
+  ) {
     return false
   }
 
   if (Symbol.iterator in a) {
-    let equal: typeof is = a instanceof Map ? (a, b) => is(a[0], b[0]) && is(a[1], b[1]) : is
+    let equal: typeof is =
+      a instanceof Map ? (a, b) => is(a[0], b[0]) && is(a[1], b[1]) : is
     let aIter = a[Symbol.iterator]()
     let bIter = b[Symbol.iterator]()
     while (1) {
@@ -123,7 +134,12 @@ export type Assign<T1, T2, T3 = {}, T4 = {}> = Plain<
 
 /** `Object.assign` with fixed types, equal properties replaced instead of changed to a union */
 export const assign: {
-  <T1, T2, T3 = {}, T4 = {}>(a1: T1, a2: T2, a3?: T3, a4?: T4): Assign<T1, T2, T3, T4>
+  <T1, T2, T3 = {}, T4 = {}>(
+    a1: T1,
+    a2: T2,
+    a3?: T3,
+    a4?: T4,
+  ): Assign<T1, T2, T3, T4>
 } = Object.assign
 
 /** `Object.assign` which set an empty object to the first argument */
@@ -138,14 +154,20 @@ export const entries: {
 } = Object.entries
 
 /** Get a new object only with the passed keys*/
-export const pick = <T, K extends keyof T>(target: T, keys: Array<K>): Plain<Pick<T, K>> => {
+export const pick = <T, K extends keyof T>(
+  target: T,
+  keys: Array<K>,
+): Plain<Pick<T, K>> => {
   const result: any = {}
   for (const key of keys) result[key] = target[key]
   return result
 }
 
 /** Get a new object without the passed keys*/
-export const omit = <T, K extends keyof T>(target: T, keys: Array<K>): Plain<Omit<T, K>> => {
+export const omit = <T, K extends keyof T>(
+  target: T,
+  keys: Array<K>,
+): Plain<Omit<T, K>> => {
   const result: any = {}
   for (const key in target) {
     if (!keys.includes(key as any)) result[key] = target[key]
@@ -159,7 +181,8 @@ export const omit = <T, K extends keyof T>(target: T, keys: Array<K>): Plain<Omi
  */
 export const jsonClone = <T>(value: T): T => JSON.parse(JSON.stringify(value))
 
-let _random = (min = 0, max = Number.MAX_SAFE_INTEGER - 1) => Math.floor(Math.random() * (max - min + 1)) + min
+let _random = (min = 0, max = Number.MAX_SAFE_INTEGER - 1) =>
+  Math.floor(Math.random() * (max - min + 1)) + min
 /** Get random integer. Parameters should be integers too. */
 export const random: typeof _random = (min, max) => _random(min, max)
 
@@ -194,13 +217,21 @@ export const toStringKey = (thing: any, immutable = true): string => {
 
   if (tag === 'symbol') return `[reatom Symbol]${thing.description || 'symbol'}`
 
-  if (tag !== 'function' && (tag !== 'object' || thing === null || thing instanceof Date || thing instanceof RegExp)) {
+  if (
+    tag !== 'function' &&
+    (tag !== 'object' ||
+      thing === null ||
+      thing instanceof Date ||
+      thing instanceof RegExp)
+  ) {
     return `[reatom ${tag}]` + thing
   }
 
   if (visited.has(thing)) return visited.get(thing)!
 
-  var name = Reflect.getPrototypeOf(thing)?.constructor.name || toString.call(thing).slice(8, -1)
+  var name =
+    Reflect.getPrototypeOf(thing)?.constructor.name ||
+    toString.call(thing).slice(8, -1)
   // get a unique prefix for each type to separate same array / map
   // thing could be a circular or not stringifiable object from a userspace
   var result = `[reatom ${name}#${random()}]`
@@ -220,7 +251,10 @@ export const toStringKey = (thing: any, immutable = true): string => {
     return result
   }
 
-  var iterator = Symbol.iterator in thing ? thing : Object.entries(thing).sort(([a], [b]) => a.localeCompare(b))
+  var iterator =
+    Symbol.iterator in thing
+      ? thing
+      : Object.entries(thing).sort(([a], [b]) => a.localeCompare(b))
   for (let item of iterator) result += toStringKey(item, immutable)
 
   if (immutable) {
@@ -262,24 +296,31 @@ export const throwIfAborted = (controller?: void | null | AbortController) => {
   }
 }
 
-export const isAbort = (thing: any): thing is AbortError => thing instanceof Error && thing.name === 'AbortError'
+export const isAbort = (thing: any): thing is AbortError =>
+  thing instanceof Error && thing.name === 'AbortError'
 
-export const throwAbort = (message: string, controller?: AbortController): never => {
+export const throwAbort = (
+  message: string,
+  controller?: AbortController,
+): never => {
   const error = toAbortError(message)
   controller?.abort(error)
   throw error
 }
 
-export const setTimeout: SetTimeout = Object.assign((...a: Parameters<SetTimeout>) => {
-  const intervalId = globalThis.setTimeout(...a)
-  return typeof intervalId === 'number'
-    ? intervalId
-    : Object.assign(intervalId, {
-        toJSON() {
-          return -1
-        },
-      })
-}, globalThis.setTimeout)
+export const setTimeout: SetTimeout = Object.assign(
+  (...a: Parameters<SetTimeout>) => {
+    const intervalId = globalThis.setTimeout(...a)
+    return typeof intervalId === 'number'
+      ? intervalId
+      : Object.assign(intervalId, {
+          toJSON() {
+            return -1
+          },
+        })
+  },
+  globalThis.setTimeout,
+)
 
 /** @link https://developer.mozilla.org/en-US/docs/Web/API/setTimeout#maximum_delay_value */
 export const MAX_SAFE_TIMEOUT = 2 ** 31 - 1

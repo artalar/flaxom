@@ -37,7 +37,10 @@ test(`should respect initState, create and remove elements properly`, () => {
     list.remove(ctx, list.find(ctx, (n) => ctx.get(n) === 2)!)
     assert.ok(false, 'Error expected')
   } catch (error: any) {
-    assert.is(error?.message, 'Reatom error: The passed data is not a linked list node.')
+    assert.is(
+      error?.message,
+      'Reatom error: The passed data is not a linked list node.',
+    )
   }
 })
 
@@ -45,7 +48,9 @@ test(`should swap elements`, () => {
   const ctx = createTestCtx()
   const list = reatomLinkedList((ctx, n: number) => ({ n }))
   const { array } = list.reatomMap((ctx, { n }) => ({ n }))
-  const track = ctx.subscribeTrack(atom((ctx) => ctx.spy(array).map(({ n }) => n)))
+  const track = ctx.subscribeTrack(
+    atom((ctx) => ctx.spy(array).map(({ n }) => n)),
+  )
   const one = list.create(ctx, 1)
   const two = list.create(ctx, 2)
   const three = list.create(ctx, 3)
