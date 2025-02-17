@@ -16,28 +16,32 @@ import { BooleanAtom, noop, parseAtoms, reatomBoolean, take, withComputed, withI
 
 import { HISTORY_LENGTH, buttonCss as editButtonCss, historyStates, idxMap } from './utils'
 
-const differ = create()
+const differ = create({
+  propertyFilter(name, context) {
+    return typeof (context.right as any)?.[name] !== 'function' && typeof (context.left as any)?.[name] !== 'function'
+  },
+})
 
-differ.processor.pipes.diff.before(
-  'trivial',
-  Object.assign(
-    function functionIgnoring(context: DiffContext) {
-      if (typeof context.left === 'function' || typeof context.right === 'function') {
-        if (context.left === context.right) {
-          context.setResult(undefined).exit()
-        }
+// differ.processor.pipes.diff.before(
+//   'trivial',
+//   Object.assign(
+//     function functionIgnoring(context: DiffContext) {
+//       if (typeof context.left === 'function' || typeof context.right === 'function') {
+//         if (context.left === context.right) {
+//           context.setResult(undefined).exit()
+//         }
 
-        context
-          .setResult([
-            typeof context.left === 'function' ? context.left.toString() : context.left,
-            typeof context.right === 'function' ? context.right.toString() : context.right,
-          ])
-          .exit()
-      }
-    },
-    { filterName: 'functionIgnoring' },
-  ),
-)
+//         context
+//           .setResult([
+//             typeof context.left === 'function' ? context.left.toString() : context.left,
+//             typeof context.right === 'function' ? context.right.toString() : context.right,
+//           ])
+//           .exit()
+//       }
+//     },
+//     { filterName: 'functionIgnoring' },
+//   ),
+// )
 
 const buttonCss = css`
   width: 20px;
@@ -143,7 +147,16 @@ const getHTMLDiff = (a: AtomCache, b: AtomCache) => {
           {a.proto.name}
         </a>
       )}
-      <div ref={(ctx, e) => (e.innerHTML = htmlFormatter.format(delta, a.state))} />
+      <div
+        ref={(ctx, el) => {
+          el.innerHTML = htmlFormatter
+            .format(delta, a.state)
+            .replaceAll(
+              `<pre class="jsondiffpatch-error">TypeError: Cannot read properties of undefined (reading 'replace')</pre>`,
+              '[Function]',
+            )
+        }}
+      />
     </div>
   )
 }
