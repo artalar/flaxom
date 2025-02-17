@@ -13,7 +13,7 @@
     "prettify:watch": "onchange */**/**/*.{js,ts,md} -- prettier --write {{changed}}",
     "package-generator": "tsx tools/new-package.ts",
     "update": "npx npm-check-updates -u",
-    "prepare": "husky install",
+    "prepare": "git config blame.ignoreRevsFile .git-blame-ignore-revs && husky install",
     "actualize-issue-templates": "npx tsx ./tools/actualize-issue-templates.ts"
   },
   "workspaces": [
