@@ -1,4 +1,4 @@
-import { it, expect } from 'vitest'
+import { test, expect } from 'vitest'
 
 // export const Counter = (props) => {
 //   const [count, setCount] = useState(props.value ?? 0)
@@ -25,4 +25,4 @@ import { it, expect } from 'vitest'
 //   )
 // })
 
-it(`base API`, async () => {})
+test(`base API`, async () => {})

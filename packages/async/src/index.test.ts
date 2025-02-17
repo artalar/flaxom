@@ -1,4 +1,4 @@
-import { it, test, expect } from 'vitest'
+import { test, expect } from 'vitest'
 import { action, atom } from '@reatom/core'
 import { mapPayloadAwaited } from '@reatom/lens'
 import { take, concurrent } from '@reatom/effects'
@@ -137,7 +137,7 @@ test('withAbort', async () => {
   expect(abortTrack.calls.length).toBe(1)
 })
 
-it('withAbort user abort', async () => {
+test('withAbort user abort', async () => {
   let shouldAbort = false
   let shouldThrow = false
   const error = random()
@@ -183,7 +183,7 @@ it('withAbort user abort', async () => {
   expect(errorSubscriber.lastInput().at(-1)?.payload).toBe(error)
 })
 
-it('withAbort and real fetch', async () => {
+test('withAbort and real fetch', async () => {
   const handleError = mockFn((e) => {
     throw e
   })
@@ -216,7 +216,7 @@ it('withAbort and real fetch', async () => {
   ).toBeTruthy()
 })
 
-it('withAbort strategy first-in-win', async () => {
+test('withAbort strategy first-in-win', async () => {
   const anAsync = reatomAsync(async (ctx, v: number) => {
     await ctx.schedule(() => sleep())
     return v
@@ -251,7 +251,7 @@ it('withAbort strategy first-in-win', async () => {
   expect(abortTrack.calls.length).toBe(1)
 })
 
-it('hooks', async () => {
+test('hooks', async () => {
   let onEffect = 0
   let onFulfill = 0
   let onReject = 0
@@ -284,7 +284,7 @@ it('hooks', async () => {
   expect([onEffect, onFulfill, onReject, onSettle]).toEqual([2, 1, 1, 2])
 })
 
-it('onConnect', async () => {
+test('onConnect', async () => {
   const fetchData = reatomAsync(async (ctx, payload: number) => payload).pipe(
     withDataAtom(0),
   )
@@ -296,7 +296,7 @@ it('onConnect', async () => {
   expect(track.lastInput()).toBe(123)
 })
 
-it('withErrorAtom resetTrigger', async () => {
+test('withErrorAtom resetTrigger', async () => {
   const effect = reatomAsync(async () => {
     if (1) throw 42
     return 42
@@ -314,7 +314,7 @@ it('withErrorAtom resetTrigger', async () => {
   expect(ctx.get(effect.errorAtom)).toBe(undefined)
 })
 
-it('withErrorAtom should be computed first', async () => {
+test('withErrorAtom should be computed first', async () => {
   let error
   const effect = reatomAsync(async () => {
     if (1) throw 42
@@ -333,7 +333,7 @@ it('withErrorAtom should be computed first', async () => {
   expect(error).toBe(42)
 })
 
-it('withErrorAtom initState', async () => {
+test('withErrorAtom initState', async () => {
   let error
   const effect = reatomAsync(async () => {
     if (1) throw 42
@@ -350,7 +350,7 @@ it('withErrorAtom initState', async () => {
   expect(ctx.get(effect.errorAtom)).toBe('test')
 })
 
-it('nested abort', async () => {
+test('nested abort', async () => {
   let result = false
   let thrown = false
   const do1 = reatomAsync(async (ctx) => {
@@ -381,7 +381,7 @@ it('nested abort', async () => {
   expect(thrown).toBe(true)
 })
 
-it('onConnect and take', async () => {
+test('onConnect and take', async () => {
   const act = action()
   const res = atom(false)
   const effect = reatomAsync(async (ctx) => {
@@ -407,7 +407,7 @@ it('onConnect and take', async () => {
   expect(ctx.get(res)).toBe(false)
 })
 
-it('handle error correctly', async () => {
+test('handle error correctly', async () => {
   const doSome = reatomAsync(() => {
     throw new Error('test error')
   })
@@ -422,7 +422,7 @@ it('handle error correctly', async () => {
   )
 })
 
-it('withRetry abort', async () => {
+test('withRetry abort', async () => {
   const effect = reatomAsync(async () => {
     if (1) throw new Error('test error')
   }).pipe(
@@ -447,7 +447,7 @@ it('withRetry abort', async () => {
   expect(ctx.get(effect.pendingAtom) + ctx.get(effect.retriesAtom)).toBe(0)
 })
 
-it('withAbort + withRetry', async () => {
+test('withAbort + withRetry', async () => {
   const effect = reatomAsync(async () => {
     if (1) throw new Error('test error')
   }).pipe(
@@ -468,7 +468,7 @@ it('withAbort + withRetry', async () => {
   expect(track.calls.length > 2).toBeTruthy()
 })
 
-it('effects concurrent without unhandled rejection', async () => {
+test('effects concurrent without unhandled rejection', async () => {
   const ctx = createTestCtx()
 
   const track = mockFn()

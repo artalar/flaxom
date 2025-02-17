@@ -1,12 +1,12 @@
 import { action, atom } from '@reatom/core'
 import { createTestCtx } from '@reatom/testing'
-import { describe, it, expect } from 'vitest'
+import { describe, test, expect } from 'vitest'
 import { LL_NEXT, LL_PREV, reatomLinkedList } from './reatomLinkedList'
 import { parseAtoms } from '@reatom/lens'
 import { isCausedBy } from '@reatom/effects'
 
 describe('reatomLinkedList', () => {
-  it('should respect initState, create and remove elements properly', () => {
+  test('should respect initState, create and remove elements properly', () => {
     const ctx = createTestCtx()
     const list = reatomLinkedList({
       create: (ctx, n: number) => atom(n),
@@ -33,11 +33,13 @@ describe('reatomLinkedList', () => {
     }).toThrow('Reatom error: The passed data is not a linked list node.')
   })
 
-  it('should swap elements', () => {
+  test('should swap elements', () => {
     const ctx = createTestCtx()
     const list = reatomLinkedList((ctx, n: number) => ({ n }))
     const { array } = list.reatomMap((ctx, { n }) => ({ n }))
-    const track = ctx.subscribeTrack(atom((ctx) => ctx.spy(array).map(({ n }) => n)))
+    const track = ctx.subscribeTrack(
+      atom((ctx) => ctx.spy(array).map(({ n }) => n)),
+    )
     const one = list.create(ctx, 1)
     const two = list.create(ctx, 2)
     const three = list.create(ctx, 3)
@@ -76,7 +78,7 @@ describe('reatomLinkedList', () => {
     expect(parseAtoms(ctx, list.array)).toEqual([])
   })
 
-  it('should move elements', () => {
+  test('should move elements', () => {
     const ctx = createTestCtx()
     const list = reatomLinkedList((ctx, n: number) => ({ n }))
     const one = list.create(ctx, 1)
@@ -99,14 +101,16 @@ describe('reatomLinkedList', () => {
     expect(track.lastInput().map(({ n }) => n)).toEqual([1, 2, 3, 4])
   })
 
-  it('should respect node keys even if it is an atom', () => {
+  test('should respect node keys even if it is an atom', () => {
     const ctx = createTestCtx()
     const list = reatomLinkedList({
       create: (ctx, id: string) => ({ id: atom(id) }),
       key: 'id',
       initState: [{ id: atom('1') }, { id: atom('2') }],
     })
-    const track = ctx.subscribeTrack(atom((ctx) => [...ctx.spy(list.map).keys()]))
+    const track = ctx.subscribeTrack(
+      atom((ctx) => [...ctx.spy(list.map).keys()]),
+    )
 
     expect(track.lastInput()).toEqual(['1', '2'])
 
@@ -114,7 +118,7 @@ describe('reatomLinkedList', () => {
     expect(track.lastInput()).toEqual(['0', '2'])
   })
 
-  it('should correctly handle batching and cause tracking', () => {
+  test('should correctly handle batching and cause tracking', () => {
     const ctx = createTestCtx()
     const list = reatomLinkedList(() => ({}))
     list.onChange((ctx) => {
@@ -129,12 +133,14 @@ describe('reatomLinkedList', () => {
     })
   })
 
-  it('should remove a single node', () => {
+  test('should remove a single node', () => {
     const ctx = createTestCtx()
     const list = reatomLinkedList((ctx, n: number) => ({ n }))
 
     const node = list.create(ctx, 1)
-    expect(ctx.get(list.array)).toEqual([{ n: 1, [LL_PREV]: null, [LL_NEXT]: null }])
+    expect(ctx.get(list.array)).toEqual([
+      { n: 1, [LL_PREV]: null, [LL_NEXT]: null },
+    ])
     expect(ctx.get(list).size).toBe(1)
 
     list.remove(ctx, node)

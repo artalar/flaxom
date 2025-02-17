@@ -1,3 +1,3 @@
-import { it } from 'vitest'
+import { test } from 'vitest'
 
-it('all-settled sources already tested by @reatom/effects', () => {})
+test('all-settled sources already tested by @reatom/effects', () => {})

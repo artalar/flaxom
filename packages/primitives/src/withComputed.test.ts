@@ -1,10 +1,10 @@
 import { atom, createCtx } from '@reatom/core'
-import { describe, it, expect } from 'vitest'
+import { describe, test, expect } from 'vitest'
 
 import { withComputed } from './withComputed'
 
 describe('withComputed', () => {
-  it('should compute value based on dependencies', () => {
+  test('should compute value based on dependencies', () => {
     const a = atom(0)
     const b = atom(0).pipe(withComputed((ctx) => ctx.spy(a)))
     const ctx = createCtx()

@@ -1,13 +1,13 @@
 import { AtomMut, atom } from '@reatom/core'
 import { createTestCtx } from '@reatom/testing'
-import { expect, it, vi } from 'vitest'
+import { expect, test, vi } from 'vitest'
 
 import { reatomDynamicUndo, reatomUndo, withUndo } from './'
 import { reatomMap } from '@reatom/primitives'
 import { parseAtoms } from '@reatom/lens'
 import { createMemStorage, reatomPersist } from '@reatom/persist'
 
-it('withUndo', async () => {
+test('withUndo', async () => {
   const a = atom(0).pipe(withUndo({ length: 5 }))
   const ctx = createTestCtx()
 
@@ -54,7 +54,7 @@ it('withUndo', async () => {
   expect(ctx.get(a)).toBe(0)
 })
 
-it('withUndo without getting historyAtom before first change', async () => {
+test('withUndo without getting historyAtom before first change', async () => {
   const a = atom(0).pipe(withUndo({ length: 5 }))
   const ctx = createTestCtx()
 
@@ -65,7 +65,7 @@ it('withUndo without getting historyAtom before first change', async () => {
   expect(ctx.get(a.historyAtom)).toEqual([0, 1])
 })
 
-it('limit', () => {
+test('limit', () => {
   const a = atom(0).pipe(withUndo({ length: 5 }))
   const ctx = createTestCtx()
 
@@ -83,7 +83,7 @@ it('limit', () => {
   expect(ctx.get(a.historyAtom)).toEqual([6, 7, 8, 9])
 })
 
-it('reatomUndo', () => {
+test('reatomUndo', () => {
   const a = atom(0, 'a')
   const b = atom(0, 'b')
   const c = reatomUndo({ a, b }, 'c')
@@ -118,7 +118,7 @@ it('reatomUndo', () => {
   expect(ctx.get(c.isRedoAtom)).toBe(false)
 })
 
-it('reatomDynamicUndo', () => {
+test('reatomDynamicUndo', () => {
   const listAtom = reatomMap<number, AtomMut<number>>()
   const listUndoAtom = reatomDynamicUndo((ctx) => {
     parseAtoms(ctx, listAtom)
@@ -146,7 +146,9 @@ it('reatomDynamicUndo', () => {
   const elementAtom = atom(3)
   listAtom.set(ctx, 3, elementAtom)
   expect(track.mock.calls.length).toBe(4)
-  expect(parseAtoms(ctx, listAtom)).toEqual(new Map().set(1, 100).set(2, 200).set(3, 3))
+  expect(parseAtoms(ctx, listAtom)).toEqual(
+    new Map().set(1, 100).set(2, 200).set(3, 3),
+  )
 
   listUndoAtom.undo(ctx)
   expect(ctx.get(listAtom).size).toBe(2)
@@ -157,12 +159,16 @@ it('reatomDynamicUndo', () => {
 
   listUndoAtom.redo(ctx)
   listUndoAtom.redo(ctx)
-  expect(parseAtoms(ctx, listAtom)).toEqual(new Map().set(1, 100).set(2, 200).set(3, 3))
+  expect(parseAtoms(ctx, listAtom)).toEqual(
+    new Map().set(1, 100).set(2, 200).set(3, 3),
+  )
   expect(listAtom.get(ctx, 3)).toBe(elementAtom)
 })
 
-it('shouldReplace', () => {
-  const inputAtom = atom('').pipe(withUndo({ shouldReplace: (ctx, state) => !state.endsWith(' ') }))
+test('shouldReplace', () => {
+  const inputAtom = atom('').pipe(
+    withUndo({ shouldReplace: (ctx, state) => !state.endsWith(' ') }),
+  )
   const ctx = createTestCtx()
 
   for (const letter of 'This is a test') {
@@ -179,7 +185,7 @@ it('shouldReplace', () => {
   expect(ctx.get(inputAtom)).toBe('This')
 })
 
-it('shouldUpdate', () => {
+test('shouldUpdate', () => {
   const ctx = createTestCtx()
   const inputAtom = atom('').pipe(withUndo({ shouldUpdate: () => true }))
 
@@ -198,7 +204,7 @@ it('shouldUpdate', () => {
   expect(ctx.get(inputAtom.historyAtom).length).toBe(2)
 })
 
-it('withPersist', async () => {
+test('withPersist', async () => {
   const ctx = createTestCtx()
   const mockStorage = createMemStorage({ name: 'undo' })
   const withMock = reatomPersist(mockStorage)

@@ -1,10 +1,10 @@
 import { createTestCtx } from '@reatom/testing'
-import { it, describe, expect } from 'vitest'
+import { test, describe, expect } from 'vitest'
 import { atom, AtomMut } from '@reatom/core'
 import { select } from './select'
 
 describe('select', () => {
-  // it('should not recompute the end atom if the source atom changed', () => {
+  // test('should not recompute the end atom if the source atom changed', () => {
   //   let track = 0;
   //   const a = atom(0);
   //   const b = atom((ctx) => {
@@ -27,7 +27,7 @@ describe('select', () => {
   //   expect(track).toBe(2);
   // });
 
-  // it('many selects should work', () => {
+  // test('many selects should work', () => {
   //   const list = atom(new Array<{ value: AtomMut<number> >());
   //   const target = atom((ctx) => {
   //     const length = select(ctx, (ctx) => ctx.spy(list).length);
@@ -54,7 +54,7 @@ describe('select', () => {
   //   expect(track.calls.length).toBe(3);
   // });
 
-  // it('prevent select memoization errors', () => {
+  // test('prevent select memoization errors', () => {
   //   const list = atom(new Array<AtomMut<{ name: string; value: number }>>());
   //   const sum = atom((ctx) => ctx.spy(list).reduce((acc, el) => acc + select(ctx, (ctx) => ctx.spy(el).value), 0));
   //   const ctx = createTestCtx();
@@ -70,7 +70,7 @@ describe('select', () => {
   //   // expect(ctx.get(sum)).toBe(3);
   // });
 
-  it('should filter equals', () => {
+  test('should filter equals', () => {
     const n = atom(1)
     const odd = atom((ctx) =>
       select(

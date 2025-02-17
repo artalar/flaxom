@@ -1,8 +1,8 @@
 import { action, atom } from '@reatom/core'
-import { it, expect } from 'vitest'
+import { test, expect } from 'vitest'
 import { createTestCtx } from './'
 
-it('createTestCtx', async () => {
+test('createTestCtx', async () => {
   const act = action((ctx) => ctx.schedule(() => 123))
   const ctx = createTestCtx()
   const listener = ctx.subscribeTrack(act)
@@ -21,7 +21,7 @@ it('createTestCtx', async () => {
   expect(await listener.lastInput()[0]?.payload).toBe(43) // Last input should return mocked payload
 })
 
-it('countAtom', () => {
+test('countAtom', () => {
   const countAtom = atom(0)
   const add = action((ctx, value: number) => {
     return countAtom(ctx, value)
@@ -58,7 +58,7 @@ it('countAtom', () => {
   expect(payloadTrack.lastInput()).toEqual([10]) // Check payload after unmock
 })
 
-it('mock computed atom', () => {
+test('mock computed atom', () => {
   const testAtom = atom<string>(() => {
     throw new Error('unreachable')
   }, 'testAtom')

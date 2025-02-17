@@ -1,9 +1,9 @@
 import { action, atom } from '@reatom/core'
-import { describe, it, expect } from 'vitest'
+import { describe, test, expect } from 'vitest'
 import { createTestCtx } from './'
 
 describe('createTestCtx', () => {
-  it('should track actions and atoms correctly', async () => {
+  test('should track actions and atoms correctly', async () => {
     const add = action<number>()
     const countAtom = atom((ctx, state = 0) => {
       ctx.spy(add, ({ payload }) => (state += payload))

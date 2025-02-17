@@ -1,7 +1,7 @@
-import { it, expect } from 'vitest'
+import { test, expect } from 'vitest'
 import { atom, createCtx } from '@reatom/framework'
 
-it('test ESM import', () => {
+test('test ESM import', () => {
   const ctx = createCtx()
   const me = atom('check ✅', 'me')
 

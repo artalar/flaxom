@@ -1,4 +1,4 @@
-import { it, expect, vi } from 'vitest'
+import { test, expect, vi } from 'vitest'
 import { mockFn } from '@reatom/testing'
 
 import {
@@ -53,7 +53,7 @@ const isConnected = (ctx: Ctx, { __reatom: proto }: Atom) => {
 export const getCache = <T>(ctx: Ctx, anAtom: Atom<T>): AtomCache<T> =>
   ctx.get((read) => (ctx.get(anAtom), read(anAtom.__reatom)!))
 
-it(`action`, () => {
+test(`action`, () => {
   const act1 = action()
   const act2 = action()
   const fn = mockFn()
@@ -82,7 +82,7 @@ it(`action`, () => {
   expect(fn.calls.length).toBe(3)
 })
 
-it(`linking`, () => {
+test(`linking`, () => {
   const a1 = atom(0, `a1`)
   const a2 = atom((ctx) => ctx.spy(a1), `a2`)
   const ctx = createCtx()
@@ -113,7 +113,7 @@ it(`linking`, () => {
   expect(ctx.get((read) => read(a1.__reatom))!.subs.size).toBe(0)
 })
 
-it(`nested deps`, () => {
+test(`nested deps`, () => {
   const a1 = atom(0, `a1`)
   const a2 = atom((ctx) => ctx.spy(a1) + ctx.spy(a1) - ctx.spy(a1), `a2`)
   const a3 = atom((ctx) => ctx.spy(a1), `a3`)
@@ -166,7 +166,7 @@ it(`nested deps`, () => {
   }
 })
 
-it(`transaction batch`, () => {
+test(`transaction batch`, () => {
   const track = vi.fn()
   const pushNumber = action<number>()
   const numberAtom = atom((ctx) => {
@@ -203,7 +203,7 @@ it(`transaction batch`, () => {
   expect(track.mock.calls.map((call) => call[0])).toEqual([1, 2, 3, 4, 5])
 })
 
-it(`late effects batch`, async () => {
+test(`late effects batch`, async () => {
   const a = atom(0)
   const ctx = createCtx({
     // @ts-ignores
@@ -228,7 +228,7 @@ it(`late effects batch`, async () => {
   expect(fn).toHaveBeenLastCalledWith(3)
 })
 
-it(`display name`, () => {
+test(`display name`, () => {
   const firstNameAtom = atom(`John`, `firstName`)
   const lastNameAtom = atom(`Doe`, `lastName`)
   const isFirstNameShortAtom = atom(
@@ -282,7 +282,7 @@ it(`display name`, () => {
   ])
 })
 
-it(// this test written is more just for example purposes
+test(// this test written is more just for example purposes
 `dynamic lists`, () => {
   const listAtom = atom(new Array<AtomMut<number>>())
   const sumAtom = atom((ctx) =>
@@ -310,7 +310,7 @@ it(// this test written is more just for example purposes
   expect(sumListener).toHaveBeenLastCalledWith(4)
 })
 
-it('no uncaught errors from schedule promise', () => {
+test('no uncaught errors from schedule promise', () => {
   const doTest = action((ctx) => {
     ctx.schedule(() => {})
     throw 'err'
@@ -320,7 +320,7 @@ it('no uncaught errors from schedule promise', () => {
   expect(() => doTest(ctx)).toThrow()
 })
 
-it('async cause track', () => {
+test('async cause track', () => {
   const a1 = atom(0, 'a1')
   const act1 = action((ctx) => ctx.schedule(() => act2(ctx)), 'act1')
   const act2 = action((ctx) => a1(ctx, (s) => ++s), 'act2')
@@ -339,7 +339,7 @@ it('async cause track', () => {
   ).toBe('act2')
 })
 
-it('disconnect tail deps', () => {
+test('disconnect tail deps', () => {
   const aAtom = atom(0, 'aAtom')
   const track = vi.fn((ctx: CtxSpy) => ctx.spy(aAtom))
   const bAtom = atom(track, 'bAtom')
@@ -359,7 +359,7 @@ it('disconnect tail deps', () => {
   expect(isConnected(ctx, bAtom)).toBe(false)
 })
 
-it('deps shift', () => {
+test('deps shift', () => {
   const deps = [atom(0), atom(0), atom(0)]
   const track = vi.fn()
 
@@ -380,7 +380,7 @@ it('deps shift', () => {
   expect(track).toHaveBeenCalledTimes(1)
 })
 
-it('subscribe to cached atom', () => {
+test('subscribe to cached atom', () => {
   const a1 = atom(0)
   const a2 = atom((ctx) => ctx.spy(a1))
   const ctx = createCtx()
@@ -391,7 +391,7 @@ it('subscribe to cached atom', () => {
   expect(ctx.get((r) => r(a1.__reatom)?.subs.size)).toBe(1)
 })
 
-it('update propagation for atom with listener', () => {
+test('update propagation for atom with listener', () => {
   const a1 = atom(0)
   const a2 = atom((ctx) => ctx.spy(a1))
   const a3 = atom((ctx) => ctx.spy(a2))
@@ -423,7 +423,7 @@ it('update propagation for atom with listener', () => {
   expect(ctx.get((r) => r(a2.__reatom))!.subs.size).toBe(1)
 })
 
-it('update queue', () => {
+test('update queue', () => {
   const a1 = atom(5)
   const a2 = atom((ctx) => {
     const v = ctx.spy(a1)
@@ -446,7 +446,7 @@ it('update queue', () => {
   expect(() => a1(ctx, 0)).toThrow()
 })
 
-it('do not create extra patch', () => {
+test('do not create extra patch', () => {
   const a = atom(0)
   const ctx = createCtx()
   const track = mockFn()
@@ -457,7 +457,7 @@ it('do not create extra patch', () => {
   expect(track.calls.length).toBe(0)
 })
 
-it('should catch', async () => {
+test('should catch', async () => {
   const a = atom(() => {
     throw new Error()
   })
@@ -481,7 +481,7 @@ it('should catch', async () => {
   expect(res2).toBe('catch')
 })
 
-it('no extra tick by schedule', async () => {
+test('no extra tick by schedule', async () => {
   let isDoneSync = false
   createCtx()
     .schedule(() => {
@@ -516,7 +516,7 @@ it('no extra tick by schedule', async () => {
   expect(isDoneAsyncInTr).toBe(true)
 })
 
-it('update callback should accept the fresh state', () => {
+test('update callback should accept the fresh state', () => {
   const a = atom(0)
   const b = atom(0)
   b.__reatom.computer = (ctx) => ctx.spy(a)
@@ -537,7 +537,7 @@ it('update callback should accept the fresh state', () => {
   expect(state).toBe(2)
 })
 
-it('updateHooks should be called only for computers', () => {
+test('updateHooks should be called only for computers', () => {
   const track = mockFn()
 
   const a = atom(1)
@@ -558,7 +558,7 @@ it('updateHooks should be called only for computers', () => {
   expect(track.inputs()).toEqual(['c'])
 })
 
-it('hooks', () => {
+test('hooks', () => {
   const theAtom = atom(0)
   const atomHook = mockFn()
   theAtom.onChange(atomHook)
@@ -586,7 +586,7 @@ it('hooks', () => {
   expect(actionHook.lastInput(2)).toEqual([1])
 })
 
-it('update hook for atom without cache', () => {
+test('update hook for atom without cache', () => {
   const a = atom(0)
   const hook = mockFn()
   a.onChange(hook)
@@ -596,7 +596,7 @@ it('update hook for atom without cache', () => {
   expect(hook.calls.length).toBe(1)
 })
 
-it('cause available inside a computation', () => {
+test('cause available inside a computation', () => {
   let test = false
   const a = atom(0, 'a')
   const b = atom((ctx) => {
@@ -611,7 +611,7 @@ it('cause available inside a computation', () => {
   ctx.get(b)
 })
 
-it('ctx collision', () => {
+test('ctx collision', () => {
   const a = atom(0)
   const ctx1 = createCtx()
   const ctx2 = createCtx()
@@ -619,7 +619,7 @@ it('ctx collision', () => {
   expect(() => ctx1.get(() => ctx2.get(a))).toThrow()
 })
 
-it('conditional deps duplication', () => {
+test('conditional deps duplication', () => {
   const listAtom = atom([1, 2, 3])
 
   const filterAtom = atom<'odd' | 'even'>('odd')
@@ -650,7 +650,7 @@ it('conditional deps duplication', () => {
   expect(track.lastInput()).toEqual([2])
 })
 
-it('nested schedule', async () => {
+test('nested schedule', async () => {
   const act = action((ctx) => {
     return ctx.schedule(() => {
       return ctx.schedule(async () => {})
@@ -661,7 +661,7 @@ it('nested schedule', async () => {
   await act(ctx)
 })
 
-it('dynamic spy callback prevValue', () => {
+test('dynamic spy callback prevValue', () => {
   let testPrev: any
   const a = atom(0)
   const b = atom((ctx) => {
@@ -679,7 +679,7 @@ it('dynamic spy callback prevValue', () => {
   expect(testPrev).toBe(undefined)
 })
 
-it('should drop actualization of stale atom during few updates in one transaction', () => {
+test('should drop actualization of stale atom during few updates in one transaction', () => {
   const a = atom(0)
   const b = atom((ctx) => ctx.spy(a))
   const ctx = createCtx()
@@ -691,7 +691,7 @@ it('should drop actualization of stale atom during few updates in one transactio
   })
 })
 
-it('nested condition branches', () => {
+test('nested condition branches', () => {
   const a = atom(true)
   const b = atom(1)
   const c = atom(1)
@@ -712,7 +712,7 @@ it('nested condition branches', () => {
   expect(isConnected(ctx, c)).toBeTruthy()
 })
 
-it('disconnect of the last version of pubs', async () => {
+test('disconnect of the last version of pubs', async () => {
   const ctx = createCtx()
 
   let logs = new Array<string>()
@@ -738,7 +738,7 @@ it('disconnect of the last version of pubs', async () => {
   expect(logs).toEqual(['', 'dep', 'end disconnected', 'dep disconnected'])
 })
 
-it('computed deps change during disconnection', () => {
+test('computed deps change during disconnection', () => {
   const ctx = createCtx()
 
   const reatomSome = (name: string) => {
@@ -761,7 +761,7 @@ it('computed deps change during disconnection', () => {
   expect(ctx.get(subscription)).toBe(1)
 })
 
-it('extra log for init update', () => {
+test('extra log for init update', () => {
   const ctx = createCtx()
   const logger = mockFn()
 
@@ -777,7 +777,7 @@ it('extra log for init update', () => {
   expect(logger.lastInput().length).toBe(2)
 })
 
-// it(`maximum call stack`, () => {
+// test(`maximum call stack`, () => {
 //   const atoms = new Map<AtomProto, Atom>()
 //   let i = 0
 //   const reducer = (ctx: CtxSpy): any => {

@@ -1,7 +1,7 @@
-import { it, expect } from 'vitest'
+import { test, expect } from 'vitest'
 import { createTestCtx } from '@reatom/testing'
 
-it('stub', () => {
+test('stub', () => {
   const ctx = createTestCtx()
 
   // expect.fail('No tests!')

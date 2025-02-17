@@ -1,22 +1,27 @@
 import { createCtx } from '@reatom/core'
-import { describe, it, expect } from 'vitest'
+import { describe, test, expect } from 'vitest'
 import { reatomEnum } from './reatomEnum'
 
 describe('reatomEnum', () => {
-  it('static enum property', async () => {
+  test('static enum property', async () => {
     const enumAtom = reatomEnum(['a', 'b'])
     expect(enumAtom.enum).toEqual({ a: 'a', b: 'b' })
   })
 
-  it('camelCase', async () => {
-    const sortFilterAtom = reatomEnum(['fullName', 'created', 'updated', 'pushed'])
+  test('camelCase', async () => {
+    const sortFilterAtom = reatomEnum([
+      'fullName',
+      'created',
+      'updated',
+      'pushed',
+    ])
     const ctx = createCtx()
 
     sortFilterAtom.setUpdated(ctx)
     expect(ctx.get(sortFilterAtom)).toBe('updated')
   })
 
-  it('snake_case', async () => {
+  test('snake_case', async () => {
     const cases = ['full_name', 'created', 'updated', 'pushed'] as const
     const sortFilterAtom = reatomEnum(cases, { format: 'snake_case' })
     const ctx = createCtx()
@@ -29,7 +34,7 @@ describe('reatomEnum', () => {
     expect(ctx.get(sortFilterAtom)).toBe('updated')
   })
 
-  it('reset', () => {
+  test('reset', () => {
     const enumAtom = reatomEnum(['a', 'b'], { initState: 'b' })
     const ctx = createCtx()
 

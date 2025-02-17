@@ -1,6 +1,6 @@
-import { it, expect } from 'vitest'
+import { test, expect } from 'vitest'
 
-it('base API', async () => {
+test('base API', async () => {
   // expect.fail('You forgot to test your code')
   expect(true).toBe(true) // Placeholder for an actual test
 })

@@ -1,4 +1,4 @@
-import { expect, it } from 'vitest'
+import { expect, test } from 'vitest'
 import { createTestCtx, mockFn } from '@reatom/testing'
 import { ReatomFetchConfig, createReatomFetch, reatomFetch } from './index'
 
@@ -8,12 +8,14 @@ const transport = mockFn((url: string, init: RequestInit) => {
 
 const API = 'https://api.acme.com'
 
-it('configuration', async () => {
+test('configuration', async () => {
   const ctx = createTestCtx()
 
   const reatomFetch = createReatomFetch({ transport })
 
-  async function configure(input: ReatomFetchConfig<any> | (() => ReatomFetchConfig<any>)) {
+  async function configure(
+    input: ReatomFetchConfig<any> | (() => ReatomFetchConfig<any>),
+  ) {
     const fetcher = reatomFetch(input)
     await fetcher(ctx)
     expect(transport.lastInput(0)).toBe(`${API}/`)
@@ -25,7 +27,7 @@ it('configuration', async () => {
   await configure(() => API)
 })
 
-it('merges URLs', async () => {
+test('merges URLs', async () => {
   const ctx = createTestCtx()
 
   async function mergeUrls(urlBase: string, url: string, result: string) {
@@ -43,10 +45,14 @@ it('merges URLs', async () => {
   await mergeUrls(`${API}/v2`, '/user', `${API}/v2/user`)
 })
 
-it('merges headers', async () => {
+test('merges headers', async () => {
   const ctx = createTestCtx()
 
-  async function mergeHeaders(headersBase: HeadersInit, headers: HeadersInit, result: HeadersInit) {
+  async function mergeHeaders(
+    headersBase: HeadersInit,
+    headers: HeadersInit,
+    result: HeadersInit,
+  ) {
     const fetcher = reatomFetch({
       transport,
       url: API,
@@ -54,9 +60,13 @@ it('merges headers', async () => {
       headersBase,
     })
     await fetcher(ctx)
-    expect(Object.fromEntries([...((transport.lastInput(1) as RequestInit).headers as Headers).entries()])).toEqual(
-      result,
-    )
+    expect(
+      Object.fromEntries([
+        ...(
+          (transport.lastInput(1) as RequestInit).headers as Headers
+        ).entries(),
+      ]),
+    ).toEqual(result)
   }
 
   await mergeHeaders({ accept: 'text/plain' }, {}, { accept: 'text/plain' })
@@ -72,14 +82,17 @@ it('merges headers', async () => {
   )
 })
 
-it('content parsing', async () => {
+test('content parsing', async () => {
   const ctx = createTestCtx()
 
   const fetcher = reatomFetch({
     transport: (url, init) => {
-      return new Response(JSON.stringify({ got: JSON.parse(init.body as string) }), {
-        headers: { 'content-type': 'application/json' },
-      })
+      return new Response(
+        JSON.stringify({ got: JSON.parse(init.body as string) }),
+        {
+          headers: { 'content-type': 'application/json' },
+        },
+      )
     },
     url: API,
     body: 'Hello world!',

@@ -1,14 +1,18 @@
-import { describe, it, expect } from 'vitest'
+import { describe, test, expect } from 'vitest'
 
 import { isDeepEqual, toAbortError, toStringKey, mockRandom } from './'
 
 describe('Utility Functions Tests', () => {
-  it('isDeepEqual Set', () => {
-    expect(isDeepEqual(new Set([{ a: 1 }, { a: 2 }]), new Set([{ a: 1 }, { a: 2 }]))).toBe(true)
-    expect(isDeepEqual(new Set([{ a: 1 }, { a: 2 }]), new Set([{ a: 2 }, { a: 1 }]))).toBe(false)
+  test('isDeepEqual Set', () => {
+    expect(
+      isDeepEqual(new Set([{ a: 1 }, { a: 2 }]), new Set([{ a: 1 }, { a: 2 }])),
+    ).toBe(true)
+    expect(
+      isDeepEqual(new Set([{ a: 1 }, { a: 2 }]), new Set([{ a: 2 }, { a: 1 }])),
+    ).toBe(false)
   })
 
-  it('isDeepEqual Map', () => {
+  test('isDeepEqual Map', () => {
     expect(
       isDeepEqual(
         new Map([[{ a: 1 }, 1], [{ a: 2 }, 2]]) /* prettier-ignore */,
@@ -41,7 +45,7 @@ describe('Utility Functions Tests', () => {
     ).toBe(true)
   })
 
-  it('toAbortError', () => {
+  test('toAbortError', () => {
     const err = new Error('test')
     const abortErr = toAbortError(err)
     expect(abortErr.name).toBe('AbortError')
@@ -49,7 +53,7 @@ describe('Utility Functions Tests', () => {
     expect(abortErr.cause).toBe(err)
   })
 
-  it('toStringKey', () => {
+  test('toStringKey', () => {
     const CLASS = new AbortController()
 
     const obj: Record<string, any> = {}

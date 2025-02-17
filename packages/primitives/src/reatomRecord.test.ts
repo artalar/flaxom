@@ -1,9 +1,9 @@
 import { createCtx } from '@reatom/core'
-import { describe, it, expect } from 'vitest'
+import { describe, test, expect } from 'vitest'
 import { reatomRecord } from './reatomRecord'
 
 describe('reatomRecord', () => {
-  it('should manage record state correctly', () => {
+  test('should manage record state correctly', () => {
     const ctx = createCtx()
     const person = reatomRecord({
       civis: true,

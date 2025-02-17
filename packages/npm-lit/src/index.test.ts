@@ -1,6 +1,6 @@
-import { it } from 'vitest'
+import { test } from 'vitest'
 
-it(`base API`, async () => {
+test(`base API`, async () => {
   // Todo?
   // expect(true).toBe(true)
 })

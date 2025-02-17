@@ -1,39 +1,41 @@
 import { createCtx } from '@reatom/core'
-import { describe, it, expect } from 'vitest'
+import { describe, test, expect } from 'vitest'
 import { reatomArray } from './reatomArray'
 
 describe('reatomArray', () => {
-  it('init', () => {
+  test('init', () => {
     const ctx = createCtx()
     expect(ctx.get(reatomArray([1, 2, 3]))).toEqual([1, 2, 3])
   })
 
-  it('toReversed', () => {
+  test('toReversed', () => {
     const ctx = createCtx()
     expect(reatomArray([1, 2, 3]).toReversed(ctx)).toEqual([3, 2, 1])
   })
 
-  it('toSorted', () => {
+  test('toSorted', () => {
     const ctx = createCtx()
     expect(reatomArray([3, 1, 2]).toSorted(ctx)).toEqual([1, 2, 3])
   })
 
-  it('toSorted with compareFn', () => {
+  test('toSorted with compareFn', () => {
     const ctx = createCtx()
-    expect(reatomArray([3, 1, 2]).toSorted(ctx, (a, b) => b - a)).toEqual([3, 2, 1])
+    expect(reatomArray([3, 1, 2]).toSorted(ctx, (a, b) => b - a)).toEqual([
+      3, 2, 1,
+    ])
   })
 
-  it('toSpliced', () => {
+  test('toSpliced', () => {
     const ctx = createCtx()
     expect(reatomArray([3, 1, 2]).toSpliced(ctx, 1, 2, 44)).toEqual([3, 44])
   })
 
-  it('with', () => {
+  test('with', () => {
     const ctx = createCtx()
     expect(reatomArray([3, 1, 2]).with(ctx, 1, 15)).toEqual([3, 15, 2])
   })
 
-  it(`push`, () => {
+  test(`push`, () => {
     const ctx = createCtx()
     const arrayAtom = reatomArray([3, 1, 2])
 
@@ -41,7 +43,7 @@ describe('reatomArray', () => {
     expect(ctx.get(arrayAtom)).toEqual([3, 1, 2, 4])
   })
 
-  it(`pop`, () => {
+  test(`pop`, () => {
     const ctx = createCtx()
     const arrayAtom = reatomArray([3, 1, 2])
 
@@ -49,7 +51,7 @@ describe('reatomArray', () => {
     expect(ctx.get(arrayAtom)).toEqual([3, 1])
   })
 
-  it(`shift`, () => {
+  test(`shift`, () => {
     const ctx = createCtx()
     const arrayAtom = reatomArray([3, 1, 2])
 
@@ -57,7 +59,7 @@ describe('reatomArray', () => {
     expect(ctx.get(arrayAtom)).toEqual([1, 2])
   })
 
-  it(`unshift`, () => {
+  test(`unshift`, () => {
     const ctx = createCtx()
     const arrayAtom = reatomArray([3, 1, 2])
 

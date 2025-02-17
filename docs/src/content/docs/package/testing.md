@@ -17,7 +17,7 @@ npm i @reatom/testing
 
 ## Usage
 
-We recommend to use [vitest](https://vitest.dev) as helper library for test description, as it could be used in any runtime (and even browser!) and super fast. To clarify, with vitest you allow to run your test files with node / deno / bun / graalvm / [esbuild-kit/tsx](https://github.com/esbuild-kit/tsx) and browser just out of the box. But `@reatom/testing` is not coupled to uvu, you could use any testing framework.
+We recommend to use [vitest](https://vitest.dev) as helper library for test description, as it could be used in any runtime (and even browser!) and super fast. To clarify, with vitest you allow to run your test files with node / deno / bun / graalvm / [esbuild-kit/tsx](https://github.com/esbuild-kit/tsx) and browser just out of the box. But `@reatom/testing` is not coupled to vitest, you could use any testing framework.
 
 ```ts
 import { createTestCtx, mockFn } from '@reatom/testing'
@@ -52,7 +52,7 @@ declare function mockFn<I extends any[], O>(
 [source](https://github.com/artalar/reatom/blob/v3/packages/testing/src/index.story.test.ts)
 
 ```ts
-it('createTestCtx', async () => {
+test('createTestCtx', async () => {
   const add = action<number>()
   const countAtom = atom((ctx, state = 0) => {
     ctx.spy(add, ({ payload }) => (state += payload))

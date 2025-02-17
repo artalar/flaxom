@@ -1,4 +1,4 @@
-import { it, expect } from 'vitest'
+import { test, expect } from 'vitest'
 import { createTestCtx, mockFn } from '@reatom/testing'
 
 import {
@@ -10,7 +10,7 @@ import {
 } from './'
 import { atom } from '@reatom/core'
 
-it('direct updateFromSource call should be ignored', async () => {
+test('direct updateFromSource call should be ignored', async () => {
   const ctx = createTestCtx()
 
   const sync = mockFn()
@@ -38,7 +38,7 @@ it('direct updateFromSource call should be ignored', async () => {
   expect(ctx.get(urlAtom).href).toBe('http://example.com/?test=3')
 })
 
-it('SearchParamsAtom.lens', () => {
+test('SearchParamsAtom.lens', () => {
   const ctx = createTestCtx()
 
   setupUrlAtomSettings(ctx, () => new URL('http://example.com'))
@@ -57,7 +57,7 @@ it('SearchParamsAtom.lens', () => {
   expect(ctx.get(urlAtom).href).toBe('http://example.com/path')
 })
 
-it('SearchParamsAtom.lens path', () => {
+test('SearchParamsAtom.lens path', () => {
   const ctx = createTestCtx()
 
   setupUrlAtomSettings(ctx, () => new URL('http://example.com'))
@@ -84,7 +84,7 @@ it('SearchParamsAtom.lens path', () => {
   expect(ctx.get(urlAtom).href).toEqual('http://example.com/results')
 })
 
-it('SearchParamsAtom.lens subpath', () => {
+test('SearchParamsAtom.lens subpath', () => {
   const ctx = createTestCtx()
 
   setupUrlAtomSettings(ctx, () => new URL('http://example.com'))
@@ -125,7 +125,7 @@ it('SearchParamsAtom.lens subpath', () => {
   expect(ctx.get(urlAtom).href).toEqual('http://example.com/results/some')
 })
 
-it('SearchParamsAtom remove query from url', () => {
+test('SearchParamsAtom remove query from url', () => {
   const ctx = createTestCtx()
 
   setupUrlAtomSettings(ctx, () => new URL('http://example.com'))
@@ -147,7 +147,7 @@ it('SearchParamsAtom remove query from url', () => {
   expect(ctx.get(urlAtom).href).toEqual('http://example.com/results')
 })
 
-it('inactive subpath should not affect mutated atoms', () => {
+test('inactive subpath should not affect mutated atoms', () => {
   const ctx = createTestCtx()
 
   setupUrlAtomSettings(ctx, () => new URL('http://example.com/some?test=10'))

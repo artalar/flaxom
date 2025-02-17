@@ -1,22 +1,35 @@
 import { createTestCtx } from '@reatom/testing'
-import { describe, it, expect } from 'vitest'
+import { describe, test, expect } from 'vitest'
 import { match } from './match'
 import { Ctx, CtxSpy, atom } from '@reatom/core'
 
 describe('match', () => {
-  it('is method', () => {
+  test('is method', () => {
     const ctx = createTestCtx()
 
-    const expressions = ['a', () => 'a', atom('a'), (ctx: CtxSpy) => ctx.spy(atom('a'))]
-    const statements = [true, (ctx: Ctx, value: any) => value === 'a', (ctx: Ctx) => ctx.get(atom(true))]
+    const expressions = [
+      'a',
+      () => 'a',
+      atom('a'),
+      (ctx: CtxSpy) => ctx.spy(atom('a')),
+    ]
+    const statements = [
+      true,
+      (ctx: Ctx, value: any) => value === 'a',
+      (ctx: Ctx) => ctx.get(atom(true)),
+    ]
 
     for (const expression of expressions) {
       for (const statement of statements) {
         expect(ctx.get(match(expression))).toBeUndefined()
         expect(ctx.get(match(expression).is('b', statement))).toBeUndefined()
         expect(ctx.get(match(expression).is('a', statement))).toBe(true)
-        expect(ctx.get(match(expression).is('a', statement).is('b', true))).toBe(true)
-        expect(ctx.get(match(expression).is('b', statement).is('a', true))).toBe(true)
+        expect(
+          ctx.get(match(expression).is('a', statement).is('b', true)),
+        ).toBe(true)
+        expect(
+          ctx.get(match(expression).is('b', statement).is('a', true)),
+        ).toBe(true)
         expect(ctx.get(match(expression).default(statement))).toBe(true)
       }
     }
@@ -31,11 +44,14 @@ describe('match', () => {
     expect(track.lastInput()).toBe(false)
   })
 
-  it('with', () => {
+  test('with', () => {
     const ctx = createTestCtx()
 
     type Data = { type: 'text' } | { type: 'img' }
-    type Result = { type: 'ok'; data: Data } | { type: 'error' } | { type: 'unknown' }
+    type Result =
+      | { type: 'ok'; data: Data }
+      | { type: 'error' }
+      | { type: 'unknown' }
 
     const result = atom(null! as Result)
 
@@ -58,14 +74,14 @@ describe('match', () => {
     expect(ctx.get(matched)).toBe('ok/text')
   })
 
-  it('default should check in the end', () => {
+  test('default should check in the end', () => {
     const ctx = createTestCtx()
 
     expect(ctx.get(match(true).default(false).truthy(true))).toBe(true)
   })
 })
 
-it('reactive change', () => {
+test('reactive change', () => {
   const ctx = createTestCtx()
 
   const boolAtom = atom(true)

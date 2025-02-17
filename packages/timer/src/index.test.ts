@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, test, expect } from 'vitest'
 import { createTestCtx, getDuration } from '@reatom/testing'
 import { sleep } from '@reatom/utils'
 import { reatomTimer } from './'
@@ -6,14 +6,16 @@ import { reatomTimer } from './'
 describe(
   'timer',
   () => {
-    it(`base API`, async () => {
+    test(`base API`, async () => {
       const timerAtom = reatomTimer(`test`)
       const ctx = createTestCtx()
 
       timerAtom.intervalAtom.setSeconds(ctx, 0.001)
 
       var target = 50
-      var duration = await getDuration(() => timerAtom.startTimer(ctx, target / 1000))
+      var duration = await getDuration(() =>
+        timerAtom.startTimer(ctx, target / 1000),
+      )
 
       expect(duration).toBeGreaterThanOrEqual(target)
 
@@ -26,7 +28,7 @@ describe(
       expect(duration).lessThan(target)
     })
 
-    it('progressAtom', async () => {
+    test('progressAtom', async () => {
       const timerAtom = reatomTimer({ delayMultiplier: 1 })
       const ctx = createTestCtx()
 
@@ -37,7 +39,7 @@ describe(
       expect(track.inputs()).toEqual([0, 0.2, 0.4, 0.6, 0.8, 1])
     })
 
-    it('pauseAtom', async () => {
+    test('pauseAtom', async () => {
       const timerAtom = reatomTimer({ interval: 10, delayMultiplier: 1 })
       const ctx = createTestCtx()
 
@@ -63,13 +65,17 @@ describe(
       expect(track.inputs()).toEqual([0.1, 0.2, 0.3])
 
       await sleep(target - Date.now() - 5)
-      expect(track.inputs()).toEqual([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9])
+      expect(track.inputs()).toEqual([
+        0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9,
+      ])
 
       await sleep(10)
-      expect(track.inputs()).toEqual([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1])
+      expect(track.inputs()).toEqual([
+        0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1,
+      ])
     })
 
-    it('do not allow over progress', async () => {
+    test('do not allow over progress', async () => {
       const timerAtom = reatomTimer({ delayMultiplier: 1, interval: 1 })
       const ctx = createTestCtx()
 
@@ -85,7 +91,7 @@ describe(
       expect(ctx.get(timerAtom.progressAtom)).toBe(1)
     })
 
-    it('allow start from passed time', async () => {
+    test('allow start from passed time', async () => {
       const timerAtom = reatomTimer({ delayMultiplier: 1, interval: 1 })
       const ctx = createTestCtx()
 

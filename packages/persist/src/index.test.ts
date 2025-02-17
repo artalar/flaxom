@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, test, expect } from 'vitest'
 import { action, atom } from '@reatom/core'
 import { createTestCtx } from '@reatom/testing'
 import { noop, random } from '@reatom/utils'
@@ -8,7 +8,7 @@ import { createMemStorage, reatomPersist } from './'
 const withSomePersist = reatomPersist(createMemStorage({ name: 'test' }))
 
 describe('base', () => {
-  it('should persist and update state correctly', async () => {
+  test('should persist and update state correctly', async () => {
     const a1 = atom(0).pipe(withSomePersist('a1'))
     const a2 = atom(0).pipe(withSomePersist('a2'))
 
@@ -42,7 +42,7 @@ describe('base', () => {
 })
 
 describe('async', () => {
-  it('should handle async updates', async () => {
+  test('should handle async updates', async () => {
     let trigger = noop
     const number1Atom = atom(0).pipe(withSomePersist({ key: 'test' }))
     const number2Atom = atom(0).pipe(withSomePersist({ key: 'test' }))
@@ -78,7 +78,7 @@ describe('async', () => {
 })
 
 describe('should not skip double update', () => {
-  it('should persist and update state correctly', async () => {
+  test('should persist and update state correctly', async () => {
     const a1 = atom(0).pipe(withSomePersist('a1'))
     const a2 = atom(0).pipe(withSomePersist('a2'))
 
@@ -104,7 +104,7 @@ describe('should not skip double update', () => {
 })
 
 describe('should memoize a computer', () => {
-  it('should compute and memoize correctly', () => {
+  test('should compute and memoize correctly', () => {
     const ctx = createTestCtx()
     const storage = withSomePersist.storageAtom(
       ctx,
@@ -148,7 +148,7 @@ describe('should memoize a computer', () => {
 })
 
 describe('should not accept an action', () => {
-  it('should throw an error', () => {
+  test('should throw an error', () => {
     expect(() => action().pipe(withSomePersist('test'))).toThrow()
   })
 })

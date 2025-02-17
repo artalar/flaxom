@@ -1,6 +1,15 @@
-import { it, expect, describe } from 'vitest'
+import { test, expect, describe } from 'vitest'
 import { atom } from '@reatom/core'
-import { Atom, createAtom, createStore, Fn, getState, Rec, callSafety, defaultStore } from '../'
+import {
+  Atom,
+  createAtom,
+  createStore,
+  Fn,
+  getState,
+  Rec,
+  callSafety,
+  defaultStore,
+} from '../'
 import { createNumberAtom, createPrimitiveAtom } from '../primitives'
 
 import { mockFn, parseCauses, sleep } from '../test_utils'
@@ -11,7 +20,7 @@ function init(atoms: Array<Atom>, store = defaultStore) {
 }
 
 describe('core-v2', () => {
-  it('displayName', () => {
+  test('displayName', () => {
     const firstNameAtom = createPrimitiveAtom(
       'John',
       {
@@ -44,7 +53,10 @@ describe('core-v2', () => {
 
     const displayNameAtom = createAtom(
       { isFirstNameShortAtom, fullNameAtom, firstNameAtom },
-      ({ get }) => (get(`isFirstNameShortAtom`) ? get(`fullNameAtom`) : get(`firstNameAtom`)),
+      ({ get }) =>
+        get(`isFirstNameShortAtom`)
+          ? get(`fullNameAtom`)
+          : get(`firstNameAtom`),
       `displayName`,
     )
 
@@ -74,7 +86,7 @@ describe('core-v2', () => {
     expect(cb.lastInput()).toEqual('Joooooooooooooooooooe')
   })
 
-  it('combine', () => {
+  test('combine', () => {
     const aAtom = createPrimitiveAtom(0)
     const bAtom = createAtom({ aAtom }, ({ get }) => get('aAtom') % 2)
     const cAtom = createAtom({ aAtom }, ({ get }) => get('aAtom') % 2)
@@ -102,20 +114,26 @@ describe('core-v2', () => {
     expect(bsState2).toBe(bsState3)
   })
 
-  it('atom external action subscribe', () => {
-    const a1 = createAtom({ add: (value: number) => value }, (track, state = 0) => {
-      track.onAction('add', (value: number) => {
-        state += value
-      })
-      return state
-    })
+  test('atom external action subscribe', () => {
+    const a1 = createAtom(
+      { add: (value: number) => value },
+      (track, state = 0) => {
+        track.onAction('add', (value: number) => {
+          state += value
+        })
+        return state
+      },
+    )
 
-    const a2 = createAtom({ add: (value: number) => value }, (track, state = 0) => {
-      track.onAction('add', (value: number) => {
-        state += value
-      })
-      return state
-    })
+    const a2 = createAtom(
+      { add: (value: number) => value },
+      (track, state = 0) => {
+        track.onAction('add', (value: number) => {
+          state += value
+        })
+        return state
+      },
+    )
 
     const store = createStore()
     init([a1, a2], store)
@@ -129,7 +147,7 @@ describe('core-v2', () => {
     expect(store.getState(a2)).toBe(0)
   })
 
-  it.skip('atom filter', () => {
+  test.skip('atom filter', () => {
     const track = mockFn()
     const a1Atom = createPrimitiveAtom(0, null, 'a1Atom')
     const a2Atom = createPrimitiveAtom(0, null, 'a2Atom')
@@ -164,15 +182,21 @@ describe('core-v2', () => {
     expect(bCache4.state).toBe(1)
     expect(bCache3.state).not.toBe(bCache4.state)
 
-    const bCache5 = bAtom(createTransaction([a1Atom.change((s) => s + 2)]), bCache4)
+    const bCache5 = bAtom(
+      createTransaction([a1Atom.change((s) => s + 2)]),
+      bCache4,
+    )
     expect(track.calls.length).toBe(3)
     expect(bCache4).not.toBe(bCache5)
     expect(bCache5.state).toBe(3)
     expect(bCache4.state).not.toBe(bCache5.state)
   })
 
-  it.skip('in atom action effect', async () => {
-    function createResource<I, O>(fetcher: (params: I) => Promise<O>, id: string) {
+  test.skip('in atom action effect', async () => {
+    function createResource<I, O>(
+      fetcher: (params: I) => Promise<O>,
+      id: string,
+    ) {
       const resourceAtom = createAtom(
         {
           request: (payload: I) => payload,
@@ -183,7 +207,11 @@ describe('core-v2', () => {
             schedule((dispatch) =>
               fetcher(payload)
                 .then((data) => dispatch(create('response', data)))
-                .catch((e) => dispatch(create('response', e instanceof Error ? e : new Error(e)))),
+                .catch((e) =>
+                  dispatch(
+                    create('response', e instanceof Error ? e : new Error(e)),
+                  ),
+                ),
             )
           })
 
@@ -199,7 +227,10 @@ describe('core-v2', () => {
       return resourceAtom
     }
 
-    const dataAtom = createResource((params: void) => Promise.resolve([]), 'data')
+    const dataAtom = createResource(
+      (params: void) => Promise.resolve([]),
+      'data',
+    )
     const cb = mockFn()
 
     const store = createStore()
@@ -222,7 +253,7 @@ describe('core-v2', () => {
     ])
   })
 
-  it.skip('Atom store dependency states', () => {
+  test.skip('Atom store dependency states', () => {
     const aTrack = mockFn()
     const noopAction = () => ({ type: 'noop', payload: null })
     const aAtom = createAtom({ inc: () => null }, ({ onAction }, state = 1) => {
@@ -245,15 +276,17 @@ describe('core-v2', () => {
     expect(bCache3.state).toBe(3)
   })
 
-  it.skip('Atom from', () => {
+  test.skip('Atom from', () => {
     const a = createPrimitiveAtom(42)
 
-    expect(a(createTransaction([{ type: 'noooop', payload: null }])).state).toBe(42)
+    expect(
+      a(createTransaction([{ type: 'noooop', payload: null }])).state,
+    ).toBe(42)
     expect(a(createTransaction([a.set(43)])).state).toBe(43)
     expect(a(createTransaction([a.change((s) => s + 2)])).state).toBe(44)
   })
 
-  it.skip('Persist', () => {
+  test.skip('Persist', () => {
     const snapshot: Rec = { TEST: 42 }
     const persist = createPersist({ get: (key) => snapshot[key] })
     const a = createPrimitiveAtom(0, null, {
@@ -266,7 +299,7 @@ describe('core-v2', () => {
     expect(state).toBe(42)
   })
 
-  it('Batched dispatch', () => {
+  test('Batched dispatch', () => {
     const a = createPrimitiveAtom(0)
     const store = createStore()
     const cb = mockFn()
@@ -280,15 +313,21 @@ describe('core-v2', () => {
     expect(cb.lastInput()).toBe(2)
   })
 
-  it('Manage dynamic dependencies', () => {
+  test('Manage dynamic dependencies', () => {
     let reducerCalls = 0
     const a = createPrimitiveAtom(0)
     const b = createAtom(
       { add: (atom: Atom) => atom },
-      ({ onAction, getUnlistedState }, state = new Array<readonly [Atom, any]>()) => {
+      (
+        { onAction, getUnlistedState },
+        state = new Array<readonly [Atom, any]>(),
+      ) => {
         reducerCalls++
 
-        onAction('add', (atom) => (state = [...state, [atom, getUnlistedState(atom)]]))
+        onAction(
+          'add',
+          (atom) => (state = [...state, [atom, getUnlistedState(atom)]]),
+        )
         return state
       },
     )
@@ -302,7 +341,7 @@ describe('core-v2', () => {
     expect(reducerCalls).toBe(2)
   })
 
-  it('await all effect', async () => {
+  test('await all effect', async () => {
     function createCallSafetyTracked(cb: Fn) {
       let count = 0
       const callSafetyTracked: typeof callSafety = (...a: any[]) => {
@@ -359,7 +398,7 @@ describe('core-v2', () => {
     expect(cb.calls.length).toBe(1)
   })
 
-  it('subscription to in-cache atom', () => {
+  test('subscription to in-cache atom', () => {
     const a = createPrimitiveAtom(0)
     const b = createAtom({ a }, ({ get }) => get('a'))
 
@@ -383,7 +422,7 @@ describe('core-v2', () => {
     expect(trackB.calls.length).toBe(3)
   })
 
-  it('getState of stale atom', () => {
+  test('getState of stale atom', () => {
     const a = createPrimitiveAtom(0)
     const b = createAtom({ a }, ({ get }) => get('a'))
 
@@ -404,7 +443,7 @@ describe('core-v2', () => {
     expect(getState(b, store)).toBe(2)
   })
 
-  it.skip('subscription call cause', () => {
+  test.skip('subscription call cause', () => {
     const counterAtom = createAtom(
       { inc: () => null, add: (v: number) => v },
       ({ onAction }, counter = 1) => {
@@ -414,8 +453,16 @@ describe('core-v2', () => {
       },
       'counter',
     )
-    const counterIsEvenAtom = createAtom({ counterAtom }, ({ get }) => get('counterAtom') % 2 === 0, 'counterIsEven')
-    const counterIsHugeAtom = createAtom({ counterAtom }, ({ get }) => get('counterAtom') > 10_000, 'counterIsHuge')
+    const counterIsEvenAtom = createAtom(
+      { counterAtom },
+      ({ get }) => get('counterAtom') % 2 === 0,
+      'counterIsEven',
+    )
+    const counterIsHugeAtom = createAtom(
+      { counterAtom },
+      ({ get }) => get('counterAtom') > 10_000,
+      'counterIsHuge',
+    )
     const titleAtom = createAtom(
       { counterIsEvenAtom, counterIsHugeAtom },
       ({ onChange }, title = 'counter') => {
@@ -432,27 +479,34 @@ describe('core-v2', () => {
     store.subscribe(titleAtom, cb)
 
     store.dispatch(counterAtom.inc())
-    expect(parseCauses(cb.lastInput(1))).toEqual(['DISPATCH: inc_counter', 'counterIsEven atom'])
+    expect(parseCauses(cb.lastInput(1))).toEqual([
+      'DISPATCH: inc_counter',
+      'counterIsEven atom',
+    ])
 
     store.dispatch(counterAtom.add(100_000))
-    expect(parseCauses(cb.lastInput(1))).toEqual(['DISPATCH: add_counter', 'counterIsHuge atom'])
+    expect(parseCauses(cb.lastInput(1))).toEqual([
+      'DISPATCH: add_counter',
+      'counterIsHuge atom',
+    ])
   })
 
-  it.skip('createTemplateCache', () => {
+  test.skip('createTemplateCache', () => {
     const atomWithoutSnapshot = createNumberAtom(0)
     const atomWithSnapshot = createNumberAtom(0)
 
     const snapshot = { [atomWithSnapshot.id]: 42 }
 
     const store = createStore({
-      createTemplateCache: (atom) => Object.assign(createTemplateCache(atom), { state: snapshot[atom.id] }),
+      createTemplateCache: (atom) =>
+        Object.assign(createTemplateCache(atom), { state: snapshot[atom.id] }),
     })
 
     expect(store.getState(atomWithoutSnapshot)).toBe(0)
     expect(store.getState(atomWithSnapshot)).toBe(42)
   })
 
-  it.skip('onPatch / onError', () => {
+  test.skip('onPatch / onError', () => {
     const a = createPrimitiveAtom(0)
     const b = createAtom({ a }, (track) => {
       const state = track.get('a')
@@ -486,21 +540,24 @@ describe('core-v2', () => {
     expect(store.getCache(a)!.state).toBe(2)
   })
 
-  it('State updates order', async () => {
-    const a = createAtom({ setB: () => null, _setC: () => null }, ({ onAction, schedule, create }, state = 'a') => {
-      onAction('setB', () => {
-        state = 'b'
-        schedule((dispatch) => {
-          dispatch(create('_setC'))
+  test('State updates order', async () => {
+    const a = createAtom(
+      { setB: () => null, _setC: () => null },
+      ({ onAction, schedule, create }, state = 'a') => {
+        onAction('setB', () => {
+          state = 'b'
+          schedule((dispatch) => {
+            dispatch(create('_setC'))
+          })
         })
-      })
 
-      onAction('_setC', () => {
-        state = 'c'
-      })
+        onAction('_setC', () => {
+          state = 'c'
+        })
 
-      return state
-    })
+        return state
+      },
+    )
 
     const store = createStore()
     const listener = mockFn()
@@ -512,7 +569,7 @@ describe('core-v2', () => {
     expect(listener.calls.map((c) => c.i[0])).toEqual(['a', 'c'])
   })
 
-  it('v3', () => {
+  test('v3', () => {
     const a = atom(0)
     const b = createAtom({}, (track) => track.v3ctx.spy(a))
     const store = createStore()

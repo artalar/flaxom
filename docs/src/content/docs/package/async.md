@@ -922,7 +922,7 @@ describe('optimistic update', () => {
     }
   })
 
-  it('optimistic update', async () => {
+  test('optimistic update', async () => {
     const ctx = createTestCtx()
     const effectTrack = ctx.subscribeTrack(getData.onFulfill)
     const dataTrack = ctx.subscribeTrack(getData.dataAtom)
@@ -995,7 +995,7 @@ describe('concurrent pooling', () => {
     }
   }).pipe(withAbort({ strategy: 'last-in-win' }))
 
-  it('concurrent pooling', async () => {
+  test('concurrent pooling', async () => {
     const ctx = createTestCtx()
     const track = ctx.subscribeTrack(progressAtom)
 

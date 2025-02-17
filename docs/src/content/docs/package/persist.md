@@ -117,7 +117,7 @@ import { createMemStorage } from '@reatom/persist'
 import { withLocalStorage } from '@reatom/persist-web-storage'
 import { tokenAtom } from './feature'
 
-it('token', () => {
+test('token', () => {
   const ctx = createTestCtx()
   const mockStorage = createMemStorage({ token: '123' })
   withLocalStorage.storageAtom(ctx, mockStorage)

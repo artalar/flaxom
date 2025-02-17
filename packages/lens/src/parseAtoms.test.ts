@@ -1,20 +1,22 @@
 import { createTestCtx } from '@reatom/testing'
-import { it, describe, expect } from 'vitest'
+import { test, describe, expect } from 'vitest'
 import { atom } from '@reatom/core'
 import { parseAtoms } from './parseAtoms'
 import { reatomZod } from '@reatom/npm-zod'
 import { z } from 'zod'
 
 describe('parseAtoms', () => {
-  it('should return value', () => {
+  test('should return value', () => {
     const ctx = createTestCtx()
 
     expect(parseAtoms(ctx, 'some bare value')).toBe('some bare value')
     expect(parseAtoms(ctx, 10)).toBe(10)
-    expect(parseAtoms(ctx, Symbol.for('specialSymbol'))).toBe(Symbol.for('specialSymbol'))
+    expect(parseAtoms(ctx, Symbol.for('specialSymbol'))).toBe(
+      Symbol.for('specialSymbol'),
+    )
   })
 
-  it('should parse deep atoms', () => {
+  test('should parse deep atoms', () => {
     const ctx = createTestCtx()
 
     expect(
@@ -32,7 +34,7 @@ describe('parseAtoms', () => {
     ).toEqual([['deep']])
   })
 
-  it('should parse records', () => {
+  test('should parse records', () => {
     const ctx = createTestCtx()
 
     expect(
@@ -54,7 +56,7 @@ describe('parseAtoms', () => {
     })
   })
 
-  it('should parse maps', () => {
+  test('should parse maps', () => {
     const ctx = createTestCtx()
 
     const atomized = new Map()
@@ -71,7 +73,7 @@ describe('parseAtoms', () => {
     expect(parsed.size).toBe(3)
   })
 
-  it('should spy if inside atom', () => {
+  test('should spy if inside atom', () => {
     const ctx = createTestCtx()
 
     const valueAtom = atom('default')
@@ -83,7 +85,7 @@ describe('parseAtoms', () => {
     expect(ctx.get(parsedAtom)).toEqual({ key: 'new' })
   })
 
-  it('should parse sets', () => {
+  test('should parse sets', () => {
     const ctx = createTestCtx()
 
     const atomized = new Set()
@@ -107,7 +109,7 @@ describe('parseAtoms', () => {
     // expect(parsed.size).toBe(3)
   })
 
-  it('should parse mixed values', () => {
+  test('should parse mixed values', () => {
     const ctx = createTestCtx()
 
     expect(
@@ -129,13 +131,15 @@ describe('parseAtoms', () => {
     })
   })
 
-  it('should parse deep structures', () => {
+  test('should parse deep structures', () => {
     const ctx = createTestCtx()
 
-    expect(parseAtoms(ctx, [[[[[atom('deepStruct')]]]]])).toEqual([[[[['deepStruct']]]]])
+    expect(parseAtoms(ctx, [[[[[atom('deepStruct')]]]]])).toEqual([
+      [[[['deepStruct']]]],
+    ])
   })
 
-  it('should parse linked list as array', () => {
+  test('should parse linked list as array', () => {
     const ctx = createTestCtx()
     const model = reatomZod(
       z.object({
@@ -188,10 +192,12 @@ describe('parseAtoms', () => {
   })
 })
 
-it('should ignore constructor', () => {
+test('should ignore constructor', () => {
   const ctx = createTestCtx()
 
   const constructObject = new AbortController()
 
-  expect(parseAtoms(ctx, { constructObject }).constructObject).toBe(constructObject)
+  expect(parseAtoms(ctx, { constructObject }).constructObject).toBe(
+    constructObject,
+  )
 })

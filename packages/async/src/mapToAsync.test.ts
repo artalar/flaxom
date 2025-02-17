@@ -1,10 +1,10 @@
-import { it, expect } from 'vitest'
+import { test, expect } from 'vitest'
 import { take, takeNested } from '@reatom/effects'
 import { createTestCtx } from '@reatom/testing'
 import { atom } from '@reatom/core'
 import { mapToAsync, withDataAtom } from './index'
 
-it(`mapToAsync interface`, () => {
+test(`mapToAsync interface`, () => {
   const argumentAtom = atom(0, 'argumentAtom')
   const asyncAction = argumentAtom.pipe(mapToAsync(async (ctx, arg) => arg))
 
@@ -13,7 +13,7 @@ it(`mapToAsync interface`, () => {
   expect(asyncAction.unstable_unhook).toBeTypeOf('function')
 })
 
-it(`is called whenever argument is changed`, async () => {
+test(`is called whenever argument is changed`, async () => {
   const argumentAtom = atom('initial', 'argumentAtom')
   const asyncAction = argumentAtom.pipe(
     mapToAsync(async (ctx, arg) => arg),
@@ -31,7 +31,7 @@ it(`is called whenever argument is changed`, async () => {
   expect(ctx.get(asyncAction.dataAtom)).toBe('updated')
 })
 
-it(`can be unhooked`, async () => {
+test(`can be unhooked`, async () => {
   const argumentAtom = atom('initial', 'argumentAtom')
   const asyncAction = argumentAtom.pipe(
     mapToAsync(async (ctx, n) => n),

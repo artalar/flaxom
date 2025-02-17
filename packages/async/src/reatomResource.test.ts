@@ -1,4 +1,4 @@
-import { it, expect } from 'vitest'
+import { test, expect } from 'vitest'
 import { createTestCtx, mockFn } from '@reatom/testing'
 import { atom } from '@reatom/core'
 import { noop, sleep } from '@reatom/utils'
@@ -14,7 +14,7 @@ import {
 import { reatomResource } from './reatomResource'
 import { take } from '@reatom/effects'
 
-it('base', async () => {
+test('base', async () => {
   const paramsAtom = atom(0, 'paramsAtom')
   const async1 = reatomResource(async (ctx) => {
     const argument = ctx.spy(paramsAtom)
@@ -41,7 +41,7 @@ it('base', async () => {
   expect(track.calls.length).toBe(2)
 })
 
-it('withCache', async () => {
+test('withCache', async () => {
   const sleepTrack = mockFn(sleep)
   const paramsAtom = atom(0, 'paramsAtom')
   const aAtom = reatomResource(async (ctx) => {
@@ -84,7 +84,7 @@ it('withCache', async () => {
   expect(sleepTrack.calls.length).toBe(4)
 })
 
-it('controller', async () => {
+test('controller', async () => {
   let collision = false
   const controllerTrack = mockFn()
   const paramsAtom = atom(0, 'paramsAtom')
@@ -116,7 +116,7 @@ it('controller', async () => {
   expect(collision).toBeFalsy()
 })
 
-it('withDataAtom', async () => {
+test('withDataAtom', async () => {
   const paramsAtom = atom(0, 'paramsAtom')
   const someResource = reatomResource(async (ctx) => {
     const params = ctx.spy(paramsAtom)
@@ -132,7 +132,7 @@ it('withDataAtom', async () => {
   expect(isConnected(ctx, paramsAtom)).toBeFalsy()
 })
 
-it('withErrorAtom withRetry', async () => {
+test('withErrorAtom withRetry', async () => {
   let shouldThrow = true
   const paramsAtom = atom(1, 'paramsAtom')
   const someResource = reatomResource(async (ctx) => {
@@ -178,7 +178,7 @@ it('withErrorAtom withRetry', async () => {
   expect(retriesTrack.inputs()).toEqual([0, 1, 0])
 })
 
-it('abort should not stale', async () => {
+test('abort should not stale', async () => {
   const paramsAtom = atom(123, 'paramsAtom')
   const someResource = reatomResource(async (ctx) => {
     const params = ctx.spy(paramsAtom)
@@ -194,7 +194,7 @@ it('abort should not stale', async () => {
   expect(ctx.get(someResource.dataAtom)).toBe(123)
 })
 
-it('direct retry', async () => {
+test('direct retry', async () => {
   const paramsAtom = atom(123, 'paramsAtom')
   const someResource = reatomResource(async (ctx) => {
     ctx.spy(paramsAtom)
@@ -214,7 +214,7 @@ it('direct retry', async () => {
   expect(calls).toBe(2)
 })
 
-it('withCache stale abort', async () => {
+test('withCache stale abort', async () => {
   const someResource = reatomResource(async (ctx) => {
     await ctx.schedule(() => sleep())
     return 1
@@ -227,7 +227,7 @@ it('withCache stale abort', async () => {
   expect(ctx.get(someResource.dataAtom)).toBe(1)
 })
 
-it('withCache stale invalidation', async () => {
+test('withCache stale invalidation', async () => {
   const ctx = createTestCtx()
   const someResource = reatomResource(async (ctx): Promise<number> => {
     return ctx.get(someResource.dataAtom) + 1
@@ -245,7 +245,7 @@ it('withCache stale invalidation', async () => {
   expect(ctx.get(someResource.dataAtom)).toBe(2)
 })
 
-it('do not rerun without deps on read', async () => {
+test('do not rerun without deps on read', async () => {
   let i = 0
   const someResource = reatomResource(async (ctx) => {
     ++i
@@ -261,7 +261,7 @@ it('do not rerun without deps on read', async () => {
   expect(i).toBe(2)
 })
 
-it('sync retry in onConnect', async () => {
+test('sync retry in onConnect', async () => {
   const getEventsSoon = reatomResource(async () => 1).pipe(
     withDataAtom(0, (ctx, payload, state) => payload + state),
     withRetry(),
@@ -282,7 +282,7 @@ it('sync retry in onConnect', async () => {
   expect(ctx.get(getEventsSoon.dataAtom)).toBeGreaterThan(1)
 })
 
-it('do not drop the cache of an error', async () => {
+test('do not drop the cache of an error', async () => {
   let calls = 0
   const shouldThrowAtom = atom(true, 'shouldThrowAtom')
   const someResource = reatomResource(async (ctx) => {
@@ -305,7 +305,7 @@ it('do not drop the cache of an error', async () => {
   expect(calls).toBe(2)
 })
 
-it('reset', async () => {
+test('reset', async () => {
   const ctx = createTestCtx()
   let i = 0
   const someResource = reatomResource(async (ctx) => {
@@ -328,7 +328,7 @@ it('reset', async () => {
   expect(i).toBe(2)
 })
 
-it('ignore abort if a subscribers exists', async () => {
+test('ignore abort if a subscribers exists', async () => {
   const ctx = createTestCtx()
   const res = reatomResource(async (ctx): Promise<number> => {
     await ctx.schedule(() => sleep())
@@ -347,7 +347,7 @@ it('ignore abort if a subscribers exists', async () => {
   expect(track.lastInput()).toBe(2)
 })
 
-it('recursion and promiseAtom', async () => {
+test('recursion and promiseAtom', async () => {
   const ctx = createTestCtx()
 
   const n = reatomAsync(async (ctx) => {

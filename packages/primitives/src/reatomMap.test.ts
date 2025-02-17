@@ -1,5 +1,5 @@
 import { createCtx } from '@reatom/core'
-import { it, expect, describe } from 'vitest'
+import { test, expect, describe } from 'vitest'
 
 import { reatomMap } from './reatomMap'
 
@@ -10,7 +10,7 @@ const defaultMapEntries: readonly [string, number][] = [
 ]
 
 describe(`reatomMap`, () => {
-  it(`init`, () => {
+  test(`init`, () => {
     const ctx = createCtx()
 
     const mapAtom = reatomMap(new Map(defaultMapEntries))
@@ -18,7 +18,7 @@ describe(`reatomMap`, () => {
     expect([...ctx.get(mapAtom).entries()]).toStrictEqual(defaultMapEntries)
   })
 
-  it(`get`, () => {
+  test(`get`, () => {
     const ctx = createCtx()
 
     const mapAtom = reatomMap(new Map(defaultMapEntries))
@@ -26,7 +26,7 @@ describe(`reatomMap`, () => {
     expect(mapAtom.get(ctx, 'b')).toEqual(2)
   })
 
-  it(`set`, () => {
+  test(`set`, () => {
     const ctx = createCtx()
 
     const mapAtom = reatomMap(new Map(defaultMapEntries))
@@ -36,7 +36,7 @@ describe(`reatomMap`, () => {
     expect(mapAtom.get(ctx, 'd')).toEqual(4)
   })
 
-  it(`has`, () => {
+  test(`has`, () => {
     const ctx = createCtx()
 
     const mapAtom = reatomMap(new Map(defaultMapEntries))
@@ -44,7 +44,7 @@ describe(`reatomMap`, () => {
     expect(mapAtom.has(ctx, 'a')).toEqual(true)
   })
 
-  it(`delete`, () => {
+  test(`delete`, () => {
     const ctx = createCtx()
 
     const mapAtom = reatomMap(new Map(defaultMapEntries))
@@ -54,7 +54,7 @@ describe(`reatomMap`, () => {
     expect(mapAtom.has(ctx, 'a')).toEqual(false)
   })
 
-  it(`clear`, () => {
+  test(`clear`, () => {
     const ctx = createCtx()
 
     const mapAtom = reatomMap(new Map(defaultMapEntries))

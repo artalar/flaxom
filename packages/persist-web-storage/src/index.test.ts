@@ -1,3 +1,3 @@
-import { it } from 'vitest'
+import { test } from 'vitest'
 
-it('base API', () => {})
+test('base API', () => {})

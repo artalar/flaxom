@@ -1,7 +1,7 @@
-import { it, expect } from 'vitest'
+import { test, expect } from 'vitest'
 const { atom, createCtx } = require('@reatom/framework')
 
-it('test CommonJS import', () => {
+test('test CommonJS import', () => {
   const ctx = createCtx()
   const me = atom('check ✅', 'me')
 

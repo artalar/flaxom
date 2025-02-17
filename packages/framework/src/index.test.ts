@@ -1,4 +1,4 @@
-import { it, expect } from 'vitest'
+import { test, expect } from 'vitest'
 
 import * as async from '@reatom/async'
 import * as core from '@reatom/core'
@@ -9,8 +9,17 @@ import * as logger from '@reatom/logger'
 import * as primitives from '@reatom/primitives'
 import * as utils from '@reatom/utils'
 
-it('base API', async () => {
-  const packages = [async, core, effects, hooks, lens, logger, primitives, utils]
+test('base API', async () => {
+  const packages = [
+    async,
+    core,
+    effects,
+    hooks,
+    lens,
+    logger,
+    primitives,
+    utils,
+  ]
 
   const allExports = packages
     .reduce((acc, v) => [...acc, ...Object.keys(v)], new Array<string>())
