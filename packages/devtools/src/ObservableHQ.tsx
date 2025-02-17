@@ -22,27 +22,6 @@ const differ = create({
   },
 })
 
-// differ.processor.pipes.diff.before(
-//   'trivial',
-//   Object.assign(
-//     function functionIgnoring(context: DiffContext) {
-//       if (typeof context.left === 'function' || typeof context.right === 'function') {
-//         if (context.left === context.right) {
-//           context.setResult(undefined).exit()
-//         }
-
-//         context
-//           .setResult([
-//             typeof context.left === 'function' ? context.left.toString() : context.left,
-//             typeof context.right === 'function' ? context.right.toString() : context.right,
-//           ])
-//           .exit()
-//       }
-//     },
-//     { filterName: 'functionIgnoring' },
-//   ),
-// )
-
 const buttonCss = css`
   width: 20px;
   height: 20px;
@@ -114,8 +93,12 @@ const EditForm = ({
   )
 }
 
+const getUrlString = (thing: any) => (thing instanceof URL ? thing.href : thing)
+
 const getHTMLDiff = (a: AtomCache, b: AtomCache) => {
-  const delta = differ.diff(a.state, b.state)
+  const aState = getUrlString(a.state)
+  const bState = getUrlString(b.state)
+  const delta = differ.diff(aState, bState)
 
   if (!delta) return null
 
@@ -150,7 +133,7 @@ const getHTMLDiff = (a: AtomCache, b: AtomCache) => {
       <div
         ref={(ctx, el) => {
           el.innerHTML = htmlFormatter
-            .format(delta, a.state)
+            .format(delta, aState)
             .replaceAll(
               `<pre class="jsondiffpatch-error">TypeError: Cannot read properties of undefined (reading 'replace')</pre>`,
               '[Function]',
