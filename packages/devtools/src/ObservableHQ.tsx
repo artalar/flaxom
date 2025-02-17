@@ -16,6 +16,19 @@ import { BooleanAtom, noop, parseAtoms, reatomBoolean, take, withComputed, withI
 
 import { HISTORY_LENGTH, buttonCss as editButtonCss, historyStates, idxMap } from './utils'
 
+const differ = jsondiffpatch.create()
+
+differ.processor.pipes.diff.before(
+  'trivial',
+  // @ts-ignore
+  (context) => {
+    if (typeof context.left === 'function' || typeof context.right === 'function') {
+      // @ts-ignore
+      context.setResult([context.left.toString(), context.right.toString()]).exit()
+    }
+  },
+)
+
 const buttonCss = css`
   width: 20px;
   height: 20px;
@@ -88,7 +101,7 @@ const EditForm = ({
 }
 
 const getHTMLDiff = (a: AtomCache, b: AtomCache) => {
-  const delta = jsondiffpatch.diff(a.state, b.state)
+  const delta = differ.diff(a.state, b.state)
 
   if (!delta) return null
 
