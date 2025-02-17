@@ -2,7 +2,9 @@ import type { Causes } from '../src'
 
 export const sleep = (ms = 0) => new Promise((r) => setTimeout(r, ms))
 
-export function mockFn<I extends any[], O>(fn: (...input: I) => O = (...i: any) => void 0 as any) {
+export function mockFn<I extends any[], O>(
+  fn: (...input: I) => O = (...i: any) => void 0 as any,
+) {
   const _fn = Object.assign(
     function (...i: I) {
       // @ts-ignore
@@ -27,6 +29,8 @@ export function mockFn<I extends any[], O>(fn: (...input: I) => O = (...i: any) 
 
 export function parseCauses(causes: Causes): Array<string> {
   return causes.map((cause) =>
-    typeof cause === 'string' ? cause : `DISPATCH: ${cause.actions.map(({ type }) => type).join(`, `)}`,
+    typeof cause === 'string'
+      ? cause
+      : `DISPATCH: ${cause.actions.map(({ type }) => type).join(`, `)}`,
   )
 }

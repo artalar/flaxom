@@ -2,7 +2,9 @@ import * as v3 from '@reatom/core'
 
 /* UTILITY */
 
-export type Fn<Args extends any[] = any[], Return = any> = (...a: Args) => Return
+export type Fn<Args extends any[] = any[], Return = any> = (
+  ...a: Args
+) => Return
 
 export type Rec<Values = any> = Record<string, Values>
 
@@ -104,14 +106,20 @@ export type AtomBindings<State = any> = {
 
 export type AtomBinded<State = any> = Atom<State> & AtomBindings<State>
 
-export type TrackReducer<State = any, Deps extends Rec<Fn | Atom> = Rec<Fn | Atom>> = {
+export type TrackReducer<
+  State = any,
+  Deps extends Rec<Fn | Atom> = Rec<Fn | Atom>,
+> = {
   (track: Track<Deps>): State
   // TODO: how to infer type from default value of optional argument?
   // jsdoc?
   // (track: Track<Deps>, state?: undefined | State): State
 }
 
-export type CacheReducer<State = any> = Fn<[transaction: Transaction, cache: CacheTemplate<State>], Cache<State>>
+export type CacheReducer<State = any> = Fn<
+  [transaction: Transaction, cache: CacheTemplate<State>],
+  Cache<State>
+>
 
 export type AtomListener<State> = Fn<[state: State, ctx: Causes]>
 
@@ -119,18 +127,25 @@ export type AtomEffect<Ctx extends Cache['ctx'] = Cache['ctx']> = Fn<
   [dispatch: Store['dispatch'], ctx: Ctx, causes: Causes]
 >
 
-export type DepsPayloadMappers<Deps extends Rec<Fn | Atom | ActionCreator> = Rec<Fn | Atom | ActionCreator>> =
-  OmitValues<Deps, Atom | ActionCreator>
+export type DepsPayloadMappers<
+  Deps extends Rec<Fn | Atom | ActionCreator> = Rec<Fn | Atom | ActionCreator>,
+> = OmitValues<Deps, Atom | ActionCreator>
 
-export type DepsActionCreators<Deps extends Rec<Fn | Atom | ActionCreator> = Rec<Fn | Atom>> = {
+export type DepsActionCreators<
+  Deps extends Rec<Fn | Atom | ActionCreator> = Rec<Fn | Atom>,
+> = {
   [K in keyof Deps]: Deps[K] extends ActionCreator ? Deps[K] : never
 }
 
-export type DepsAtoms<Deps extends Rec<Fn | Atom | ActionCreator> = Rec<Fn | Atom>> = {
+export type DepsAtoms<
+  Deps extends Rec<Fn | Atom | ActionCreator> = Rec<Fn | Atom>,
+> = {
   [K in keyof Deps]: Deps[K] extends Atom ? Deps[K] : never
 }
 
-export type Track<Deps extends Rec<Fn | Atom | ActionCreator> = Rec<Fn | Atom>> = {
+export type Track<
+  Deps extends Rec<Fn | Atom | ActionCreator> = Rec<Fn | Atom>,
+> = {
   /** Create action */
   create: <Name extends keyof DepsPayloadMappers<Deps>>(
     name: Name,
@@ -138,7 +153,9 @@ export type Track<Deps extends Rec<Fn | Atom | ActionCreator> = Rec<Fn | Atom>> 
   ) => Action<ReturnType<DepsPayloadMappers<Deps>[Name]>>
 
   /** Subscribe to atom state changes and receive it */
-  get<Name extends keyof DepsAtoms<Deps>>(name: Name): AtomState<DepsAtoms<Deps>[Name]>
+  get<Name extends keyof DepsAtoms<Deps>>(
+    name: Name,
+  ): AtomState<DepsAtoms<Deps>[Name]>
 
   /** Get atom state without subscribing to it! */
   getUnlistedState<State>(atom: Atom<State>): State
@@ -162,7 +179,12 @@ export type Track<Deps extends Rec<Fn | Atom | ActionCreator> = Rec<Fn | Atom>> 
   /** Subscribe to atom state changes and react to it */
   onChange<Name extends keyof DepsAtoms<Deps>>(
     name: Name,
-    reaction: Fn<[newState: AtomState<DepsAtoms<Deps>[Name]>, oldState: undefined | AtomState<DepsAtoms<Deps>[Name]>]>,
+    reaction: Fn<
+      [
+        newState: AtomState<DepsAtoms<Deps>[Name]>,
+        oldState: undefined | AtomState<DepsAtoms<Deps>[Name]>,
+      ]
+    >,
   ): void
 
   /** React only at first reducer call */
@@ -202,7 +224,10 @@ type CustomAction<Data extends Rec, Args extends any[] = any[]> = Merge<
   }
 >
 
-export type ActionCreator<Args extends any[] = any[], Data extends ActionData = { payload: Args[0] }> = {
+export type ActionCreator<
+  Args extends any[] = any[],
+  Data extends ActionData = { payload: Args[0] },
+> = {
   (...a: Args): CustomAction<Data, Args>
 
   type: Action['type']
@@ -232,7 +257,9 @@ export type Cause = Atom['id'] | Action['type'] | string
 // export type Causes = [TransactionResult, ...(Array<Cause> | Causes)]
 export type Causes = Array<Cause | TransactionResult>
 
-export type TransactionEffect = Fn<[dispatch: Store['dispatch'], causes: Causes]>
+export type TransactionEffect = Fn<
+  [dispatch: Store['dispatch'], causes: Causes]
+>
 
 export type Store = {
   /**
@@ -289,10 +316,12 @@ export type AtomState<T extends Atom | Cache<any>> = T extends Atom<infer State>
   ? State
   : never
 
-export type ActionPayload<T extends ActionCreator | Action> = T extends ActionCreator<any[], { payload: infer Payload }>
-  ? Payload
-  : T extends Action<infer Payload>
-  ? Payload
-  : never
+export type ActionPayload<T extends ActionCreator | Action> =
+  T extends ActionCreator<any[], { payload: infer Payload }>
+    ? Payload
+    : T extends Action<infer Payload>
+    ? Payload
+    : never
 
-export type ActionCreatorData<T extends ActionCreator> = T extends ActionCreator<any[], infer Data> ? Data : never
+export type ActionCreatorData<T extends ActionCreator> =
+  T extends ActionCreator<any[], infer Data> ? Data : never

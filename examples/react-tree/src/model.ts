@@ -1,4 +1,11 @@
-import { type Atom, action, atom, type Action, type AtomMut, random } from '@reatom/framework'
+import {
+  type Atom,
+  action,
+  atom,
+  type Action,
+  type AtomMut,
+  random,
+} from '@reatom/framework'
 
 export interface Tree {
   id: string
@@ -14,15 +21,25 @@ export const reatomTree = (id: string, parent?: Tree): Tree => {
   id += random(1000, 9999)
   const name = `tree#${id}`
 
-  const childrenAtom: Tree['childrenAtom'] = atom(new Array<Tree>(), `${name}.childrenAtom`)
+  const childrenAtom: Tree['childrenAtom'] = atom(
+    new Array<Tree>(),
+    `${name}.childrenAtom`,
+  )
 
   const indeterminateChildrenAtom = atom(
-    (ctx) => ctx.spy(childrenAtom).some((child) => ctx.spy(child.indeterminateAtom)),
+    (ctx) =>
+      ctx.spy(childrenAtom).some((child) => ctx.spy(child.indeterminateAtom)),
     `${name}._indeterminateChildrenAtom`,
   )
 
   const checkedCountAtom = atom(
-    (ctx) => ctx.spy(childrenAtom).reduce((acc, child) => (ctx.spy(child.checkedAtom) ? acc + 1 : acc), 0),
+    (ctx) =>
+      ctx
+        .spy(childrenAtom)
+        .reduce(
+          (acc, child) => (ctx.spy(child.checkedAtom) ? acc + 1 : acc),
+          0,
+        ),
     `${name}._checkedCountAtom`,
   )
 

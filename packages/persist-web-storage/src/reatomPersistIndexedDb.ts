@@ -5,10 +5,16 @@ import { BroadcastMessage, WithPersistWebStorage } from './types'
 
 const idb = { get, set, del, createStore }
 
-export const reatomPersistIndexedDb = (dbName: string, channel: BroadcastChannel): WithPersistWebStorage => {
+export const reatomPersistIndexedDb = (
+  dbName: string,
+  channel: BroadcastChannel,
+): WithPersistWebStorage => {
   const postMessage = (msg: BroadcastMessage) => channel.postMessage(msg)
 
-  const memCacheAtom = atom((ctx, state = new Map<string, PersistRecord>()) => state, `withIndexedDb._memCacheAtom`)
+  const memCacheAtom = atom(
+    (ctx, state = new Map<string, PersistRecord>()) => state,
+    `withIndexedDb._memCacheAtom`,
+  )
 
   let store: UseStore
   const getStore = () => (store ??= idb.createStore(dbName, 'atoms'))

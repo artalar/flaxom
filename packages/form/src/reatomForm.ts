@@ -15,7 +15,8 @@ import { AsyncAction, reatomAsync, withAbort } from '@reatom/async'
 import { reatomRecord } from '@reatom/primitives'
 import { toError } from './utils'
 
-export interface FormFieldAtom<State = any, Value = State> extends FieldAtom<State, Value> {
+export interface FormFieldAtom<State = any, Value = State>
+  extends FieldAtom<State, Value> {
   remove: Action<[], void>
 }
 
@@ -27,7 +28,10 @@ export interface Form {
   /** Submit async handler. It checks the validation of all the fields in `fieldsListAtom`, calls the form's `validate` options handler, and then the `onSubmit` options handler. Check the additional options properties of async action: https://www.reatom.dev/package/async/. */
   onSubmit: AsyncAction<[], void>
   /** The same `reatomField` method, but with bindings to `fieldsListAtom`. */
-  reatomField<State, Value>(options: FieldOptions<State, Value>, name?: string): FormFieldAtom<State, Value>
+  reatomField<State, Value>(
+    options: FieldOptions<State, Value>,
+    name?: string,
+  ): FormFieldAtom<State, Value>
   /** Action to reset the state, the value, the validation, and the focus states. */
   reset: Action<[], void>
   /** Atom with validation state of the form, computed from all the fields in `fieldsListAtom` */
@@ -51,7 +55,10 @@ export const reatomForm = (
   // this is out of the options for eslint compatibility
   name = optionsName ?? __count('form'),
 ): Form => {
-  const fieldsListAtom = atom<Array<FormFieldAtom>>([], `${name}.fieldsListAtom`)
+  const fieldsListAtom = atom<Array<FormFieldAtom>>(
+    [],
+    `${name}.fieldsListAtom`,
+  )
   const focusAtom = atom((ctx, state = fieldInitFocus) => {
     const formFocus = { ...fieldInitFocus }
     for (const fieldAtom of ctx.spy(fieldsListAtom)) {
@@ -100,7 +107,11 @@ export const reatomForm = (
     let { valid, validating } = ctx.get(validationAtom)
 
     if (validating) {
-      valid = await take(ctx, validationAtom, (ctx, { validating, valid }, skip) => (validating ? skip : valid))
+      valid = await take(
+        ctx,
+        validationAtom,
+        (ctx, { validating, valid }, skip) => (validating ? skip : valid),
+      )
     }
 
     if (valid) {

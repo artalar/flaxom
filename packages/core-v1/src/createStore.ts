@@ -1,12 +1,22 @@
 import * as v3 from '@reatom/core'
 import { State, BaseAction } from './kernel'
-import { throwError, safetyFunc, assign, getIsAtom, getIsAction, TREE } from './shared'
+import {
+  throwError,
+  safetyFunc,
+  assign,
+  getIsAtom,
+  getIsAction,
+  TREE,
+} from './shared'
 import { Action, actions, PayloadActionCreator } from './declareAction'
 import { Atom, init, replace } from './declareAtom'
 
 type ActionsSubscriber = (action: Action<unknown>, stateDiff: State) => any
 type SubscribeFunction = {
-  <T>(target: Atom<T> | PayloadActionCreator<T>, listener: (state: T) => any): () => void
+  <T>(
+    target: Atom<T> | PayloadActionCreator<T>,
+    listener: (state: T) => any,
+  ): () => void
   (listener: ActionsSubscriber): () => void
 }
 type GetStateFunction = {
@@ -29,7 +39,11 @@ export function createStore(atom: Atom<any>, initState?: State): Store
 // TODO: try to use ES6 Map's instead of plain object
 // for prevent using `delete` operator
 // (need perf tests)
-export function createStore(atom?: Atom<any> | State, initState?: State, v3ctx = v3.createCtx()): Store {
+export function createStore(
+  atom?: Atom<any> | State,
+  initState?: State,
+  v3ctx = v3.createCtx(),
+): Store {
   const activeAtoms = new Map<v3.Atom, number>()
   // @ts-expect-error
   v3ctx.cause[TREE] = activeAtoms
@@ -38,7 +52,8 @@ export function createStore(atom?: Atom<any> | State, initState?: State, v3ctx =
   let snapshot: State = {}
 
   if (atom !== undefined) {
-    if (typeof atom === 'object' && initState === undefined) assign(snapshot, atom)
+    if (typeof atom === 'object' && initState === undefined)
+      assign(snapshot, atom)
     else {
       if (!getIsAtom(atom)) throwError('Invalid atom')
 
@@ -84,7 +99,10 @@ export function createStore(atom?: Atom<any> | State, initState?: State, v3ctx =
   }
 
   function subscribe(subscriber: ActionsSubscriber): () => void
-  function subscribe<T>(target: Atom<T> | PayloadActionCreator<T>, subscriber: (state: T) => any): () => void
+  function subscribe<T>(
+    target: Atom<T> | PayloadActionCreator<T>,
+    subscriber: (state: T) => any,
+  ): () => void
   function subscribe<T>(
     target: Atom<T> | PayloadActionCreator<T> | ActionsSubscriber,
     subscriber?: (state: T) => any,
@@ -94,7 +112,8 @@ export function createStore(atom?: Atom<any> | State, initState?: State, v3ctx =
     let skipFirst = true
 
     if (subscriber === undefined) {
-      if (getIsAtom(listener) || getIsAction(listener)) throwError('Invalid listener')
+      if (getIsAtom(listener) || getIsAction(listener))
+        throwError('Invalid listener')
 
       ensureCanMutateNextDispatchListeners()
       nextDispatchListeners.push(listener)
@@ -106,9 +125,11 @@ export function createStore(atom?: Atom<any> | State, initState?: State, v3ctx =
       }
     }
 
-    if (!getIsAtom(target) && !getIsAction(target)) throwError('Invalid subscription target')
+    if (!getIsAtom(target) && !getIsAction(target))
+      throwError('Invalid subscription target')
 
-    const { v3atom, v3action }: { v3atom?: v3.Atom; v3action?: v3.Action } = target as any
+    const { v3atom, v3action }: { v3atom?: v3.Atom; v3action?: v3.Action } =
+      target as any
 
     if (v3action) {
       return v3ctx.subscribe(v3action, (calls) => {
@@ -145,7 +166,11 @@ export function createStore(atom?: Atom<any> | State, initState?: State, v3ctx =
     }
 
     const { type, payload, reactions, v3action } = action
-    if (typeof action !== 'object' || action === null || typeof type !== 'string') {
+    if (
+      typeof action !== 'object' ||
+      action === null ||
+      typeof type !== 'string'
+    ) {
       throwError('Invalid action')
     }
 

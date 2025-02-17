@@ -23,16 +23,23 @@ const stringifyAttrs = (options: CookieAttributes): string => {
 }
 
 const converter = {
-  read: (value: string): string => value.replace(/(%[\dA-F]{2})+/gi, decodeURIComponent),
+  read: (value: string): string =>
+    value.replace(/(%[\dA-F]{2})+/gi, decodeURIComponent),
   write: (value: string): string =>
-    encodeURIComponent(value).replace(/%(2[346BF]|3[AC-F]|40|5[BDE]|60|7[BCD])/g, decodeURIComponent),
+    encodeURIComponent(value).replace(
+      /%(2[346BF]|3[AC-F]|40|5[BDE]|60|7[BCD])/g,
+      decodeURIComponent,
+    ),
 }
 
 export const reatomPersistCookie =
   (name: string, document: Document) =>
   (options: CookieAttributes = {}): WithPersistWebStorage => {
     const now = Date.now()
-    const memCacheAtom = atom((_ctx, state = new Map<string, PersistRecord>()) => state, `${name}._memCacheAtom`)
+    const memCacheAtom = atom(
+      (_ctx, state = new Map<string, PersistRecord>()) => state,
+      `${name}._memCacheAtom`,
+    )
 
     return reatomPersist({
       name,
@@ -105,6 +112,8 @@ try {
   isCookieAvailable = false
 }
 
-export const withCookie: (options?: CookieAttributes) => WithPersistWebStorage = isCookieAvailable
-  ? /*#__PURE__*/ reatomPersistCookie('withCookie', globalThis.document)
-  : /*#__PURE__*/ () => reatomPersist(createMemStorage({ name: 'withCookie' }))
+export const withCookie: (options?: CookieAttributes) => WithPersistWebStorage =
+  isCookieAvailable
+    ? /*#__PURE__*/ reatomPersistCookie('withCookie', globalThis.document)
+    : /*#__PURE__*/ () =>
+        reatomPersist(createMemStorage({ name: 'withCookie' }))

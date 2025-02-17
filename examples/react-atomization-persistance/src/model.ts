@@ -1,4 +1,13 @@
-import { Action, action, atom, AtomMut, ParseAtoms, parseAtoms, withInit, random } from '@reatom/framework'
+import {
+  Action,
+  action,
+  atom,
+  AtomMut,
+  ParseAtoms,
+  parseAtoms,
+  withInit,
+  random,
+} from '@reatom/framework'
 
 export type Field = {
   id: number
@@ -25,14 +34,19 @@ const reatomField = (id: number, name: string, value: string): Field => {
     id,
     name,
     value: atom(value, valueName),
-    remove: action((ctx) => listAtom(ctx, (state) => state.filter((el) => el !== field)), `${valueName}.remove`),
+    remove: action(
+      (ctx) => listAtom(ctx, (state) => state.filter((el) => el !== field)),
+      `${valueName}.remove`,
+    ),
   }
   field.value.onChange(toLS)
 
   return field
 }
 
-export const listAtom = atom(new Array<Field>(), 'listAtom').pipe(withInit(fromLS))
+export const listAtom = atom(new Array<Field>(), 'listAtom').pipe(
+  withInit(fromLS),
+)
 listAtom.onChange(toLS)
 
 export const newFieldAtom = atom('', 'newFieldAtom')

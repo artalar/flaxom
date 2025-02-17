@@ -5,12 +5,12 @@ import { getRootCause } from '@reatom/hooks'
 import { isAction, Store } from './internal'
 
 export function createStore({
-                              callSafety = v3.callSafely,
-                              v3ctx = v3.createCtx({
-                                callNearEffect: callSafety,
-                                callLateEffect: callSafety,
-                              }),
-                            }: {
+  callSafety = v3.callSafely,
+  v3ctx = v3.createCtx({
+    callNearEffect: callSafety,
+    callLateEffect: callSafety,
+  }),
+}: {
   callSafety?: typeof v3.callSafely
   v3ctx?: v3.Ctx
 } = {}): Store {

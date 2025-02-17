@@ -1,7 +1,10 @@
 import { Atom, AtomOptions, Rec } from '@reatom/core-v2'
 import { createPrimitiveAtom, PrimitiveAtom, PrimitiveAtomCreator } from '.'
 
-export type EnumAtom<T extends string, Format extends 'camelCase' | 'snake_case' = 'camelCase'> = PrimitiveAtomCreator<
+export type EnumAtom<
+  T extends string,
+  Format extends 'camelCase' | 'snake_case' = 'camelCase',
+> = PrimitiveAtomCreator<
   T,
   {
     [K in T as Format extends 'camelCase'
@@ -15,7 +18,10 @@ export type EnumAtom<T extends string, Format extends 'camelCase' | 'snake_case'
 }
 
 let count = 0
-export function createEnumAtom<T extends string, Format extends 'camelCase' | 'snake_case' = 'camelCase'>(
+export function createEnumAtom<
+  T extends string,
+  Format extends 'camelCase' | 'snake_case' = 'camelCase',
+>(
   variants: ReadonlyArray<T>,
   options:
     | Atom['id']
@@ -34,7 +40,11 @@ export function createEnumAtom<T extends string, Format extends 'camelCase' | 's
 
       const actionCreatorName = variant.replace(
         /^./,
-        (firstLetter) => 'set' + (format === 'camelCase' ? firstLetter.toUpperCase() : `_${firstLetter}`),
+        (firstLetter) =>
+          'set' +
+          (format === 'camelCase'
+            ? firstLetter.toUpperCase()
+            : `_${firstLetter}`),
       )
       acc[actionCreatorName] = () => variant
       return acc

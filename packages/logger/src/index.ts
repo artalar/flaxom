@@ -23,7 +23,10 @@ export interface LogMsg {
 export const getCause = (patch: AtomCache, log = ''): string => {
   if (log.length > 10_000) return `${log} ...`
   if (patch.cause !== null && patch.cause.proto !== __root)
-    return getCause(patch.cause, log + ' <-- ' + (patch.cause.proto.name ?? 'unnamed'))
+    return getCause(
+      patch.cause,
+      log + ' <-- ' + (patch.cause.proto.name ?? 'unnamed'),
+    )
   else {
     return log || 'root'
   }
@@ -68,13 +71,16 @@ export const createLogBatched = ({
 
     setTimeout(
       (length) => {
-        isBatching = queue.length !== length && Date.now() - batchingStart < limit
+        isBatching =
+          queue.length !== length && Date.now() - batchingStart < limit
 
         if (isBatching) return
 
         const isFewTransactions = queue.length > 0
 
-        console.groupCollapsed(`Reatom ${domain}${length} transaction${length > 1 ? 's' : ''}`)
+        console.groupCollapsed(
+          `Reatom ${domain}${length} transaction${length > 1 ? 's' : ''}`,
+        )
 
         if (shouldLogGraph) {
           logGraph(
@@ -88,14 +94,21 @@ export const createLogBatched = ({
         }
 
         for (const { changes, time, error } of queue) {
-          console.log(`%c ${time}`, `padding-left: calc(50% - ${time.length / 2}em); font-size: 0.7rem;`)
+          console.log(
+            `%c ${time}`,
+            `padding-left: calc(50% - ${
+              time.length / 2
+            }em); font-size: 0.7rem;`,
+          )
 
           if (error) console.error(error)
 
           let inGroup = false
           Object.entries(changes).forEach(([k, change], i, arr) => {
             const isAction = 'payload' in change
-            const color = isAction ? 'background: #ffff80; color: #151134;' : 'background: #151134; color: white;'
+            const color = isAction
+              ? 'background: #ffff80; color: #151134;'
+              : 'background: #151134; color: white;'
             const style = `${color}font-weight: 400; padding: 0.15em;  padding-right: 1ch;`
 
             const name = k.replace(/(\d)*\./, '')
@@ -205,11 +218,16 @@ export const connectLogger = (
         let atomHistory = history.get(proto) ?? []
         if (historyLength) {
           atomHistory = atomHistory.slice(0, historyLength - 1)
-          atomHistory.unshift(isAction ? { ...patch, state: [...state] } : patch)
+          atomHistory.unshift(
+            isAction ? { ...patch, state: [...state] } : patch,
+          )
           history.set(proto, atomHistory)
         }
 
-        const isConnection = !oldCache && cause!.proto.name === 'root' && (!isAction || state.length === 0)
+        const isConnection =
+          !oldCache &&
+          cause!.proto.name === 'root' &&
+          (!isAction || state.length === 0)
 
         if (isConnection) continue
 

@@ -24,7 +24,8 @@ const DEPS_SHAPE = Symbol('@@Reatom/DEPS_SHAPE')
 // action for set initialState of each atom to global state
 export const init = declareAction(['@@Reatom/init'])
 export const initAction = init()
-export const replace = v3.action<Record<string | symbol, any>>('@@Reatom/replace')
+export const replace =
+  v3.action<Record<string | symbol, any>>('@@Reatom/replace')
 
 type AtomName = TreeId | [string]
 type AtomsMap = { [key: string]: Atom<any> }
@@ -37,7 +38,10 @@ type Reducer<TState, TValue> = (state: TState, value: TValue) => TState
 interface DependencyMatcherOn<TState> {
   <T>(dependency: Atom<T>, reducer: Reducer<TState, T>): void
   <T>(dependency: PayloadActionCreator<T>, reducer: Reducer<TState, T>): void
-  <T>(dependency: Atom<T> | PayloadActionCreator<T>, reducer: Reducer<TState, T>): void
+  <T>(
+    dependency: Atom<T> | PayloadActionCreator<T>,
+    reducer: Reducer<TState, T>,
+  ): void
 }
 type DependencyMatcher<TState> = (on: DependencyMatcherOn<TState>) => any
 
@@ -48,7 +52,10 @@ export interface Atom<T> extends Unit {
   [DEPS_SHAPE]?: AtomsMap | TupleOfAtoms
 }
 
-export function declareAtom<TState>(initialState: TState, dependencyMatcher: DependencyMatcher<TState>): Atom<TState>
+export function declareAtom<TState>(
+  initialState: TState,
+  dependencyMatcher: DependencyMatcher<TState>,
+): Atom<TState>
 export function declareAtom<TState>(
   name: AtomName,
   initialState: TState,
@@ -69,7 +76,8 @@ export function declareAtom<TState>(
 
   name = getName(id)
 
-  if (initialState === undefined) throwError(`Atom "${name}". Initial state can't be undefined`)
+  if (initialState === undefined)
+    throwError(`Atom "${name}". Initial state can't be undefined`)
 
   const deps: Array<{ dep: v3.Atom; reducer: Reducer<any, any> }> = []
   const tree = new Tree(id)
@@ -94,7 +102,9 @@ export function declareAtom<TState>(
 
           if (state === undefined) {
             const idx = 1 + deps.findIndex((el) => el.reducer === reducer)
-            throwError(`Invalid state. Reducer number ${idx} in "${name}" atom returns undefined`)
+            throwError(
+              `Invalid state. Reducer number ${idx} in "${name}" atom returns undefined`,
+            )
           }
         }
       })
@@ -102,12 +112,20 @@ export function declareAtom<TState>(
 
     return state
   }, id as string)
-  ;(v3atom.__reatom.connectHooks = new Set()).add((ctx) => __onConnect(ctx, v3atom))
-  ;(v3atom.__reatom.disconnectHooks = new Set()).add((ctx) => __onDisconnect(ctx, v3atom))
+  ;(v3atom.__reatom.connectHooks = new Set()).add((ctx) =>
+    __onConnect(ctx, v3atom),
+  )
+  ;(v3atom.__reatom.disconnectHooks = new Set()).add((ctx) =>
+    __onDisconnect(ctx, v3atom),
+  )
   const initialPhase = true
 
-  function on<T>(dep: Unit | PayloadActionCreator<T>, reducer: Reducer<TState, T>) {
-    if (!initialPhase) throwError("Can't define dependencies after atom initialization")
+  function on<T>(
+    dep: Unit | PayloadActionCreator<T>,
+    reducer: Reducer<TState, T>,
+  ) {
+    if (!initialPhase)
+      throwError("Can't define dependencies after atom initialization")
 
     safetyFunc(reducer, 'reducer')
 
@@ -133,12 +151,18 @@ export function declareAtom<TState>(
 
   dependencyMatcher(on)
 
-  const atom = function atom(state: State = {}, action: Action<any> = initAction) {
+  const atom = function atom(
+    state: State = {},
+    action: Action<any> = initAction,
+  ) {
     const ctx = v3.createCtx()
 
     ctx.subscribe((logs) => {
       if (logs.length > 0) state = assign({}, state)
-      logs.forEach((patch) => patch.proto.isAction || (state[patch.proto.name!] = patch.state))
+      logs.forEach(
+        (patch) =>
+          patch.proto.isAction || (state[patch.proto.name!] = patch.state),
+      )
     })
 
     ctx.get(() => {
@@ -212,7 +236,10 @@ export function combine<T extends AtomsMap | TupleOfAtoms>(
   name: AtomName,
   shape: T,
 ): Atom<{ [key in keyof T]: T[key] extends Atom<infer S> ? S : never }>
-export function combine<T extends AtomsMap | TupleOfAtoms>(name: AtomName | T, shape?: T) {
+export function combine<T extends AtomsMap | TupleOfAtoms>(
+  name: AtomName | T,
+  shape?: T,
+) {
   if (arguments.length === 1) shape = name as T
 
   const isArray = Array.isArray(shape)
@@ -222,13 +249,19 @@ export function combine<T extends AtomsMap | TupleOfAtoms>(name: AtomName | T, s
 
   if (arguments.length === 1)
     name = isArray
-      ? Symbol(`[${keys.map((k) => getName(getTree((shape as TupleOfAtoms)[k as any]!).id)).join()}]`)
+      ? Symbol(
+          `[${keys
+            .map((k) => getName(getTree((shape as TupleOfAtoms)[k as any]!).id))
+            .join()}]`,
+        )
       : Symbol(`{${keys.map(getName).join()}}`)
 
   const atom = declareAtom(name as AtomName, isArray ? [] : {}, (on) =>
     keys.forEach((key) =>
       on((shape as any)[key], (state, payload) => {
-        const newState: any = isArray ? (state as any[]).slice(0) : assign({}, state)
+        const newState: any = isArray
+          ? (state as any[]).slice(0)
+          : assign({}, state)
         newState[key] = payload
         return newState
       }),
@@ -238,7 +271,9 @@ export function combine<T extends AtomsMap | TupleOfAtoms>(name: AtomName | T, s
   return atom
 }
 
-export function getDepsShape(thing: Atom<any>): AtomsMap | TupleOfAtoms | undefined {
+export function getDepsShape(
+  thing: Atom<any>,
+): AtomsMap | TupleOfAtoms | undefined {
   return thing[DEPS_SHAPE]
 }
 
@@ -249,7 +284,11 @@ export function v3toV1<T>(anAtom: v3.Atom<T>): Atom<T> {
   const name = (anAtom.__reatom.name ??= nameToId('atom') as string)
 
   // @ts-expect-error
-  const v1atom: Atom<T> = (anAtom.v1atom = declareAtom([name], null as any, (on) => []))
+  const v1atom: Atom<T> = (anAtom.v1atom = declareAtom(
+    [name],
+    null as any,
+    (on) => [],
+  ))
   v1atom.v3atom = anAtom
 
   return v1atom

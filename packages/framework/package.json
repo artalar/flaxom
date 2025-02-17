@@ -5,20 +5,12 @@
   "sideEffects": false,
   "description": "Reatom for framework",
   "source": "src/index.ts",
-  "exports": {
-    "types": "./build/index.d.ts",
-    "require": "./build/index.js",
-    "default": "./build/index.mjs"
-  },
+  "exports": { "types": "./build/index.d.ts", "require": "./build/index.js", "default": "./build/index.mjs" },
   "main": "build/index.js",
   "module": "build/index.mjs",
   "types": "build/index.d.ts",
-  "browserslist": [
-    "last 1 year"
-  ],
-  "minify": {
-    "mangle": false
-  },
+  "browserslist": ["last 1 year"],
+  "minify": { "mangle": false },
   "scripts": {
     "prepublishOnly": "npm run build",
     "build": "microbundle -f esm,cjs",
@@ -37,16 +29,8 @@
   },
   "author": "artalar",
   "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+ssh://git@github.com/artalar/reatom.git"
-  },
-  "bugs": {
-    "url": "https://github.com/artalar/reatom/issues"
-  },
+  "repository": { "type": "git", "url": "git+ssh://git@github.com/artalar/reatom.git" },
+  "bugs": { "url": "https://github.com/artalar/reatom/issues" },
   "homepage": "https://www.reatom.dev/package/framework",
-  "files": [
-    "/build",
-    "/package.json"
-  ]
+  "files": ["/build", "/package.json"]
 }

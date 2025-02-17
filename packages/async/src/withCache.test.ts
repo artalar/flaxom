@@ -160,7 +160,7 @@ test('withCache withAbort vary params', async () => {
 })
 
 test('withCache withAbort same params', async () => {
-  const effect = mockFn(async (ctx: any, n: number) => {
+  const effect = mockFn(async (ctx: AsyncCtx, n: number) => {
     ctx.controller.signal.throwIfAborted()
     return n
   })

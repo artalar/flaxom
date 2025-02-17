@@ -12,7 +12,10 @@ export type SetAtom<T> = PrimitiveAtomCreator<
 >
 
 let count = 0
-export function createSetAtom<T>(initState = new Set<T>(), options: AtomOptions<Set<T>> = `set${++count}`) {
+export function createSetAtom<T>(
+  initState = new Set<T>(),
+  options: AtomOptions<Set<T>> = `set${++count}`,
+) {
   type State = Set<T>
 
   return createPrimitiveAtom(
@@ -25,7 +28,8 @@ export function createSetAtom<T>(initState = new Set<T>(), options: AtomOptions<
         return newState
       },
       clear: (): State => new Set(),
-      change: (state, cb: (stateCopy: State) => State): State => cb(new Set(state)),
+      change: (state, cb: (stateCopy: State) => State): State =>
+        cb(new Set(state)),
     },
     options,
   )

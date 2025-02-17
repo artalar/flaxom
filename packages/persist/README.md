@@ -102,7 +102,7 @@ export const tokenAtom = atom('', 'tokenAtom').pipe(withLocalStorage('token'))
 
 ```ts
 // feature.test.ts
-import { it } from 'vitest'
+import { test } from 'vitest'
 import { createTestCtx } from '@reatom/testing'
 import { createMemStorage } from '@reatom/persist'
 import { withLocalStorage } from '@reatom/persist-web-storage'

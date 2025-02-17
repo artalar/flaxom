@@ -40,11 +40,16 @@ export function useAction<Args extends any[] = []>(
 ): (...args: Args) => void {
   const store = React.useContext(reatomContext)
 
-  return React.useCallback(bindActionCreator(store, actionCreator), deps.concat(store))
+  return React.useCallback(
+    bindActionCreator(store, actionCreator),
+    deps.concat(store),
+  )
 }
 
 type ActionCreators<T extends Rec = {}> = {
-  [K in keyof T]: T[K] extends (...a: infer Args) => Action ? (...args: Args) => void : never
+  [K in keyof T]: T[K] extends (...a: infer Args) => Action
+    ? (...args: Args) => void
+    : never
 }
 
 export function useAtom<T extends Atom>(
@@ -61,7 +66,10 @@ export function useAtom(atom: Atom, mapOrDeps?: Fn | any[], deps?: any[]) {
   if (typeof mapOrDeps === 'function') {
     deps ??= []
     // FIXME: rewrite to useState
-    atom = React.useMemo(() => createAtom({ origin }, ({ get }) => mapOrDeps(get(`origin`))), deps.concat(origin))
+    atom = React.useMemo(
+      () => createAtom({ origin }, ({ get }) => mapOrDeps(get(`origin`))),
+      deps.concat(origin),
+    )
   } else {
     deps = mapOrDeps ?? []
   }
@@ -87,7 +95,9 @@ export function useAtom(atom: Atom, mapOrDeps?: Fn | any[], deps?: any[]) {
   React.useEffect(() => {
     return store.subscribe(
       atom,
-      (newState) => Object.is(newState, lastRef.current) || setState((lastRef.current = newState)),
+      (newState) =>
+        Object.is(newState, lastRef.current) ||
+        setState((lastRef.current = newState)),
     )
   }, deps)
 

@@ -1,4 +1,13 @@
-import { action, Action, Atom, atom, AtomMut, Ctx, __count, AtomCache } from '@reatom/core'
+import {
+  action,
+  Action,
+  Atom,
+  atom,
+  AtomMut,
+  Ctx,
+  __count,
+  AtomCache,
+} from '@reatom/core'
 import { __thenReatomed } from '@reatom/effects'
 import { RecordAtom, reatomRecord } from '@reatom/primitives'
 import { isDeepEqual, noop, toAbortError } from '@reatom/utils'
@@ -43,7 +52,9 @@ export interface FieldActions<Value = any> {
   validate: Action<[], FieldValidation>
 }
 
-export interface FieldAtom<State = any, Value = State> extends AtomMut<State>, FieldActions<Value> {
+export interface FieldAtom<State = any, Value = State>
+  extends AtomMut<State>,
+    FieldActions<Value> {
   /** Atom of an object with all related focus statuses. */
   focusAtom: RecordAtom<FieldFocus>
 
@@ -173,9 +184,15 @@ export const reatomField = <State, Value>(
   interface This extends FieldAtom<State, Value> {}
   const fieldAtom = atom(initState, `${name}.fieldAtom`) as This
 
-  const valueAtom: This['valueAtom'] = atom((ctx) => fromState(ctx, ctx.spy(fieldAtom)), `${name}.valueAtom`)
+  const valueAtom: This['valueAtom'] = atom(
+    (ctx) => fromState(ctx, ctx.spy(fieldAtom)),
+    `${name}.valueAtom`,
+  )
 
-  const focusAtom: This['focusAtom'] = reatomRecord(fieldInitFocus, `${name}.focusAtom`)
+  const focusAtom: This['focusAtom'] = reatomRecord(
+    fieldInitFocus,
+    `${name}.focusAtom`,
+  )
   // @ts-expect-error
   focusAtom.__reatom.computer = (ctx, state: FieldFocus) => {
     const dirty = isDirty(ctx, ctx.spy(valueAtom), fromState(ctx, initState))
@@ -194,7 +211,10 @@ export const reatomField = <State, Value>(
     }
   }
 
-  const validateControllerAtom = atom(new AbortController(), `${name}.validateControllerAtom`)
+  const validateControllerAtom = atom(
+    new AbortController(),
+    `${name}.validateControllerAtom`,
+  )
   // prevent collisions for different contexts
   validateControllerAtom.__reatom.initState = () => new AbortController()
   const validate: This['validate'] = action((ctx) => {
@@ -204,7 +224,10 @@ export const reatomField = <State, Value>(
     if (!validateFn) return validationAtom.merge(ctx, { valid: true })
 
     ctx.get(validateControllerAtom).abort(toAbortError('concurrent'))
-    const controller = validateControllerAtom(ctx, ((ctx.cause as AbortableCause).controller = new AbortController()))
+    const controller = validateControllerAtom(
+      ctx,
+      ((ctx.cause as AbortableCause).controller = new AbortController()),
+    )
 
     const state = ctx.get(fieldAtom)
     const value = ctx.get(valueAtom)

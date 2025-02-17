@@ -1,4 +1,14 @@
-import { Action, atom, Atom, AtomCache, AtomState, Ctx, Fn, isAtom, throwReatomError } from '@reatom/core'
+import {
+  Action,
+  atom,
+  Atom,
+  AtomCache,
+  AtomState,
+  Ctx,
+  Fn,
+  isAtom,
+  throwReatomError,
+} from '@reatom/core'
 import { onCtxAbort } from '@reatom/effects'
 import { mapName } from './utils'
 import { type LensAtom, type LensAction } from './'
@@ -41,17 +51,30 @@ export const delay: {
 } = (options, name) => (anAtom: Atom) => {
   // listeners is a unique object for each atom instance
   const running = new WeakMap<AtomCache['listeners'], number>()
-  let { min: minOption, max: maxOption, leading = true, trailing = true, abortable = true } = options
+  let {
+    min: minOption,
+    max: maxOption,
+    leading = true,
+    trailing = true,
+    abortable = true,
+  } = options
 
-  throwReatomError(minOption === undefined && maxOption === undefined, 'wrong options')
+  throwReatomError(
+    minOption === undefined && maxOption === undefined,
+    'wrong options',
+  )
 
   minOption ??= maxOption
   maxOption ??= Number.MAX_SAFE_INTEGER
 
   name = mapName(anAtom, 'delay', name)
 
-  const minAtom = isAtom(minOption) ? minOption : atom(minOption, `${name}._minAtom`)
-  const maxAtom = isAtom(maxOption) ? maxOption : atom(maxOption, `${name}._maxAtom`)
+  const minAtom = isAtom(minOption)
+    ? minOption
+    : atom(minOption, `${name}._minAtom`)
+  const maxAtom = isAtom(maxOption)
+    ? maxOption
+    : atom(maxOption, `${name}._maxAtom`)
 
   // @ts-expect-error
   const theAtom: LensAtom & LensAction = atom((ctx, prevState?: any) => {
@@ -59,7 +82,11 @@ export const delay: {
     const max = ctx.get(maxAtom)
     const startsKey = ctx.cause.listeners
     const depState = ctx.spy(anAtom)
-    let state = ctx.cause.pubs.length ? prevState : proto.isAction ? [] : depState
+    let state = ctx.cause.pubs.length
+      ? prevState
+      : proto.isAction
+      ? []
+      : depState
 
     if (!ctx.cause.pubs.length) {
       state = proto.isAction ? [] : depState
@@ -120,7 +147,10 @@ export const debounce: {
   (min = 1, name) =>
   (anAtom) =>
     // @ts-expect-error
-    delay({ min, leading: false, trailing: true }, mapName(anAtom, 'debounce', name))(anAtom)
+    delay(
+      { min, leading: false, trailing: true },
+      mapName(anAtom, 'debounce', name),
+    )(anAtom)
 
 /** Skip updates by interval */
 export const throttle: {
@@ -138,4 +168,7 @@ export const throttle: {
   (max = 1, name) =>
   (anAtom) =>
     // @ts-expect-error
-    delay({ max, leading: true, trailing: false }, mapName(anAtom, 'throttle', name))(anAtom)
+    delay(
+      { max, leading: true, trailing: false },
+      mapName(anAtom, 'throttle', name),
+    )(anAtom)

@@ -22,11 +22,13 @@ test.skip('base', async () => {
     a2(ctx, 2)
   })
 
+  // expect(log.lastInput().changes).toEqual({ '2.a2': 2 })
   ctx.get((): void => {
     a2(ctx, 10)
     a2(ctx, 20)
   })
 
+  // expect(log.lastInput().changes).toEqual({ '1.a2': 10, '2.a2': 20 })
   ctx.get((): void => {
     let i = 0
     while (i++ < 10) a2(ctx, i)
@@ -47,6 +49,7 @@ test.skip('base', async () => {
 })
 
 test.skip('cause', async () => {
+  // should correct calculate cause for complex async transactions
   const doAsync = action(
     (ctx, v) => ctx.schedule(() => Promise.resolve(v)),
     'doAsync',

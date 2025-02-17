@@ -29,8 +29,14 @@ const reatomNotification = (message: string, kind: string): Notification => {
     resetProgress: false,
     delayMultiplier: 1,
   })
-  const remains = atom((ctx) => (1 - ctx.spy(timer.progressAtom)) * 100, `${name}._remains`)
-  const readed = atom((ctx) => ctx.spy(remains) === 0 || ctx.spy(timer) === 0, `${name}.readed`)
+  const remains = atom(
+    (ctx) => (1 - ctx.spy(timer.progressAtom)) * 100,
+    `${name}._remains`,
+  )
+  const readed = atom(
+    (ctx) => ctx.spy(remains) === 0 || ctx.spy(timer) === 0,
+    `${name}.readed`,
+  )
   const remove = action(timer.stopTimer, `${name}.remove`)
   timer.endTimer.onCall(async (ctx) => {
     await sleep(HIDE_DELAY)

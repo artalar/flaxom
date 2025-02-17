@@ -1,4 +1,16 @@
-import { Atom, AtomMut, Ctx, CtxSpy, Fn, __count, action, atom, isAction, isAtom, throwReatomError } from '@reatom/core'
+import {
+  Atom,
+  AtomMut,
+  Ctx,
+  CtxSpy,
+  Fn,
+  __count,
+  action,
+  atom,
+  isAction,
+  isAtom,
+  throwReatomError,
+} from '@reatom/core'
 import { Binded, bind } from '@reatom/lens'
 import { App, ref, Ref, onScopeDispose, inject } from 'vue'
 
@@ -38,14 +50,19 @@ export const reatomRef = ((target: any, ctx = useCtx()) => {
 }
 
 const binder = (ctx: Ctx, fn: Fn) => bind(ctx, fn)
-export const useCtxBinder = (ctx = useCtx()): (<T extends Fn>(fn: T) => Binded<T>) => bind(ctx, binder)
+export const useCtxBinder = (
+  ctx = useCtx(),
+): (<T extends Fn>(fn: T) => Binded<T>) => bind(ctx, binder)
 
 interface UseActionConfig {
   name?: string
   ctx?: Ctx
 }
 
-export const useAction = <T extends Fn<[Ctx, ...Array<any>]>>(fn: T, config: string | UseActionConfig = {}) => {
+export const useAction = <T extends Fn<[Ctx, ...Array<any>]>>(
+  fn: T,
+  config: string | UseActionConfig = {},
+) => {
   if (typeof config === 'string') config = { name: config }
 
   return bind(

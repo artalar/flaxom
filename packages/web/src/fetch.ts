@@ -2,9 +2,14 @@
 
 // TODO https://github.com/unjs/ofetch
 
-export type UrlSearchParamsInit = ConstructorParameters<typeof URLSearchParams>[0]
+export type UrlSearchParamsInit = ConstructorParameters<
+  typeof URLSearchParams
+>[0]
 
-export interface FetchRequestInit<Result = unknown, Params extends any[] = any[]> extends RequestInit {
+export interface FetchRequestInit<
+  Result = unknown,
+  Params extends any[] = any[],
+> extends RequestInit {
   url?: string | URL
   origin?: string
   transport?: typeof globalThis.fetch
@@ -15,7 +20,10 @@ export interface FetchRequestInit<Result = unknown, Params extends any[] = any[]
   getResult?: (response: Response) => Result | Promise<Result>
 }
 
-export class FetchRequest<Result = unknown, Params extends any[] = any[]> extends Request {
+export class FetchRequest<
+  Result = unknown,
+  Params extends any[] = any[],
+> extends Request {
   static defaults = {
     origin: globalThis.location?.toString(),
 
@@ -33,7 +41,9 @@ export class FetchRequest<Result = unknown, Params extends any[] = any[]> extend
       const ct = response.headers.get('Content-Type')
 
       if (ct !== 'application/json') {
-        throw new Error(`Expected Content-Type to be "application/json", got "${ct}"`)
+        throw new Error(
+          `Expected Content-Type to be "application/json", got "${ct}"`,
+        )
       }
 
       return response.json()
@@ -60,7 +70,9 @@ export class FetchRequest<Result = unknown, Params extends any[] = any[]> extend
     return new this.__proto__.constructor(this.init)
   }
 
-  extends<Res = Result, P extends any[] = Params>(init: FetchRequestInit<Res, P>): FetchRequest<Res, P> {
+  extends<Res = Result, P extends any[] = Params>(
+    init: FetchRequestInit<Res, P>,
+  ): FetchRequest<Res, P> {
     return new FetchRequest<Res, P>({
       ...this.init,
       ...init,
@@ -79,7 +91,10 @@ export class FetchRequest<Result = unknown, Params extends any[] = any[]> extend
     }
 
     init.body =
-      body && typeof body === 'object' && Reflect.getPrototypeOf(body) && !Array.isArray(body)
+      body &&
+      typeof body === 'object' &&
+      Reflect.getPrototypeOf(body) &&
+      !Array.isArray(body)
         ? (body as BodyInit)
         : JSON.stringify(body)
 

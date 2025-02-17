@@ -854,7 +854,7 @@ onDisconnect(myResource, myResource.reset)
 [source](https://github.com/artalar/reatom/blob/v3/packages/async/src/index.story.test.ts)
 
 ```ts
-import { describe, it, expect } from 'vitest'
+import { describe, test, expect } from 'vitest'
 import { createTestCtx } from '@reatom/testing'
 import { atom } from '@reatom/core'
 import { onConnect } from '@reatom/hooks'

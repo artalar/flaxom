@@ -6,7 +6,8 @@ export const logGraph = (logsSet: Set<AtomCache>) => {
     if (
       patch.cause &&
       patch.cause.proto !== __root &&
-      (!patch.cause.proto.name!.startsWith('_') || !patch.cause.proto.name!.includes('._')) &&
+      (!patch.cause.proto.name!.startsWith('_') ||
+        !patch.cause.proto.name!.includes('._')) &&
       !logsSet.has(patch.cause) &&
       !visited.has(patch.cause)
     ) {
@@ -20,7 +21,8 @@ export const logGraph = (logsSet: Set<AtomCache>) => {
   const xGap = r * 2
   const yGap = r * 3
   const maxDistance = logs.reduce(
-    (acc, patch, i) => Math.max(acc, i - ((patch.cause && logs.indexOf(patch.cause)) ?? i)),
+    (acc, patch, i) =>
+      Math.max(acc, i - ((patch.cause && logs.indexOf(patch.cause)) ?? i)),
     0,
   )
   const shiftRatio = maxDistance * xGap
@@ -34,9 +36,15 @@ export const logGraph = (logsSet: Set<AtomCache>) => {
   for (const patch of logs) {
     // if (!patch.cause) continue;
     const { isAction, name } = patch.proto
-    const color = isAction ? (name!.endsWith('.onFulfill') ? '#E6DC73' : '#ffff80') : '#151134'
+    const color = isAction
+      ? name!.endsWith('.onFulfill')
+        ? '#E6DC73'
+        : '#ffff80'
+      : '#151134'
     body += `<circle cx="${x}" cy="${y}" r="${r}" fill="${color}" />`
-    body += `<text x="${x + r * 1.5}" y="${y + r / 2}" font-size="${r}" fill="gray">${name}</text>`
+    body += `<text x="${x + r * 1.5}" y="${
+      y + r / 2
+    }" font-size="${r}" fill="gray">${name}</text>`
     y += yGap
     width = Math.max(width, x + name!.length * r)
   }

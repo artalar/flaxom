@@ -18,7 +18,9 @@ type Routes<T extends RoutesScheme | string> = T extends ''
   ? never
   : RouteAtom & {
       routes: {
-        [K in keyof T as K extends `${infer K}/${string}` ? K : K]: K extends `${string}/:${infer Param}`
+        [K in keyof T as K extends `${infer K}/${string}`
+          ? K
+          : K]: K extends `${string}/:${infer Param}`
           ? // @ts-ignore
             Routes<Record<Param, T[K]>> & { param: Atom<string> }
           : // @ts-ignore
@@ -26,7 +28,10 @@ type Routes<T extends RoutesScheme | string> = T extends ''
       }
     }
 
-export const unstable_reatomRoutes = <T extends RoutesScheme>(base: string, routes: T): Routes<T> => {
+export const unstable_reatomRoutes = <T extends RoutesScheme>(
+  base: string,
+  routes: T,
+): Routes<T> => {
   const path = parsePath(base)
   const routeAtom = atom((ctx) =>
     // TODO tests
@@ -37,7 +42,9 @@ export const unstable_reatomRoutes = <T extends RoutesScheme>(base: string, rout
     go: action((ctx) => historyAtom.push(ctx, base)),
     routes: Object.keys(routes).reduce((acc, key) => {
       const nextIdx = key.indexOf('/')
-      const subRoutes = (typeof routes[key] === 'object' ? routes[key] : {}) as Rec
+      const subRoutes = (
+        typeof routes[key] === 'object' ? routes[key] : {}
+      ) as Rec
       let isDynamic = false
 
       if ((isDynamic = key.startsWith(':'))) {
@@ -49,7 +56,10 @@ export const unstable_reatomRoutes = <T extends RoutesScheme>(base: string, rout
         key = key.slice(0, nextIdx)
       }
 
-      const routeAtom = (acc[key] = unstable_reatomRoutes(`${base === '/' ? '' : base}/${key}`, subRoutes))
+      const routeAtom = (acc[key] = unstable_reatomRoutes(
+        `${base === '/' ? '' : base}/${key}`,
+        subRoutes,
+      ))
 
       if (isDynamic) {
         console.log({ isDynamic, base })

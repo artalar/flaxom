@@ -13,7 +13,10 @@ export const reatomBoolean = (init = false, name?: string): BooleanAtom =>
     withAssign((target, name) => ({
       toggle: action((ctx) => target(ctx, (prev) => !prev), `${name}.toggle`),
       setTrue: action((ctx) => target(ctx, true) as true, `${name}.setTrue`),
-      setFalse: action((ctx) => target(ctx, false) as false, `${name}.setFalse`),
+      setFalse: action(
+        (ctx) => target(ctx, false) as false,
+        `${name}.setFalse`,
+      ),
       reset: action((ctx) => target(ctx, init), `${name}.reset`),
     })),
   )
