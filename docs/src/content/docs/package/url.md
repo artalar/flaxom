@@ -37,7 +37,9 @@ In the code below `filtersAtom` is a mutable atom which changes will be synced w
 import { reatomNumber } from '@reatom/primitives'
 import { withSearchParamsPersist } from '@reatom/url'
 
-export const pageAtom = reatomNumber(0, 'pageAtom').pipe(withSearchParamsPersist('page', (page = '0') => Number(page)))
+export const pageAtom = reatomNumber(0, 'pageAtom').pipe(
+  withSearchParamsPersist('page', (page = '0') => Number(page)),
+)
 //...
 pageAtom.increment(ctx)
 ctx.get(urlAtom).href // http://example.com/?page=1
@@ -80,7 +82,6 @@ urlAtom.go('/list')
 filtersAtom(ctx, 'some')
 ctx.get(urlAtom).href // http://example.com/list?filters=some
 
-
 urlAtom.go('/list/123')
 ctx.get(urlAtom).href // http://example.com/list/123?filters=some
 urlAtom.go('/list')
@@ -108,7 +109,11 @@ export interface SearchParamsAtom extends Atom<Rec<string>> {
   set: Action<[key: string, value: string, replace?: boolean], void>
   del: Action<[key: string, replace?: boolean], void>
   /** create AtomMut which will synced with the specified query parameter */
-  lens<T = string>(key: string, parse?: (value?: string) => T, serialize?: (value: T) => undefined | string): AtomMut<T>
+  lens<T = string>(
+    key: string,
+    parse?: (value?: string) => T,
+    serialize?: (value: T) => undefined | string,
+  ): AtomMut<T>
   /** create AtomMut which will synced with the specified query parameter */
   lens<T = string>(
     key: string,
@@ -170,7 +175,8 @@ export const RouterSync = () => {
     setupRef.current = true
     urlAtom.settingsAtom(ctx, {
       init: () => new URL(location.href),
-      sync: (_ctx, url, replace) => navigate(url.pathname + url.search, { replace }),
+      sync: (_ctx, url, replace) =>
+        navigate(url.pathname + url.search, { replace }),
     })
     // trigger `onChange` hooks.
     urlAtom(ctx, new URL(location.href))

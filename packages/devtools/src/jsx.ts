@@ -10,4 +10,6 @@ export const ROOT = CONTAINER.attachShadow({ mode: 'open' })
 
 export const ctx = createCtx()
 
-export const { h, hf, mount } = reatomJsx(ctx, undefined, { stylesheetContainer: ROOT })
+export const { h, hf, mount } = reatomJsx(ctx, undefined, {
+  stylesheetContainer: ROOT,
+})

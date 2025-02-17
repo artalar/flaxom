@@ -1,6 +1,6 @@
 import { Action, action, atom, Atom, AtomMut, Ctx } from '@reatom/core'
 import { withAssign } from './withAssign'
- 
+
 export interface SetAtom<T> extends AtomMut<Set<T>> {
   add: Action<[el: T], Set<T>>
   delete: Action<[el: T], Set<T>>
@@ -101,6 +101,6 @@ export const reatomSet = <T>(
       isDisjointFrom: (ctx: Ctx, set: Set<T>) =>
         (ctx.get(target) as ProposalSet<T>).isDisjointFrom(set),
       size: (ctx: Ctx) => ctx.get(target).size,
-      sizeAtom: atom(ctx =>  ctx.spy(target).size, `${name}.size`),
+      sizeAtom: atom((ctx) => ctx.spy(target).size, `${name}.size`),
     })),
   )

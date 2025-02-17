@@ -13,7 +13,10 @@ test('should return value', () => {
 
   assert.is(parseAtoms(ctx, 'some bare value'), 'some bare value')
   assert.is(parseAtoms(ctx, 10), 10)
-  assert.is(parseAtoms(ctx, Symbol.for('specialSymbol')), Symbol.for('specialSymbol'))
+  assert.is(
+    parseAtoms(ctx, Symbol.for('specialSymbol')),
+    Symbol.for('specialSymbol'),
+  )
 })
 
 test('should parse deep atoms', () => {
@@ -137,7 +140,9 @@ test('should parse mixed values', () => {
 test('should parse deep structures', () => {
   const ctx = createTestCtx()
 
-  assert.equal(parseAtoms(ctx, [[[[[atom('deepStruct')]]]]]), [[[[['deepStruct']]]]])
+  assert.equal(parseAtoms(ctx, [[[[[atom('deepStruct')]]]]]), [
+    [[[['deepStruct']]]],
+  ])
 })
 
 test('should parse linked list as array', () => {
@@ -197,7 +202,10 @@ test('should ignore constructor', () => {
 
   const constructObject = new AbortController()
 
-  assert.is(parseAtoms(ctx, { constructObject }).constructObject, constructObject)
+  assert.is(
+    parseAtoms(ctx, { constructObject }).constructObject,
+    constructObject,
+  )
 })
 
 test.run()

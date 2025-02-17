@@ -74,10 +74,11 @@ try {
   isBroadcastChannelAvailable = false
 }
 
-export const withBroadcastChannel: WithPersistWebStorage = isBroadcastChannelAvailable
-  ? /*#__PURE__*/ reatomPersistBroadcastChannel(
-      new BroadcastChannel('reatom_withBroadcastChannel_default'),
-    )
-  : /*#__PURE__*/ reatomPersist(
-      createMemStorage({ name: 'withBroadcastChannel' }),
-    )
+export const withBroadcastChannel: WithPersistWebStorage =
+  isBroadcastChannelAvailable
+    ? /*#__PURE__*/ reatomPersistBroadcastChannel(
+        new BroadcastChannel('reatom_withBroadcastChannel_default'),
+      )
+    : /*#__PURE__*/ reatomPersist(
+        createMemStorage({ name: 'withBroadcastChannel' }),
+      )

@@ -91,4 +91,6 @@ export const withSessionStorage: WithPersistWebStorage = isWebStorageAvailable
       'withSessionStorage',
       globalThis.sessionStorage,
     )
-  : /*#__PURE__*/ reatomPersist(createMemStorage({ name: 'withSessionStorage' }))
+  : /*#__PURE__*/ reatomPersist(
+      createMemStorage({ name: 'withSessionStorage' }),
+    )

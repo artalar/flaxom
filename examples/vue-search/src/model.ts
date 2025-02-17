@@ -14,7 +14,9 @@ import {
 import { withSearchParamsPersist } from '@reatom/url'
 import { withLocalStorage } from '@reatom/persist-web-storage'
 
-export const searchAtom = atom('', 'searchAtom').pipe(withSearchParamsPersist('search'))
+export const searchAtom = atom('', 'searchAtom').pipe(
+  withSearchParamsPersist('search'),
+)
 
 export const pageAtom = atom(1, 'pageAtom').pipe(
   // reset the state on other filters change
@@ -26,7 +28,10 @@ export const pageAtom = atom(1, 'pageAtom').pipe(
   withSearchParamsPersist('page', (page) => Number(page || 1)),
   withAssign((target, name) => ({
     next: action((ctx) => target(ctx, (page) => page + 1), `${name}.next`),
-    prev: action((ctx) => target(ctx, (page) => Math.max(1, page - 1)), `${name}.prev`),
+    prev: action(
+      (ctx) => target(ctx, (page) => Math.max(1, page - 1)),
+      `${name}.prev`,
+    ),
   })),
 )
 

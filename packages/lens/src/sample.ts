@@ -8,7 +8,10 @@ import { type LensAtom, type LensAction } from './'
 // @ts-expect-error
 export const sample: {
   // TODO for some reason an atom not handled by overloads, if an action overload is first
-  <T extends Atom>(signal: Atom, name?: string): Fn<
+  <T extends Atom>(
+    signal: Atom,
+    name?: string,
+  ): Fn<
     [T],
     T extends Action<infer Params, infer Payload>
       ? LensAction<[], Payload>

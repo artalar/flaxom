@@ -3,7 +3,14 @@ import { createTestCtx, mockFn } from '@reatom/testing'
 import { atom } from '@reatom/core'
 import { noop, sleep } from '@reatom/utils'
 import { isConnected, onConnect, onDisconnect, withInit } from '@reatom/hooks'
-import { reatomAsync, withAbort, withCache, withDataAtom, withErrorAtom, withRetry } from '.'
+import {
+  reatomAsync,
+  withAbort,
+  withCache,
+  withDataAtom,
+  withErrorAtom,
+  withRetry,
+} from '.'
 import { reatomResource } from './reatomResource'
 import { take } from '@reatom/effects'
 
