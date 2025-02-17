@@ -2,7 +2,13 @@ import { test } from 'uvu'
 import * as assert from 'uvu/assert'
 import { createTestCtx, mockFn } from '@reatom/testing'
 
-import { searchParamsAtom, setupUrlAtomSettings, updateFromSource, urlAtom, withSearchParamsPersist } from './'
+import {
+  searchParamsAtom,
+  setupUrlAtomSettings,
+  updateFromSource,
+  urlAtom,
+  withSearchParamsPersist,
+} from './'
 import { atom } from '@reatom/core'
 
 test('direct updateFromSource call should be ignored', async () => {
@@ -125,7 +131,8 @@ test('SearchParamsAtom remove query from url', () => {
   const testAtom = atom<number | undefined>(undefined).pipe(
     withSearchParamsPersist('test', {
       parse: (value) => (value === undefined ? undefined : Number(value)),
-      serialize: (value) => (value === undefined ? undefined : value.toString()),
+      serialize: (value) =>
+        value === undefined ? undefined : value.toString(),
     }),
   )
 

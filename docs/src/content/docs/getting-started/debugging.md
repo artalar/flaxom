@@ -46,7 +46,10 @@ if (import.meta.env.DEV) {
 
 const counterAtom = atom(0, 'counterAtom')
 const doubledAtom = atom((ctx) => counterAtom * 2, 'doubledAtom')
-const increment = action((ctx) => counterAtom(ctx, (state) => state + 1), 'increment')
+const increment = action(
+  (ctx) => counterAtom(ctx, (state) => state + 1),
+  'increment',
+)
 
 ctx.subscribe(doubledAtom, () => {})
 

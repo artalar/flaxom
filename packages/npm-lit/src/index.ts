@@ -36,7 +36,9 @@ export const withReatom = <T extends Constructor<LitElement>>(
     private unsub?: Unsubscribe
     private deps: Array<Atom> = []
     private depsListAtom = atom<Array<Atom>>([])
-    private depsTrackAtom = atom((ctx) => ctx.spy(this.depsListAtom).map(ctx.spy))
+    private depsTrackAtom = atom((ctx) =>
+      ctx.spy(this.depsListAtom).map(ctx.spy),
+    )
     ctx?: CtxSpy
 
     private tryConnectCtx() {

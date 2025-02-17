@@ -12,12 +12,19 @@ export interface ArrayAtom<T> extends AtomMut<Array<T>> {
   unshift: Action<[...items: T[]], number>
 }
 
-export const reatomArray = <T>(initState = [] as T[], name?: string): ArrayAtom<T> =>
+export const reatomArray = <T>(
+  initState = [] as T[],
+  name?: string,
+): ArrayAtom<T> =>
   atom(initState, name).pipe(
     withAssign((target, name) => ({
-      toReversed: action((ctx) => target(ctx, (prev) => prev.slice().reverse()), `${name}.toReversed`),
+      toReversed: action(
+        (ctx) => target(ctx, (prev) => prev.slice().reverse()),
+        `${name}.toReversed`,
+      ),
       toSorted: action(
-        (ctx, compareFn?: (a: T, b: T) => number) => target(ctx, (prev) => prev.slice().sort(compareFn)),
+        (ctx, compareFn?: (a: T, b: T) => number) =>
+          target(ctx, (prev) => prev.slice().sort(compareFn)),
         `${name}.toSorted`,
       ),
       toSpliced: action(
@@ -40,33 +47,32 @@ export const reatomArray = <T>(initState = [] as T[], name?: string): ArrayAtom<
         `${name}.with`,
       ),
       push: action((ctx, ...items: T[]) => {
-        const arrCopy = ctx.get(target).slice();
-        const pushed = arrCopy.push(...items);
-        target(ctx, arrCopy);
+        const arrCopy = ctx.get(target).slice()
+        const pushed = arrCopy.push(...items)
+        target(ctx, arrCopy)
 
-        return pushed;
+        return pushed
       }, `${name}.push`),
       pop: action((ctx) => {
-        const arrCopy = ctx.get(target).slice();
-        const popped = arrCopy.pop();
-        target(ctx, arrCopy);
+        const arrCopy = ctx.get(target).slice()
+        const popped = arrCopy.pop()
+        target(ctx, arrCopy)
 
-        return popped;
+        return popped
       }, `${name}.pop`),
       shift: action((ctx) => {
-        const arrCopy = ctx.get(target).slice();
-        const shifted = arrCopy.shift();
-        target(ctx, arrCopy);
+        const arrCopy = ctx.get(target).slice()
+        const shifted = arrCopy.shift()
+        target(ctx, arrCopy)
 
-        return shifted;
+        return shifted
       }, `${name}.shift`),
       unshift: action((ctx, ...items: T[]) => {
-        const arrCopy = ctx.get(target).slice();
-        const unshifted = arrCopy.unshift(...items);
-        target(ctx, arrCopy);
-        
-        return unshifted;
-      }, `${name}.unshift`),
+        const arrCopy = ctx.get(target).slice()
+        const unshifted = arrCopy.unshift(...items)
+        target(ctx, arrCopy)
 
+        return unshifted
+      }, `${name}.unshift`),
     })),
   )

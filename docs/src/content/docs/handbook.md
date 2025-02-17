@@ -219,7 +219,9 @@ export const submit = action(async (ctx, event) => {
   const body = new FormData()
   body.append('name', name)
 
-  const response = await ctx.schedule(() => fetch('/api/submit', { method: 'POST', body: body }))
+  const response = await ctx.schedule(() =>
+    fetch('/api/submit', { method: 'POST', body: body }),
+  )
   if (response.ok) {
     nameAtom(ctx, '')
     alert('You are logged in')
@@ -266,7 +268,10 @@ export const pageAtom = atom(1, 'pageAtom').pipe(
 export const issuesReaction = reatomResource(async (ctx) => {
   const page = ctx.spy(pageAtom)
   return await ctx.schedule(() =>
-    request<IssuesResponse>(`https://api.github.com/search/issues?q=reatom&page=${page}&per_page=10`, ctx.controller),
+    request<IssuesResponse>(
+      `https://api.github.com/search/issues?q=reatom&page=${page}&per_page=10`,
+      ctx.controller,
+    ),
   )
 }, 'issuesReaction').pipe(withDataAtom({ items: [] }))
 

@@ -6,7 +6,11 @@ import { reatomMap } from './reatomMap'
 
 const test = suite('reatomMap')
 
-const defaultMapEntries: readonly [string, number][] = [['a', 1], ['b', 2], ['c', 3]] ;
+const defaultMapEntries: readonly [string, number][] = [
+  ['a', 1],
+  ['b', 2],
+  ['c', 3],
+]
 
 test(`reatomMap. init`, () => {
   const ctx = createCtx()
@@ -38,7 +42,6 @@ test(`reatomMap. has`, () => {
   const ctx = createCtx()
 
   const mapAtom = reatomMap(new Map(defaultMapEntries))
-
 
   assert.equal(mapAtom.has(ctx, 'a'), true)
 })

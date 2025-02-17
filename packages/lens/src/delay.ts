@@ -39,7 +39,10 @@ export interface DelayOptions {
 /** Flexible updates delayer */
 export const delay: {
   // TODO for some reason an atom not handled by overloads, if an action overload is first
-  <T extends Atom>(options: DelayOptions, name?: string): Fn<
+  <T extends Atom>(
+    options: DelayOptions,
+    name?: string,
+  ): Fn<
     [T],
     T extends Action<infer Params, infer Payload>
       ? LensAction<Params, Payload>
@@ -131,7 +134,10 @@ export const delay: {
 /** Delay updates by timeout */
 export const debounce: {
   // TODO for some reason an atom not handled by overloads, if an action overload is first
-  <T extends Atom>(wait: DelayOptions['min'], name?: string): Fn<
+  <T extends Atom>(
+    wait: DelayOptions['min'],
+    name?: string,
+  ): Fn<
     [T],
     T extends Action<infer Params, infer Payload>
       ? LensAction<Params, Payload>
@@ -149,7 +155,10 @@ export const debounce: {
 /** Skip updates by interval */
 export const throttle: {
   // TODO for some reason an atom not handled by overloads, if an action overload is first
-  <T extends Atom>(wait: DelayOptions['max'], name?: string): Fn<
+  <T extends Atom>(
+    wait: DelayOptions['max'],
+    name?: string,
+  ): Fn<
     [T],
     T extends Action<infer Params, infer Payload>
       ? LensAction<Params, Payload>

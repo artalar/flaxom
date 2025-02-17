@@ -14,7 +14,9 @@ import {
 } from '@reatom/core'
 import { createMemStorage } from '@reatom/persist'
 
-export function mockFn<I extends any[], O>(fn: (...input: I) => O = (...i: any) => void 0 as any) {
+export function mockFn<I extends any[], O>(
+  fn: (...input: I) => O = (...i: any) => void 0 as any,
+) {
   const _fn = Object.assign(
     function (...i: I) {
       try {
@@ -58,7 +60,10 @@ export const getDuration = async (cb: () => void) => {
 export interface TestCtx extends Ctx {
   mock<T>(anAtom: Atom<T>, fallback: T): Unsubscribe
 
-  mockAction<I extends any[], O>(anAction: Action<I, O>, cb: Fn<[Ctx, ...I], O>): Unsubscribe
+  mockAction<I extends any[], O>(
+    anAction: Action<I, O>,
+    cb: Fn<[Ctx, ...I], O>,
+  ): Unsubscribe
 
   subscribeTrack<T, F extends Fn<[T]>>(
     anAtom: Atom<T>,
@@ -144,7 +149,10 @@ export const createTestCtx = (options?: CtxOptions): TestCtx => {
         mocks.delete(proto)
       }
     },
-    mockAction<I extends any[], O>(anAction: Action<I, O>, cb: Fn<[Ctx, ...I], O>) {
+    mockAction<I extends any[], O>(
+      anAction: Action<I, O>,
+      cb: Fn<[Ctx, ...I], O>,
+    ) {
       const proto = anAction.__reatom
 
       throwReatomError(!proto.isAction, 'action expected')
@@ -157,4 +165,5 @@ export const createTestCtx = (options?: CtxOptions): TestCtx => {
 }
 
 /** @deprecated use `createMemStorage` fromm `@reatom/persist` instead */
-export const createMockStorage = (snapshot?: Rec) => createMemStorage({ name: 'test', snapshot })
+export const createMockStorage = (snapshot?: Rec) =>
+  createMemStorage({ name: 'test', snapshot })

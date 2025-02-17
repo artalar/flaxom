@@ -9,7 +9,7 @@ export const brands = reatomResource(async (ctx) => {
   return await ctx.schedule(() => fetchBrandsByCategory(categoryState))
 }, "brands").pipe(withDataAtom([]))
 export const brand = atom("", "brand").pipe(
-  withComputed((ctx) => ctx.spy(brands.dataAtom)[0]?.value ?? "")
+  withComputed((ctx) => ctx.spy(brands.dataAtom)[0]?.value ?? ""),
 )
 
 export const models = reatomResource(async (ctx) => {
@@ -19,7 +19,7 @@ export const models = reatomResource(async (ctx) => {
   return await ctx.schedule(() => fetchModelsByBrand(brandState))
 }, "models").pipe(withDataAtom([]))
 export const model = atom("", "model").pipe(
-  withComputed((ctx) => ctx.spy(models.dataAtom)[0]?.value ?? "")
+  withComputed((ctx) => ctx.spy(models.dataAtom)[0]?.value ?? ""),
 )
 
 export const year = atom(2024, "year")

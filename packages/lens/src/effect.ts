@@ -49,43 +49,50 @@ export const effect: {
   const { isAction } = anAtom.__reatom
   // TODO better error handling
   // @ts-expect-error
-  const theAtom: LensEffect = atom((ctx, state = []) => {
-    const resolve = (params: any[], payload: any) =>
-      ctx.get((read, acualize) => {
-        if (payload instanceof Promise) {
-          payload.then((payload) => resolve(params, payload))
+  const theAtom: LensEffect = atom(
+    (ctx, state = []) => {
+      const resolve = (params: any[], payload: any) =>
+        ctx.get((read, acualize) => {
+          if (payload instanceof Promise) {
+            payload.then((payload) => resolve(params, payload))
+          } else {
+            acualize!(
+              ctx,
+              ctx.cause.proto,
+              (patchCtx: Ctx, patch: AtomCache) => {
+                patch.state = [{ params, payload }]
+              },
+            )
+          }
+        })
+
+      ctx.spy(anAtom, (value) => {
+        if (isAction && value.payload instanceof Promise) {
+          __thenReatomed(ctx, value.payload, (payload) =>
+            ctx.schedule(() =>
+              resolve(
+                [{ params: value.params, payload }],
+                fn(ctx, payload, value.params),
+              ),
+            ),
+          )
         } else {
-          acualize!(ctx, ctx.cause.proto, (patchCtx: Ctx, patch: AtomCache) => {
-            patch.state = [{ params, payload }]
-          })
+          ctx.schedule(() =>
+            resolve(
+              [value],
+              isAction ? fn(ctx, value.payload, value.params) : fn(ctx, value),
+            ),
+          )
         }
       })
 
-    ctx.spy(anAtom, (value) => {
-      if (isAction && value.payload instanceof Promise) {
-        __thenReatomed(ctx, value.payload, (payload) =>
-          ctx.schedule(() =>
-            resolve(
-              [{ params: value.params, payload }],
-              fn(ctx, payload, value.params),
-            ),
-          ),
-        )
-      } else {
-        ctx.schedule(() =>
-          resolve(
-            [value],
-            isAction ? fn(ctx, value.payload, value.params) : fn(ctx, value),
-          ),
-        )
-      }
-    })
+      // @ts-expect-error we don't need `spy` anymore
+      ctx.spy = undefined
 
-    // @ts-expect-error we don't need `spy` anymore
-    ctx.spy = undefined
-
-    return state ?? []
-  }, mapName(anAtom, 'effect', name))
+      return state ?? []
+    },
+    mapName(anAtom, 'effect', name),
+  )
   theAtom.__reatom.isAction = true
   theAtom.deps = [anAtom]
   theAtom.unstable_unhook = onUpdate(theAtom, noop)

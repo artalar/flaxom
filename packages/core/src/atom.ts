@@ -6,7 +6,16 @@ export interface Fn<Args extends any[] = any[], Return = any> {
   (...a: Args): Return
 }
 
-export type AllTypes = undefined | null | boolean | number | string | Record<keyof any, any> | Fn | symbol | bigint
+export type AllTypes =
+  | undefined
+  | null
+  | boolean
+  | number
+  | string
+  | Record<keyof any, any>
+  | Fn
+  | symbol
+  | bigint
 
 export interface Pipe<This> {
   <T1>(operator1: Fn<[This], T1>): T1
@@ -29,7 +38,10 @@ export interface Pipe<This> {
 
 const impossibleValue: any = Symbol()
 
-export const callSafely = <I extends any[], O>(fn: (...a: I) => O, ...args: I): O | Error => {
+export const callSafely = <I extends any[], O>(
+  fn: (...a: I) => O,
+  ...args: I
+): O | Error => {
   try {
     return fn(...args)
   } catch (err: any) {
@@ -70,7 +82,10 @@ export interface Ctx {
     <T>(atom: Atom<T>, cb: Fn<[newState: T, prevState: undefined | T]>): void
   }
 
-  schedule<T = void>(cb: Fn<[Ctx], T>, step?: -1 | 0 | 1 | 2): Promise<Awaited<T>>
+  schedule<T = void>(
+    cb: Fn<[Ctx], T>,
+    step?: -1 | 0 | 1 | 2,
+  ): Promise<Awaited<T>>
 
   subscribe<T>(atom: Atom<T>, cb: Fn<[T]>): Unsubscribe
   subscribe(cb: Fn<[patches: Logs, error?: Error]>): Unsubscribe
@@ -130,20 +145,29 @@ export interface Action<Params extends any[] = any[], Payload = any>
   extends Atom<Array<{ params: Params; payload: Payload }>> {
   (ctx: Ctx, ...params: Params): Payload
 
-  onCall: (cb: (ctx: Ctx, payload: Payload, params: Params) => any) => Unsubscribe
+  onCall: (
+    cb: (ctx: Ctx, payload: Payload, params: Params) => any,
+  ) => Unsubscribe
 }
 
 export type AtomState<T> = T extends Atom<infer State> ? State : never
 
-export type ActionParams<T> = T extends Action<infer Params, any> ? Params : never
-export type ActionPayload<T> = T extends Action<any, infer Payload> ? Payload : never
+export type ActionParams<T> = T extends Action<infer Params, any>
+  ? Params
+  : never
+export type ActionPayload<T> = T extends Action<any, infer Payload>
+  ? Payload
+  : never
 
 type DefinitelyReturnType<T> = T extends Fn<any[], infer T> ? T : never
-export type IsAction<T> = T extends Fn & Atom<infer State extends Array<{ payload: DefinitelyReturnType<T> }>>
+export type IsAction<T> = T extends Fn &
+  Atom<infer State extends Array<{ payload: DefinitelyReturnType<T> }>>
   ? true
   : false
 
-export type AtomReturn<T extends Atom> = T extends Fn ? ReturnType<T> : AtomState<T>
+export type AtomReturn<T extends Atom> = T extends Fn
+  ? ReturnType<T>
+  : AtomState<T>
 
 export type CtxParams<T, Else = never> = T extends Fn<[Ctx, ...infer Params]>
   ? Params
@@ -165,7 +189,10 @@ type Falsy = false | 0 | '' | null | undefined
 // Can't be an arrow function due to
 //    https://github.com/microsoft/TypeScript/issues/34523
 /** Throws `Reatom error: ${message}` */
-export function throwReatomError(condition: any, message: string): asserts condition is Falsy {
+export function throwReatomError(
+  condition: any,
+  message: string,
+): asserts condition is Falsy {
   if (condition) throw new Error(`Reatom error: ${message}`)
 }
 
@@ -185,7 +212,10 @@ const isConnected = (cache: AtomCache): boolean => {
 }
 
 function assertFunction(thing: any): asserts thing is Fn {
-  throwReatomError(typeof thing !== 'function', `invalid "${typeof thing}", function expected`)
+  throwReatomError(
+    typeof thing !== 'function',
+    `invalid "${typeof thing}", function expected`,
+  )
 }
 
 //#endregion
@@ -199,9 +229,11 @@ export interface CtxOptions {
   restrictMultipleContexts?: boolean
 }
 
-const getRootCause = (cause: AtomCache): AtomCache => (cause.cause === null ? cause : getRootCause(cause.cause))
+const getRootCause = (cause: AtomCache): AtomCache =>
+  cause.cause === null ? cause : getRootCause(cause.cause)
 
-const isBrowser = () => typeof window === 'object' && typeof document === 'object'
+const isBrowser = () =>
+  typeof window === 'object' && typeof document === 'object'
 
 let initiations = 0
 
@@ -213,7 +245,9 @@ export const createCtx = ({
   restrictMultipleContexts = isBrowser(),
 }: CtxOptions = {}): Ctx => {
   if (restrictMultipleContexts && initiations++ === 1) {
-    console.warn('Reatom: multiple contexts detected, which is irrelevant in browser, you should use only one context')
+    console.warn(
+      'Reatom: multiple contexts detected, which is irrelevant in browser, you should use only one context',
+    )
   }
 
   let caches = new WeakMap<AtomProto, AtomCache>()
@@ -253,7 +287,10 @@ export const createCtx = ({
     effectsProcessing = false
   }
 
-  let addPatch = ({ state, proto, pubs, subs, listeners }: AtomCache, cause: AtomCache) => {
+  let addPatch = (
+    { state, proto, pubs, subs, listeners }: AtomCache,
+    cause: AtomCache,
+  ) => {
     proto.actual = false
     trLogs.push(
       (proto.patch = {
@@ -307,7 +344,9 @@ export const createCtx = ({
           nearEffects.push(...pubPatch.proto.connectHooks)
         }
 
-        for (let parentParentPatch of (pubPatch.proto.patch ?? read(pubPatch.proto)!).pubs) {
+        for (let parentParentPatch of (
+          pubPatch.proto.patch ?? read(pubPatch.proto)!
+        ).pubs) {
           connect(pubPatch.proto, parentParentPatch)
         }
       }
@@ -320,18 +359,26 @@ export const createCtx = ({
 
     if (
       pubs.length === 0 ||
-      pubs.some(({ proto, state }) => !Object.is(state, (patch.cause = actualize(patchCtx, proto)).state))
+      pubs.some(
+        ({ proto, state }) =>
+          !Object.is(state, (patch.cause = actualize(patchCtx, proto)).state),
+      )
     ) {
       let newPubs: typeof pubs = []
 
       patchCtx.spy = ({ __reatom: depProto }: Atom, cb?: Fn) => {
         let depPatch = actualize(patchCtx, depProto)
-        let prevDepPatch = newPubs.push(depPatch) <= pubs.length ? pubs[newPubs.length - 1] : undefined
+        let prevDepPatch =
+          newPubs.push(depPatch) <= pubs.length
+            ? pubs[newPubs.length - 1]
+            : undefined
         let isDepChanged = prevDepPatch?.proto !== depPatch.proto
         isDepsChanged ||= isDepChanged
 
         let state =
-          depProto.isAction && !isDepChanged ? depPatch.state.slice(prevDepPatch!.state.length) : depPatch.state
+          depProto.isAction && !isDepChanged
+            ? depPatch.state.slice(prevDepPatch!.state.length)
+            : depPatch.state
 
         if (cb && (isDepChanged || !Object.is(state, prevDepPatch!.state))) {
           if (depProto.isAction) for (const call of state) cb(call)
@@ -344,7 +391,10 @@ export const createCtx = ({
       patch.state = patch.proto.computer!(patchCtx as CtxSpy, patch.state)
       patch.pubs = newPubs
 
-      if ((isDepsChanged || pubs.length > newPubs.length) && isConnected(patch)) {
+      if (
+        (isDepsChanged || pubs.length > newPubs.length) &&
+        isConnected(patch)
+      ) {
         for (let { proto: depProto } of pubs) {
           if (newPubs.every((dep) => dep.proto !== depProto)) {
             disconnect(proto, depProto.patch ?? read(depProto)!)
@@ -364,11 +414,20 @@ export const createCtx = ({
     }
   }
 
-  let actualize = (ctx: Ctx, proto: AtomProto, updater?: Fn<[patchCtx: Ctx, patch: AtomCache]>): AtomCache => {
+  let actualize = (
+    ctx: Ctx,
+    proto: AtomProto,
+    updater?: Fn<[patchCtx: Ctx, patch: AtomCache]>,
+  ): AtomCache => {
     let { patch, actual } = proto
     let updating = updater !== undefined
 
-    if (!updating && actual && (patch!.pubs.length === 0 || isConnected(patch!))) return patch!
+    if (
+      !updating &&
+      actual &&
+      (patch!.pubs.length === 0 || isConnected(patch!))
+    )
+      return patch!
 
     let cache = patch ?? read(proto)
     let isInt = !cache
@@ -424,7 +483,9 @@ export const createCtx = ({
           subscribe: patchCtx.subscribe,
           cause: patchCtx.cause,
         }
-        proto.updateHooks.forEach((hook) => trUpdates.push(() => hook(ctx, patch!)))
+        proto.updateHooks.forEach((hook) =>
+          trUpdates.push(() => hook(ctx, patch!)),
+        )
       }
     }
 
@@ -433,14 +494,18 @@ export const createCtx = ({
 
   let ctx: Ctx = {
     get(atomOrCb) {
-      throwReatomError(CTX && getRootCause(CTX.cause) !== read(__root), 'cause collision')
+      throwReatomError(
+        CTX && getRootCause(CTX.cause) !== read(__root),
+        'cause collision',
+      )
 
       if (isAtom(atomOrCb)) {
         let proto = atomOrCb.__reatom
         if (inTr) return actualize(this, proto).state
         let cache = read(proto)
 
-        return cache !== undefined && (proto.computer === null || isConnected(cache))
+        return cache !== undefined &&
+          (proto.computer === null || isConnected(cache))
           ? cache.state
           : this.get(() => actualize(this, proto).state)
       }
@@ -555,7 +620,8 @@ export const createCtx = ({
       let { __reatom: proto } = atom as Atom
 
       let lastState = impossibleValue
-      let listener = (state: any) => Object.is(lastState, state) || cb((lastState = state))
+      let listener = (state: any) =>
+        Object.is(lastState, state) || cb((lastState = state))
 
       let cache = read(proto)
 
@@ -626,13 +692,19 @@ function onCall(this: Action, cb: Fn): Unsubscribe {
 
 export function atom<T>(computed: (ctx: CtxSpy) => T, name?: string): Atom<T>
 export function atom<T>(initState: T, name?: string): AtomMut<T>
-export function atom<T>(initState: T | ((ctx: CtxSpy) => T), name = __count('_atom')): Atom<T> | AtomMut<T> {
+export function atom<T>(
+  initState: T | ((ctx: CtxSpy) => T),
+  name = __count('_atom'),
+): Atom<T> | AtomMut<T> {
   // TODO: it took much longer than expected in profiling
   let theAtom: any = (ctx: Ctx, update: any) =>
     ctx.get(
       (read, actualize) =>
         actualize!(ctx, theAtom.__reatom, (patchCtx: Ctx, patch: AtomCache) => {
-          patch.state = typeof update === 'function' ? update(patch.state, patchCtx) : update
+          patch.state =
+            typeof update === 'function'
+              ? update(patch.state, patchCtx)
+              : update
         }).state,
     )
   let computer = null
@@ -658,7 +730,9 @@ export function atom<T>(initState: T | ((ctx: CtxSpy) => T), name = __count('_at
   theAtom.pipe = pipe
   theAtom.onChange = onChange
 
-  return experimental_PLUGINS.length === 0 ? theAtom : theAtom.pipe(...experimental_PLUGINS)
+  return experimental_PLUGINS.length === 0
+    ? theAtom
+    : theAtom.pipe(...experimental_PLUGINS)
 }
 
 export const action: {
