@@ -22,8 +22,8 @@
   "scripts": {
     "prepublishOnly": "npm run build && npm run test",
     "build": "microbundle -f esm,cjs",
-    "test": "vitest --typecheck",
-    "test:watch": "vitest --watch --typecheck"
+    "test": "ts-node src/index.test.ts",
+    "test:watch": "tsx watch src/index.test.ts"
   },
   "dependencies": {
     "@reatom/core": "^3.4.0",
