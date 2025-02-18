@@ -6,11 +6,14 @@ jobs:
   test:
     timeout-minutes: 30
     runs-on: ubuntu-latest
-    container:
-      image: node:22.13.1-alpine
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.13.1
       - name: Install dependencies
-        run: npm ci --ignore-scripts
+        run: | 
+          npm ci --ignore-scripts
+          npx playwright install --with-deps chromium
       - name: Run tests
         run: npm test
