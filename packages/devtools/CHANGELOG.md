@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.3](https://github.com/artalar/reatom/compare/devtools-v0.11.2...devtools-v0.11.3) (2025-02-18)
+
+
+### Bug Fixes
+
+* **devtools:** styles improvements ([92b534e](https://github.com/artalar/reatom/commit/92b534ea48f1c5d05df6dde4adc92921c9beb489))
+
 ## [0.11.2](https://github.com/artalar/reatom/compare/devtools-v0.11.1...devtools-v0.11.2) (2025-02-17)
 
 ### Bug Fixes

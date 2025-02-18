@@ -539,12 +539,12 @@ export const reatomFilters = (
             {atom((ctx) => `logged ${ctx.spy(list).size} of `)}
             <input
               model:valueAsNumber={filters.size}
-              css:width={atom((ctx) => `${Math.max(3, ctx.spy(filters.size).toString().length)}em`)}
+              style:width={atom((ctx) => `${Math.max(3, ctx.spy(filters.size).toString().length)}em`)}
               css={`
-                width: var(--width);
                 background: none;
                 border: none;
                 margin-left: 5px;
+                font-size: inherit;
                 &:focus {
                   outline: 2px solid #151134;
                 }

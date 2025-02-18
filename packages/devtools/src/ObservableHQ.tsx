@@ -176,7 +176,16 @@ export const ObservableHQ: FC<{
 
   // lazy append this styles
   take(ctx, showHistory, (ctx, state, SKIP) => state || SKIP).then(() => {
-    ROOT.append(<style>{jsondiffpatchStyles}</style>)
+    ROOT.append(
+      <style>
+        {jsondiffpatchStyles}
+        {`
+          .jsondiffpatch-unchanged {
+            max-height: 1rem !important;
+          }
+        `}
+      </style>,
+    )
   })
 
   const getPatchHistory = () => {
@@ -220,8 +229,7 @@ export const ObservableHQ: FC<{
         {observablehqStyles.replaceAll(':root', '.observablehq')}
         {`
         .observablehq {
-          margin: 1rem;
-          margin-top: 0em;
+          margin: 0 1rem;
         }
 
         .observablehq--inspect {
@@ -270,8 +278,12 @@ export const ObservableHQ: FC<{
           right: 1rem;
           display: flex;
           gap: 5px;
-
           display: var(--display);
+
+          opacity: 0.5;
+          &:hover, &:focus-within {
+            opacity: 1;
+          }
         `}
       >
         {update && (
