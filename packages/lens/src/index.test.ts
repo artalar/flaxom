@@ -29,7 +29,7 @@ test(`map and mapInput`, async () => {
   const aMapInput = a.pipe(mapInput((ctx, v: string) => Number(v)))
   const ctx = createTestCtx()
 
-  const aMapInputTrack = ctx.subscribeTrack(aMapInput, () => { })
+  const aMapInputTrack = ctx.subscribeTrack(aMapInput, () => {})
 
   expect(ctx.get(a)).toBe(0)
   expect(ctx.get(aMap)).toBe(1)
@@ -348,17 +348,17 @@ test('onLensUpdate', async () => {
 test('withOnUpdate and sampleBuffer example', () => {
   const sampleBuffer =
     <T>(signal: Atom) =>
-      (anAction: Action<[T], T>) => {
-        const bufferAtom = atom(
-          new Array<T>(),
-          `${anAction.__reatom.name}._sampleBuffer`,
-        )
-        return anAction.pipe(
-          mapPayload((ctx, value) => bufferAtom(ctx, (v) => [...v, value])),
-          sample(signal),
-          withOnUpdate((ctx, v) => bufferAtom(ctx, [])),
-        )
-      }
+    (anAction: Action<[T], T>) => {
+      const bufferAtom = atom(
+        new Array<T>(),
+        `${anAction.__reatom.name}._sampleBuffer`,
+      )
+      return anAction.pipe(
+        mapPayload((ctx, value) => bufferAtom(ctx, (v) => [...v, value])),
+        sample(signal),
+        withOnUpdate((ctx, v) => bufferAtom(ctx, [])),
+      )
+    }
 
   const signal = action()
   const a = action<number>()

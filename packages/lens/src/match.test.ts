@@ -24,12 +24,12 @@ test('is method', () => {
       expect(ctx.get(match(expression))).toBe(undefined)
       expect(ctx.get(match(expression).is('b', statement))).toBe(undefined)
       expect(ctx.get(match(expression).is('a', statement))).toBe(true)
-      expect(
-        ctx.get(match(expression).is('a', statement).is('b', true)),
-      ).toBe(true)
-      expect(
-        ctx.get(match(expression).is('b', statement).is('a', true)),
-      ).toBe(true)
+      expect(ctx.get(match(expression).is('a', statement).is('b', true))).toBe(
+        true,
+      )
+      expect(ctx.get(match(expression).is('b', statement).is('a', true))).toBe(
+        true,
+      )
       expect(ctx.get(match(expression).default(statement))).toBe(true)
     }
   }
