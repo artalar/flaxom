@@ -23,18 +23,16 @@ test('is method', () => {
 
   for (const expression of expressions) {
     for (const statement of statements) {
-      assert.is(ctx.get(match(expression)), undefined)
-      assert.is(ctx.get(match(expression).is('b', statement)), undefined)
-      assert.is(ctx.get(match(expression).is('a', statement)), true)
-      assert.is(
-        ctx.get(match(expression).is('a', statement).is('b', true)),
+      expect(ctx.get(match(expression))).toBe(undefined)
+      expect(ctx.get(match(expression).is('b', statement))).toBe(undefined)
+      expect(ctx.get(match(expression).is('a', statement))).toBe(true)
+      expect(ctx.get(match(expression).is('a', statement).is('b', true))).toBe(
         true,
       )
-      assert.is(
-        ctx.get(match(expression).is('b', statement).is('a', true)),
+      expect(ctx.get(match(expression).is('b', statement).is('a', true))).toBe(
         true,
       )
-      assert.is(ctx.get(match(expression).default(statement)), true)
+      expect(ctx.get(match(expression).default(statement))).toBe(true)
     }
   }
 
