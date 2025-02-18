@@ -56,4 +56,4 @@ jobs:
           name: flow
           path: 'flow-comment.json'
       - name: Exit with prettier
-        run: exit 1
+        run: exit ${{ steps.prettier_check.outputs.PRETTIER_EXIT_CODE }}
