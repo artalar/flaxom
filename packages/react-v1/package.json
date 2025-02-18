@@ -46,7 +46,6 @@
     "/package.json"
   ],
   "devDependencies": {
-    "jsdom": "^19.0.0",
     "@testing-library/react": "^16.2.0",
     "@testing-library/react-hooks": "^8.0.1"
   }

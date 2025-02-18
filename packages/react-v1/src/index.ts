@@ -180,3 +180,29 @@ export function createActionHook(ctx: Context<Store | null> = context) {
  * @param deps
  */
 export const useAction = createActionHook()
+
+// TODO: TS tests
+
+// const a = declareAction()
+// const ap = declareAction<0>()
+// const aop = declareAction<{ a: string; b: number; c: boolean }>()
+
+// const test1 = useAction(a)
+// const test2 = useAction(() => a())
+// const test3 = useAction(ap)
+// const test4 = useAction(() => ap(0))
+// const test5 = useAction<0>((v) => ap(v))
+// const test6 = useAction<0>((v) => a())
+// const test7 = useAction(() => {
+//   if (Math.random()) {
+//     return ap(0)
+//   }
+//   if (Math.random()) {
+//     return a()
+//   }
+//   if (Math.random()) {
+//     // error
+//     return 123
+//   }
+// })
+// const test8 = useAction((a: string, b: number, c: boolean = false) => aop({ a, b, c }))

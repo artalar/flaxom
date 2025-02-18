@@ -23,7 +23,7 @@
     "prepublishOnly": "npm run build && npm run test",
     "build": "microbundle -f esm,cjs",
     "test": "vitest run src/*",
-    "test:watch": "vitest src/*"
+    "test:watch": "echo 'Note: Tests could be run only with built sources' && vitest src/*"
   },
   "dependencies": {
     "@reatom/core": "^3.2.0",
