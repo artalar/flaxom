@@ -164,7 +164,7 @@ export const Graph = ({ clientCtx, getColor, width, height, initSize }: Props) =
 
             const exclude = ctx.spy(filters.exclude)
 
-            if (exclude && new RegExp(`.*${exclude}.*`, 'i').test(name!)) {
+            if (exclude && new RegExp(exclude, 'i').test(name!)) {
               state.display = 'none'
               return state
             }
@@ -176,7 +176,7 @@ export const Graph = ({ clientCtx, getColor, width, height, initSize }: Props) =
 
               try {
                 const searchValue = ctx.spy(search)
-                const result = !searchValue || new RegExp(`.*${searchValue}.*`, 'i').test(name!)
+                const result = !searchValue || new RegExp(searchValue, 'i').test(name!)
 
                 if (_type === 'filter' && !result) {
                   state.display = 'none'
@@ -378,7 +378,7 @@ export const Graph = ({ clientCtx, getColor, width, height, initSize }: Props) =
       const result =
         prev !== patch &&
         (!prev || !Object.is(patch.state, prev.state)) &&
-        (!exclude || !new RegExp(`.*${exclude}.*`, 'i').test(patch.proto.name!))
+        (!exclude || !new RegExp(exclude, 'i').test(patch.proto.name!))
 
       if (result && !isTimeStampWritten) {
         lastTimestamp = Date.now()
