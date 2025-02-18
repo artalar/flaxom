@@ -13,7 +13,7 @@
     "prettify:watch": "onchange */**/**/*.{js,ts,md} -- prettier --write {{changed}}",
     "package-generator": "tsx tools/new-package.ts",
     "update": "npx npm-check-updates -u",
-    "prepare": "husky install",
+    "prepare": "git config blame.ignoreRevsFile .git-blame-ignore-revs && husky install",
     "actualize-issue-templates": "npx tsx ./tools/actualize-issue-templates.ts"
   },
   "workspaces": [
@@ -60,7 +60,7 @@
     "use-sync-external-store": "^1.2.0",
     "uvu": "^0.5.6",
     "vite": "^5.2.6",
-    "vitest": "^2.1.3",
+    "vitest": "^2.1.9",
     "zx": "^7.2.3"
   },
   "peerDependencies": {

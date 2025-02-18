@@ -299,7 +299,9 @@ const someRequest = reatomRequest<{ data: Data } | { error: string }>()
 
 ```ts
 // type-safe destructuring
-const { data } = await take(ctx, someRequest, (ctx, payload, skip) => ('error' in payload ? skip : payload))
+const { data } = await take(ctx, someRequest, (ctx, payload, skip) =>
+  'error' in payload ? skip : payload,
+)
 ```
 
 Note that you can increase your debug experience by passing debug name in the four parameter.

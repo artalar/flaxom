@@ -33,7 +33,10 @@ function actualizePartsAvailable(
   )
   if (!block) return false
 
-  block.attributes.options = [...(templateConfig?.nonPackageParts ?? []), ...packageParts]
+  block.attributes.options = [
+    ...(templateConfig?.nonPackageParts ?? []),
+    ...packageParts,
+  ]
   echo(chalk.greenBright(issueTemplate?.name), 'available parts actualized')
   return true
 }

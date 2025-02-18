@@ -4,8 +4,8 @@ import { withAssign } from './withAssign'
 
 export interface RecordAtom<T extends Rec> extends AtomMut<T> {
   merge: Action<[slice: Partial<T>], T>
-  omit: Action<Array<(keyof T)>, T>
-  reset: Action<Array<(keyof T)>, T>
+  omit: Action<Array<keyof T>, T>
+  reset: Action<Array<keyof T>, T>
 }
 
 export const reatomRecord = <T extends Rec>(
@@ -28,7 +28,7 @@ export const reatomRecord = <T extends Rec>(
       ),
 
       omit: action(
-        (ctx, ...keys: Array<(keyof T)>) =>
+        (ctx, ...keys: Array<keyof T>) =>
           target(ctx, (prev) => {
             if (keys.some((key) => key in prev)) return omit(prev, keys) as any
             return prev

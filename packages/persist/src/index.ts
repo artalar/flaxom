@@ -98,24 +98,40 @@ export const reatomPersist = (
         time = MAX_SAFE_TIMEOUT,
         toSnapshot = (ctx, data: any) => data,
         version = 0,
-      }: WithPersistOptions<AtomState<T>> = typeof options === 'string' ? { key: options } : options
+      }: WithPersistOptions<AtomState<T>> = typeof options === 'string'
+        ? { key: options }
+        : options
       const proto = anAtom.__reatom
       const { initState, isAction } = proto
 
       throwReatomError(isAction, 'cannot apply persist to an action')
 
-      const getPersistRecord = (ctx: Ctx, state: PersistRecord | null = null) => {
+      const getPersistRecord = (
+        ctx: Ctx,
+        state: PersistRecord | null = null,
+      ) => {
         const rec = ctx.get(storageAtom).get(ctx, key)
 
         return rec?.id === state?.id ? state : rec ?? state
       }
 
-      const fromPersistRecord = (ctx: Ctx, rec: null | PersistRecord = getPersistRecord(ctx), state?: AtomState<T>) =>
+      const fromPersistRecord = (
+        ctx: Ctx,
+        rec: null | PersistRecord = getPersistRecord(ctx),
+        state?: AtomState<T>,
+      ) =>
         rec === null || (rec.version !== version && migration === undefined)
           ? initState(ctx)
-          : fromSnapshot(ctx, rec.version !== version ? migration!(ctx, rec) : rec.data, state)
+          : fromSnapshot(
+              ctx,
+              rec.version !== version ? migration!(ctx, rec) : rec.data,
+              state,
+            )
 
-      const toPersistRecord = (ctx: Ctx, state: AtomState<T>): PersistRecord => ({
+      const toPersistRecord = (
+        ctx: Ctx,
+        state: AtomState<T>,
+      ): PersistRecord => ({
         data: toSnapshot(ctx, state),
         fromState: true,
         id: random(),
@@ -126,7 +142,10 @@ export const reatomPersist = (
 
       throwReatomError(!key, 'missed key')
 
-      const persistRecordAtom = atom<PersistRecord | null>(null, `${anAtom.__reatom.name}._${storage.name}Atom`)
+      const persistRecordAtom = atom<PersistRecord | null>(
+        null,
+        `${anAtom.__reatom.name}._${storage.name}Atom`,
+      )
       // @ts-expect-error TODO
       persistRecordAtom.__reatom.computer = getPersistRecord
 
@@ -186,14 +205,17 @@ export const reatomPersist = (
         const rootCause = ctx.get((read) => read(__root))!
         // put a patch to the proto
         ctx.get(persistRecordAtom)
-        let recPatch: AtomCache = ctx.get((read, actualize) => actualize!(ctx, persistRecordAtom.__reatom))
+        let recPatch: AtomCache = ctx.get((read, actualize) =>
+          actualize!(ctx, persistRecordAtom.__reatom),
+        )
 
         if (patch.cause === recPatch && recPatch.cause === patch) {
           recPatch.cause = rootCause
         }
 
         if (
-          (anAtom.__reatom.patch === patch || Object.is(anAtom.__reatom.patch!.state, patch.state)) &&
+          (anAtom.__reatom.patch === patch ||
+            Object.is(anAtom.__reatom.patch!.state, patch.state)) &&
           patch.cause !== recPatch
         ) {
           const { subs } = recPatch
@@ -205,7 +227,9 @@ export const reatomPersist = (
 
           recPatch.cause = rootCause
 
-          const idx = patch.pubs.findIndex(({ proto }) => proto === recPatch.proto)
+          const idx = patch.pubs.findIndex(
+            ({ proto }) => proto === recPatch.proto,
+          )
           patch.pubs[idx] = recPatch
 
           ctx.get(storageAtom).set(ctx, key, rec)

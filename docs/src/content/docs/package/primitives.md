@@ -138,6 +138,9 @@ setAtom.clear(ctx)
 setAtom.reset(ctx)
 setAtom.getOrCreate(ctx, key, () => new Entity()) // non nullable entity
 
+// built-in atoms:
+ctx.get(thingsAtom.sizeAtom)
+
 // built-in functions:
 setAtom.get(ctx, key) // nullable entity
 setAtom.has(ctx, el)

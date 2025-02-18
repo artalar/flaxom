@@ -57,18 +57,20 @@ In the next example, we have an async API.
 import { action, atom } from '@reatom/core'
 
 export const todoAtom = atom(null)
-export const isLoadingAtom = atom(false);
+export const isLoadingAtom = atom(false)
 
 export const fetchTodo = action(async (ctx) => {
-  const response = await ctx.schedule(() => fetch('https://jsonplaceholder.typicode.com/todos/1'))
-  return await response.json();
+  const response = await ctx.schedule(() =>
+    fetch('https://jsonplaceholder.typicode.com/todos/1'),
+  )
+  return await response.json()
 })
 
 export const loadTodo = action(async (ctx) => {
   try {
     isLoadingAtom(ctx, true)
     const data = await ctx.schedule((ctx) => fetchTodo(ctx))
-    todoAtom(ctx, data);
+    todoAtom(ctx, data)
   } catch (e) {
     console.error(e)
   } finally {
@@ -80,13 +82,13 @@ export const loadTodo = action(async (ctx) => {
 Let's test it without calling the real api
 
 ```js
-import { expect, test } from 'vitest';
-import { createTestCtx } from '@reatom/testing';
-import { loadTodo, fetchTodo, todoAtom } from './main';
+import { expect, test } from 'vitest'
+import { createTestCtx } from '@reatom/testing'
+import { loadTodo, fetchTodo, todoAtom } from './main'
 
 test('Test loadData atom', async () => {
   const ctx = createTestCtx()
-  const track = ctx.subscribeTrack(todoAtom) 
+  const track = ctx.subscribeTrack(todoAtom)
 
   // Mock action with call
   ctx.mockAction(fetchTodo, (ctx) => Promise.resolve([{ id: 'foo' }]))

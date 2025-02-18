@@ -23,7 +23,7 @@ You can pass a callback as the last argument. In this case, the method will retu
 
 Please note that this API handles the abort context from the [onConnect](/package/hooks/#onconnect) effect and other Reatom APIs. It enables you to describe complex logic in a concise and clear manner with memory safety underneath.
 
-### onEvent WebSocket example 
+### onEvent WebSocket example
 
 Here is a usage example, which was derived from [this observable example](https://github.com/domfarolino/observable/blob/c232b2e585b71a61034fd23ba4337570b537ef27/README.md?plain=1#L86):
 
@@ -59,6 +59,7 @@ ctx.subscribe(googStockAtom, updateView)
 ```
 
 ## onEvent checkpoint example
+
 Make sure to listen to event before you actually need it. As in [take](https://reatom.dev/package/effects/#take-checkpoints) you should use checkpoints
 to handle all events without skipping it.
 
@@ -70,34 +71,34 @@ import { api } from '~/api'
 
 const heroElement = document.getElementById('#hero')
 
-const loadPageContent = reatomAsync(async (ctx)=>{
-    // Docs: https://developer.mozilla.org/en-US/docs/Web/API/Element/animate
-    const animation = heroElement.animate(heroAnimation)
+const loadPageContent = reatomAsync(async (ctx) => {
+  // Docs: https://developer.mozilla.org/en-US/docs/Web/API/Element/animate
+  const animation = heroElement.animate(heroAnimation)
 
-    const content = await api.fetchContent()
+  const content = await api.fetchContent()
 
-    // ❌ Bug:
-    // If person's connection is not fast enough animation can finish before we load content.
-    // And we will be showing last frame of animation forever...
-    await onEvent(ctx, animation, 'finish')
+  // ❌ Bug:
+  // If person's connection is not fast enough animation can finish before we load content.
+  // And we will be showing last frame of animation forever...
+  await onEvent(ctx, animation, 'finish')
 
-    pageContent(ctx, content)
+  pageContent(ctx, content)
 })
 ```
 
 And that's how we fix this behaviour using checkpoint:
 
 ```ts
-const loadPageContent = reatomAsync(async (ctx)=>{
-    const animation = heroElement.animate(heroAnimation)
-    // ✅ We make a checkpoint before loading...
-    const animationFinishedCheckpoint = onEvent(ctx, animation, 'finish')
-    
-    const content = await api.fetchContent()
-    
-    // ...and we will catch that event even if content loading takes ages
-    await animationFinishedCheckpoint
-    
-    pageContent(ctx, content)
+const loadPageContent = reatomAsync(async (ctx) => {
+  const animation = heroElement.animate(heroAnimation)
+  // ✅ We make a checkpoint before loading...
+  const animationFinishedCheckpoint = onEvent(ctx, animation, 'finish')
+
+  const content = await api.fetchContent()
+
+  // ...and we will catch that event even if content loading takes ages
+  await animationFinishedCheckpoint
+
+  pageContent(ctx, content)
 })
 ```

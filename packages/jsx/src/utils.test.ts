@@ -18,66 +18,63 @@ describe('parseClasses', () => {
   })
 
   it('handles falsy object correctly', () => {
-    expect(ctx.get(cn({
-      a: '',
-      b: 0,
-      c: NaN,
-      d: false,
-      e: null,
-      f: undefined,
-      g: atom(undefined),
-    }))).toBe('')
+    expect(
+      ctx.get(
+        cn({
+          a: '',
+          b: 0,
+          c: NaN,
+          d: false,
+          e: null,
+          f: undefined,
+          g: atom(undefined),
+        }),
+      ),
+    ).toBe('')
   })
 
   it('handles falsy array correctly', () => {
-    expect(ctx.get(cn([
-      '',
-      null,
-      undefined,
-      {},
-      [],
-      atom(undefined),
-      () => undefined,
-    ]))).toBe('')
+    expect(
+      ctx.get(
+        cn(['', null, undefined, {}, [], atom(undefined), () => undefined]),
+      ),
+    ).toBe('')
   })
 
   it('handles object correctly', () => {
-    expect(ctx.get(cn({
-      a: 'a',
-      b: 1,
-      c: true,
-      d: {},
-      e: [],
-      f: atom(true),
-      g: () => undefined,
-    }))).toBe('a b c d e f g')
+    expect(
+      ctx.get(
+        cn({
+          a: 'a',
+          b: 1,
+          c: true,
+          d: {},
+          e: [],
+          f: atom(true),
+          g: () => undefined,
+        }),
+      ),
+    ).toBe('a b c d e f g')
   })
 
   it('handles deep array correctly', () => {
-    expect(ctx.get(cn(['a', ['b', ['c']]])))
-      .toBe('a b c')
+    expect(ctx.get(cn(['a', ['b', ['c']]]))).toBe('a b c')
   })
 
   it('handles deep atom correctly', () => {
-    expect(ctx.get(cn(atom(() => atom(() => atom('a'))))))
-      .toBe('a')
+    expect(ctx.get(cn(atom(() => atom(() => atom('a')))))).toBe('a')
   })
 
   it('handles deep getter correctly', () => {
-    expect(ctx.get(cn(() => () => () => 'a')))
-      .toBe('a')
+    expect(ctx.get(cn(() => () => () => 'a'))).toBe('a')
   })
 
   it('handles complex correctly', () => {
     const isBAtom = atom(true)
     const stringAtom = atom('d')
-    const classNameAtom = cn(() => atom(() => [
-      'a',
-      {b: isBAtom},
-      ['c'],
-      stringAtom,
-      () => 'e',
-    ]))
+    const classNameAtom = cn(() =>
+      atom(() => ['a', { b: isBAtom }, ['c'], stringAtom, () => 'e']),
+    )
 
     expect(ctx.get(classNameAtom)).toBe('a b c d e')
 

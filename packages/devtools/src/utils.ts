@@ -23,7 +23,10 @@ export const getId = (node: AtomCache) => {
   return id
 }
 
-export const followingsMap = new (class extends Map<AtomCache, Array<AtomCache>> {
+export const followingsMap = new (class extends Map<
+  AtomCache,
+  Array<AtomCache>
+> {
   add(patch: AtomCache) {
     while (patch.cause?.cause) {
       let followings = this.get(patch.cause)
@@ -43,7 +46,10 @@ export const actionsStates = new WeakMap<AtomCache, Array<any>>()
 // TODO: parametrize
 export const HISTORY_LENGTH = 10
 
-export const historyStates = new (class extends WeakMap<AtomProto, Array<AtomCache>> {
+export const historyStates = new (class extends WeakMap<
+  AtomProto,
+  Array<AtomCache>
+> {
   add(patch: AtomCache) {
     let list = this.get(patch.proto)
     if (!list) {

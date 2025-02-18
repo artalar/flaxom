@@ -58,7 +58,10 @@ With "state" log you can reinit your form from the devtools with the edit tool (
 
 ```ts
 const { values, init } = useForm()
-React.useEffect(() => DEVTOOLS?.state('my-form', values).subscribe(init), [state])
+React.useEffect(
+  () => DEVTOOLS?.state('my-form', values).subscribe(init),
+  [state],
+)
 ```
 
 ## createDevtools Options

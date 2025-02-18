@@ -16,8 +16,15 @@ import {
   isShallowEqual,
   CtxSpy,
 } from '@reatom/framework'
-import { h, hf, ctx, Bind, ROOT } from './jsx'
-import { actionsStates, followingsMap, getColor, getId, historyStates, idxMap } from './utils'
+import { h, hf, ctx, Bind, ROOT, JSX } from './jsx'
+import {
+  actionsStates,
+  followingsMap,
+  getColor,
+  getId,
+  historyStates,
+  idxMap,
+} from './utils'
 import { Filter, reatomFilters } from './Graph/reatomFilters'
 import { reatomLines } from './Graph/reatomLines'
 import { ObservableHQ } from './ObservableHQ'
@@ -76,8 +83,12 @@ const Stack = ({ patch }: { patch: AtomCache }) => {
               causeEl.scrollIntoView()
               causeEl.focus()
             }}
-            // @ts-expect-error
-            style:color={atom((ctx) => (ctx.spy(causeEl.styleAtom).display === 'none' ? 'black' : undefined))}
+            style:color={atom((ctx) =>
+              // @ts-expect-error
+              ctx.spy(causeEl.styleAtom).display === 'none'
+                ? 'black'
+                : undefined,
+            )}
           >
             {cause.proto.name}
           </a>
@@ -93,7 +104,13 @@ const Stack = ({ patch }: { patch: AtomCache }) => {
   return stackEl
 }
 
-export const Graph = ({ clientCtx, getColor, width, height, initSize }: Props) => {
+export const Graph = ({
+  clientCtx,
+  getColor,
+  width,
+  height,
+  initSize,
+}: Props) => {
   const name = '_ReatomDevtools.Graph'
 
   const isBottom = reatomBoolean(false, `${name}.isBottom`)
@@ -108,7 +125,11 @@ export const Graph = ({ clientCtx, getColor, width, height, initSize }: Props) =
 
           const nodesToWatch = atom(new Array<Atom>())
           const display = atom((ctx) =>
-            ctx.spy(nodesToWatch).every((styleAtom) => ctx.spy(styleAtom).display === 'none') ? 'none' : 'flex',
+            ctx
+              .spy(nodesToWatch)
+              .every((styleAtom) => ctx.spy(styleAtom).display === 'none')
+              ? 'none'
+              : 'flex',
           )
 
           return (
@@ -129,18 +150,7 @@ export const Graph = ({ clientCtx, getColor, width, height, initSize }: Props) =
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                &:before {
-                  content: '';
-                  flex-grow: 1;
-                  height: 2px;
-                  background: gray;
-                }
-                &:after {
-                  content: '';
-                  flex-grow: 1;
-                  height: 2px;
-                  background: gray;
-                }
+                color: gray;
               `}
             >{`${new Date().toLocaleTimeString()} ${ms}ms`}</li>
           )
@@ -160,7 +170,10 @@ export const Graph = ({ clientCtx, getColor, width, height, initSize }: Props) =
 
         const style = atom(
           memo((ctx) => {
-            const state = { display: 'flex', background: 'none' }
+            const state: JSX.CSSProperties = {
+              display: 'flex',
+              background: 'none',
+            }
 
             const exclude = ctx.spy(filters.exclude)
 
@@ -176,8 +189,9 @@ export const Graph = ({ clientCtx, getColor, width, height, initSize }: Props) =
 
               try {
                 const searchValue = ctx.spy(search)
+                
                 const result = !searchValue || new RegExp(searchValue, 'i').test(name!)
-
+                                                                                 
                 if (_type === 'filter' && !result) {
                   state.display = 'none'
                 }
@@ -231,8 +245,9 @@ export const Graph = ({ clientCtx, getColor, width, height, initSize }: Props) =
             css={`
               flex-wrap: wrap;
               align-items: center;
-              padding: 5px;
-              font-size: 16px;
+              font-size: 14px;
+              border-bottom: 1px solid lightgray;
+              padding: 5px 0;
               &::marker {
                 content: '';
               }
@@ -287,17 +302,25 @@ export const Graph = ({ clientCtx, getColor, width, height, initSize }: Props) =
               />
               {name}
             </label>
-            {atom((ctx) => (ctx.spy(showStack) ? <Stack patch={patch} /> : null))}
+            {atom((ctx) =>
+              ctx.spy(showStack) ? <Stack patch={patch} /> : null,
+            )}
             {atom((ctx) =>
               ctx.spy(filters.preview) || ctx.spy(preview) ? (
                 <ObservableHQ
                   snapshot={
                     // do not show extra info for "identity" actions
-                    isAction && state.params.length === 1 && Object.is(state.params[0], state.payload)
+                    isAction &&
+                    state.params.length === 1 &&
+                    Object.is(state.params[0], state.payload)
                       ? state.payload
                       : state
                   }
-                  update={isAction ? undefined : update.bind(null, clientCtx, patch.proto)}
+                  update={
+                    isAction
+                      ? undefined
+                      : update.bind(null, clientCtx, patch.proto)
+                  }
                   patch={isAction ? undefined : patch}
                 />
               ) : (
@@ -319,7 +342,10 @@ export const Graph = ({ clientCtx, getColor, width, height, initSize }: Props) =
     lines.clear(ctx)
   })
 
-  const redrawLines = action((ctx) => lines.redraw(ctx, svg), `${name}.redrawLines`)
+  const redrawLines = action(
+    (ctx) => lines.redraw(ctx, svg),
+    `${name}.redrawLines`,
+  )
 
   const filters = reatomFilters(
     { list: list as unknown as LinkedListAtom, lines, redrawLines, initSize },
@@ -364,10 +390,14 @@ export const Graph = ({ clientCtx, getColor, width, height, initSize }: Props) =
 
     await null
 
-    let isTimeStampWritten = !ctx.get(filters.time) || lastTimestamp === Date.now()
+    let isTimeStampWritten =
+      !ctx.get(filters.time) || lastTimestamp === Date.now()
 
     const isPass = (patch: AtomCache): boolean => {
-      if (inits.get(patch.proto) === patch || (patch.proto.isAction && !actionsStates.get(patch)?.length)) {
+      if (
+        inits.get(patch.proto) === patch ||
+        (patch.proto.isAction && !actionsStates.get(patch)?.length)
+      ) {
         return false
       }
 
@@ -470,7 +500,8 @@ export const Graph = ({ clientCtx, getColor, width, height, initSize }: Props) =
         `}
         on:scroll={(ctx, e) => {
           const isBottomState =
-            e.currentTarget.scrollHeight - e.currentTarget.scrollTop < e.currentTarget.clientHeight + 10
+            e.currentTarget.scrollHeight - e.currentTarget.scrollTop <
+            e.currentTarget.clientHeight + 10
           if (ctx.get(isBottom) !== isBottomState) isBottom(ctx, isBottomState)
         }}
       >

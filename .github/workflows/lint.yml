@@ -7,13 +7,14 @@ jobs:
     timeout-minutes: 30
     runs-on: ubuntu-latest
     container:
-      image: node:${{ vars.NODE_VERSION }}-alpine
+      image: node:22.13.1-alpine
     steps:
       - name: Install git
         run: apk add git
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
           fetch-depth: 0
       - name: Install dependencies
         run: npm ci --ignore-scripts
@@ -22,7 +23,7 @@ jobs:
         continue-on-error: true
         run: |
           trap 'echo "PRETTIER_EXIT_CODE=$?" >> $GITHUB_OUTPUT' EXIT; npm run prettify:check
-      - name: Fail if there no auto fix 
+      - name: Fail if there no auto fix
         if: steps.prettier_check.outputs.PRETTIER_EXIT_CODE == 2
         run: exit 2
       - name: Run prettier
@@ -36,4 +37,23 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
           git commit -am "chore: run prettier"
-          git push https://github.com/${{ github.repository }}.git HEAD:${{ github.event.pull_request.head.ref }}
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
+      - name: Upload artifact to trigger app for forks
+        if: ${{ failure() }}
+        run: |
+          cat <<EOF > flow-comment.json
+            {
+              "name": "comment",
+              "payload": {
+                "issue_number": "${{ github.event.pull_request.number }}",
+                "message": "CI is unable to auto-fix prettier, please do it yourself by running \`npm run prettify\`."
+              }
+            }
+          EOF
+      - uses: actions/upload-artifact@v4
+        if: ${{ failure() }}
+        with:
+          name: flow
+          path: 'flow-comment.json'
+      - name: Exit with prettier
+        run: exit ${{ steps.prettier_check.outputs.PRETTIER_EXIT_CODE }}

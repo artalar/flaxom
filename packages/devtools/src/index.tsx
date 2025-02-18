@@ -185,7 +185,7 @@ export const _connectDevtools = async (
         z-index: ${MAX_Z};
         background: var(--devtools-bg);
         will-change: width, height;
-        font-size: 14px;
+        font-size: 12px;
         font-family: monospace;
         box-sizing: border-box;
       `}

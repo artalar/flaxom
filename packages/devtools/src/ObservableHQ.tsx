@@ -6,7 +6,7 @@ import { Inspector } from '@observablehq/inspector'
 // @ts-expect-error
 import observablehqStyles from '../../../node_modules/@observablehq/inspector/dist/inspector.css'
 
-import * as jsondiffpatch from 'jsondiffpatch'
+import { create, type DiffContext } from 'jsondiffpatch'
 // @ts-expect-error
 import * as htmlFormatter from 'jsondiffpatch/formatters/html'
 // @ts-expect-error
@@ -16,18 +16,11 @@ import { BooleanAtom, noop, parseAtoms, reatomBoolean, take, withComputed, withI
 
 import { HISTORY_LENGTH, buttonCss as editButtonCss, historyStates, idxMap } from './utils'
 
-const differ = jsondiffpatch.create()
-
-differ.processor.pipes.diff.before(
-  'trivial',
-  // @ts-ignore
-  (context) => {
-    if (typeof context.left === 'function' || typeof context.right === 'function') {
-      // @ts-ignore
-      context.setResult([context.left.toString(), context.right.toString()]).exit()
-    }
+const differ = create({
+  propertyFilter(name, context) {
+    return typeof (context.right as any)?.[name] !== 'function' && typeof (context.left as any)?.[name] !== 'function'
   },
-)
+})
 
 const buttonCss = css`
   width: 20px;
@@ -100,8 +93,12 @@ const EditForm = ({
   )
 }
 
+const getUrlString = (thing: any) => (thing instanceof URL ? thing.href : thing)
+
 const getHTMLDiff = (a: AtomCache, b: AtomCache) => {
-  const delta = differ.diff(a.state, b.state)
+  const aState = getUrlString(a.state)
+  const bState = getUrlString(b.state)
+  const delta = differ.diff(aState, bState)
 
   if (!delta) return null
 
@@ -133,7 +130,16 @@ const getHTMLDiff = (a: AtomCache, b: AtomCache) => {
           {a.proto.name}
         </a>
       )}
-      <div ref={(ctx, e) => (e.innerHTML = htmlFormatter.format(delta, a.state))} />
+      <div
+        ref={(ctx, el) => {
+          el.innerHTML = htmlFormatter
+            .format(delta, aState)
+            .replaceAll(
+              `<pre class="jsondiffpatch-error">TypeError: Cannot read properties of undefined (reading 'replace')</pre>`,
+              '[Function]',
+            )
+        }}
+      />
     </div>
   )
 }
@@ -170,7 +176,16 @@ export const ObservableHQ: FC<{
 
   // lazy append this styles
   take(ctx, showHistory, (ctx, state, SKIP) => state || SKIP).then(() => {
-    ROOT.append(<style>{jsondiffpatchStyles}</style>)
+    ROOT.append(
+      <style>
+        {jsondiffpatchStyles}
+        {`
+          .jsondiffpatch-unchanged {
+            max-height: 1rem !important;
+          }
+        `}
+      </style>,
+    )
   })
 
   const getPatchHistory = () => {
@@ -214,8 +229,7 @@ export const ObservableHQ: FC<{
         {observablehqStyles.replaceAll(':root', '.observablehq')}
         {`
         .observablehq {
-          margin: 1rem;
-          margin-top: 0em;
+          margin: 0 1rem;
         }
 
         .observablehq--inspect {
@@ -264,8 +278,12 @@ export const ObservableHQ: FC<{
           right: 1rem;
           display: flex;
           gap: 5px;
-
           display: var(--display);
+
+          opacity: 0.5;
+          &:hover, &:focus-within {
+            opacity: 1;
+          }
         `}
       >
         {update && (

@@ -26,5 +26,5 @@ export const getErrorMessage = (ctx: Ctx, thing: unknown) =>
   isRateLimitError(thing)
     ? undefined
     : thing instanceof Error
-      ? thing.message
-      : String(thing)
+    ? thing.message
+    : String(thing)

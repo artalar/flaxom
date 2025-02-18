@@ -4,8 +4,12 @@ import * as assert from 'uvu/assert'
 import { isDeepEqual, toAbortError, toStringKey, random, mockRandom } from './'
 
 test('isDeepEqual Set', () => {
-  assert.ok(isDeepEqual(new Set([{ a: 1 }, { a: 2 }]), new Set([{ a: 1 }, { a: 2 }])))
-  assert.not.ok(isDeepEqual(new Set([{ a: 1 }, { a: 2 }]), new Set([{ a: 2 }, { a: 1 }])))
+  assert.ok(
+    isDeepEqual(new Set([{ a: 1 }, { a: 2 }]), new Set([{ a: 1 }, { a: 2 }])),
+  )
+  assert.not.ok(
+    isDeepEqual(new Set([{ a: 1 }, { a: 2 }]), new Set([{ a: 2 }, { a: 1 }])),
+  )
   ;('👍') //?
 })
 

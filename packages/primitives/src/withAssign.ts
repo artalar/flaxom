@@ -5,4 +5,5 @@ export const withAssign =
   <Target extends Atom, Props extends object>(
     getProps: (target: Target, name: string) => Props,
   ) =>
-  (target: Target) => assign(target, getProps(target, target.__reatom.name!)) as Target & Props
+  (target: Target) =>
+    assign(target, getProps(target, target.__reatom.name!)) as Target & Props
