@@ -102,8 +102,7 @@ export const tokenAtom = atom('', 'tokenAtom').pipe(withLocalStorage('token'))
 
 ```ts
 // feature.test.ts
-import { test } from 'uvu'
-import * as assert from 'uvu/assert'
+import { test } from 'vitest'
 import { createTestCtx } from '@reatom/testing'
 import { createMemStorage } from '@reatom/persist'
 import { withLocalStorage } from '@reatom/persist-web-storage'
@@ -114,10 +113,8 @@ test('token', () => {
   const mockStorage = createMemStorage({ token: '123' })
   withLocalStorage.storageAtom(ctx, mockStorage)
 
-  assert.is(ctx.get(tokenAtom), '123')
+  expect(ctx.get(tokenAtom).toBe('123')
 })
-
-test.run()
 ```
 
 ### SSR

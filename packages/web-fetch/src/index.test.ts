@@ -1,5 +1,4 @@
-import { test } from 'uvu'
-import * as assert from 'uvu/assert'
+import { expect, test } from 'vitest'
 import { createTestCtx, mockFn } from '@reatom/testing'
 import { ReatomFetchConfig, createReatomFetch, reatomFetch } from './index'
 
@@ -19,7 +18,7 @@ test('configuration', async () => {
   ) {
     const fetcher = reatomFetch(input)
     await fetcher(ctx)
-    assert.is(transport.lastInput(0), `${API}/`)
+    expect(transport.lastInput(0)).toBe(`${API}/`)
   }
 
   await configure({ url: API })
@@ -38,7 +37,7 @@ test('merges URLs', async () => {
       urlBase,
     })
     await fetcher(ctx)
-    assert.is(transport.lastInput(0), result)
+    expect(transport.lastInput(0)).toBe(result)
   }
 
   await mergeUrls(API, '', `${API}/`)
@@ -61,14 +60,13 @@ test('merges headers', async () => {
       headersBase,
     })
     await fetcher(ctx)
-    assert.equal(
+    expect(
       Object.fromEntries([
         ...(
           (transport.lastInput(1) as RequestInit).headers as Headers
         ).entries(),
       ]),
-      result,
-    )
+    ).toEqual(result)
   }
 
   await mergeHeaders({ accept: 'text/plain' }, {}, { accept: 'text/plain' })
@@ -102,7 +100,5 @@ test('content parsing', async () => {
 
   const result = await fetcher(ctx)
 
-  assert.equal(result, { got: 'Hello world!' })
+  expect(result).toEqual({ got: 'Hello world!' })
 })
-
-test.run()

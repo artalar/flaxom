@@ -21,9 +21,8 @@
     "build-native-bindings": "microbundle --cwd=react-native-batched-updates --external=react-native,@reatom/react-v2",
     "clean": "rimraf build/",
     "rebuild": "npm run clean && npm run build",
-    "test": "echo jest tests/*",
-    "test:watch": "jest --watch",
-    "test:debug": "node --inspect-brk jest --runInBand",
+    "test": "vitest run tests/*",
+    "test:watch": "vitest tests/*",
     "prettify": "prettier --write '**/*.{js,ts,md}'",
     "prettify:watch": "onchange '**/*.{js,ts,md}' -- prettier --write {{changed}}",
     "ts-check": "tsc --noEmit",
@@ -36,8 +35,10 @@
   },
   "devDependencies": {
     "@reatom/core-v2": "^3.1.0",
+    "@testing-library/react-hooks": "^8.0.1",
     "@types/react": ">=16.8.0",
-    "react": ">=16.8.0"
+    "react": ">=16.8.0",
+    "jsdom": "^19.0.0"
   },
   "author": "artalar",
   "maintainers": [

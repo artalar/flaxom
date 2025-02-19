@@ -11,7 +11,7 @@ const isShallowEqual = (a: unknown[], b: unknown[]) =>
 let ctx: Ctx
 
 /**
- * Set context for all classes wraped by withReatom
+ * Set context for all classes wrapped by withReatom
  *
  * Call it once
  *

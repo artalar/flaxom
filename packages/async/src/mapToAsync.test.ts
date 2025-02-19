@@ -11,7 +11,6 @@ test(`mapToAsync interface`, () => {
   expect(asyncAction).toBeTypeOf('function')
   expect(asyncAction.__reatom.name).toBe('argumentAtom.mapToAsync')
   expect(asyncAction.unstable_unhook).toBeTypeOf('function')
-  ;`👍` //?
 })
 
 test(`is called whenever argument is changed`, async () => {
@@ -30,7 +29,6 @@ test(`is called whenever argument is changed`, async () => {
 
   expect(await hijackedCall).toBe('updated')
   expect(ctx.get(asyncAction.dataAtom)).toBe('updated')
-  ;`👍` //?
 })
 
 test(`can be unhooked`, async () => {
@@ -46,5 +44,4 @@ test(`can be unhooked`, async () => {
 
   await takeNested(ctx, argumentAtom, 'updated')
   expect(ctx.get(asyncAction.dataAtom)).toBe('default')
-  ;`👍` //?
 })

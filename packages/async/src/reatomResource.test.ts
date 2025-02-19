@@ -279,7 +279,7 @@ test('sync retry in onConnect', async () => {
   await sleep()
   await sleep()
   track.unsubscribe()
-  expect(ctx.get(getEventsSoon.dataAtom) > 1).toBeTruthy()
+  expect(ctx.get(getEventsSoon.dataAtom)).toBeGreaterThan(1)
 })
 
 test('do not drop the cache of an error', async () => {

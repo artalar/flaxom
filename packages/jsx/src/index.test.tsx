@@ -1,4 +1,4 @@
-import { it, expect } from 'vitest'
+import { test, expect } from 'vitest'
 import { createTestCtx, mockFn, type TestCtx } from '@reatom/testing'
 import { type Fn, type Rec, atom } from '@reatom/core'
 import { reatomLinkedList } from '@reatom/primitives'
@@ -37,7 +37,7 @@ const html = (arr: TemplateStringsArray, ...args: any[]) => {
   return html
 }
 
-it(
+test(
   'static props & children',
   setup((ctx, h, hf, mount, parent) => {
     const element = <div id="some-id">Hello, world!</div>
@@ -49,7 +49,7 @@ it(
   }),
 )
 
-it(
+test(
   'dynamic props',
   setup((ctx, h, hf, mount, parent) => {
     const val = atom('val', 'val')
@@ -61,7 +61,6 @@ it(
     mount(parent, element)
 
     expect(element.id).toBe('val')
-    // @ts-expect-error `dunno` can't be inferred
     expect(element.prp).toBe('prp')
     expect(element.getAttribute('atr')).toBe('atr')
 
@@ -70,13 +69,12 @@ it(
     atr(ctx, 'atr1')
 
     expect(element.id).toBe('val1')
-    // @ts-expect-error `dunno` can't be inferred
     expect(element.prp).toBe('prp1')
     expect(element.getAttribute('atr')).toBe('atr1')
   }),
 )
 
-it(
+test(
   'children updates',
   setup((ctx, h, hf, mount, parent) => {
     const val = atom('foo', 'val')
@@ -107,7 +105,7 @@ it(
   }),
 )
 
-it(
+test(
   'dynamic children',
   setup((ctx, h, hf, mount, parent) => {
     const children = atom(<div />)
@@ -142,7 +140,7 @@ it(
   }),
 )
 
-it(
+test(
   'spreads',
   setup((ctx, h, hf, mount, parent) => {
     const clickTrack = mockFn()
@@ -159,13 +157,12 @@ it(
     expect(element.id).toBe('1')
     expect(element.getAttribute('b')).toBe('2')
     expect(clickTrack.calls.length).toBe(0)
-    // @ts-expect-error
     element.click()
     expect(clickTrack.calls.length).toBe(1)
   }),
 )
 
-it(
+test(
   'multiple renden shared element',
   setup(async (ctx, h, hf, mount, parent) => {
     const valueAtom = atom('abc', 'value')
@@ -178,7 +175,10 @@ it(
       </>
     )
 
-    const childAtom = atom<JSX.Element | undefined>(<Component></Component>, 'child')
+    const childAtom = atom<JSX.Element | undefined>(
+      <Component></Component>,
+      'child',
+    )
     const app = <div>{childAtom}</div>
 
     mount(parent, app)
@@ -206,7 +206,7 @@ it(
   }),
 )
 
-it(
+test(
   'fragment as child',
   setup((ctx, h, hf, mount, parent) => {
     const child = (
@@ -224,11 +224,13 @@ it(
   }),
 )
 
-it(
+test(
   'array children',
   setup((ctx, h, hf, mount, parent) => {
     const n = atom(1)
-    const list = atom((ctx) => <>{...Array.from({ length: ctx.spy(n) }, (_, i) => <li>{i + 1}</li>)}</>)
+    const list = atom((ctx) => (
+      <>{...Array.from({ length: ctx.spy(n) }, (_, i) => <li>{i + 1}</li>)}</>
+    ))
 
     const element = (
       <ul>
@@ -248,7 +250,7 @@ it(
   }),
 )
 
-it(
+test(
   'linked list',
   setup(async (ctx, h, hf, mount, parent) => {
     const list = reatomLinkedList((ctx, value: any) => atom(value))
@@ -259,8 +261,8 @@ it(
     mount(parent, <div>{jsxList}</div>)
 
     expect(parent.innerText).toBe('12')
-    expect(isConnected(ctx, one)).toBeTruthy()
-    expect(isConnected(ctx, two)).toBeTruthy()
+    expect(isConnected(ctx, one)).toBe(true)
+    expect(isConnected(ctx, two)).toBe(true)
 
     list.swap(ctx, one, two)
     expect(parent.innerText).toBe('21')
@@ -268,15 +270,14 @@ it(
     list.remove(ctx, two)
     expect(parent.innerText).toBe('1')
     await sleep()
-    expect(isConnected(ctx, one)).toBeTruthy()
-    expect(isConnected(ctx, two)).toBeFalsy()
+    expect(isConnected(ctx, one)).toBe(true)
+    expect(isConnected(ctx, two)).toBe(false)
 
     list.create(ctx, <>3</>)
-
   }),
 )
 
-it(
+test(
   'boolean as child',
   setup((ctx, h, hf, mount, parent) => {
     const trueAtom = atom(true, 'true')
@@ -294,12 +295,14 @@ it(
     )
 
     expect(element.childNodes.length).toBe(4)
-    expect(element.innerHTML).toBe('<!--true--><!--true--><!--false--><!--false-->')
+    expect(element.innerHTML).toBe(
+      '<!--true--><!--true--><!--false--><!--false-->',
+    )
     expect(element.textContent).toBe('')
   }),
 )
 
-it(
+test(
   'null as child',
   setup((ctx, h, hf, mount, parent) => {
     const nullAtom = atom(null, 'null')
@@ -318,7 +321,7 @@ it(
   }),
 )
 
-it(
+test(
   'undefined as child',
   setup((ctx, h, hf, mount, parent) => {
     const undefinedAtom = atom(undefined, 'undefined')
@@ -337,7 +340,7 @@ it(
   }),
 )
 
-it(
+test(
   'empty string as child',
   setup((ctx, h, hf, mount, parent) => {
     const emptyStringAtom = atom('', 'emptyString')
@@ -356,7 +359,7 @@ it(
   }),
 )
 
-it(
+test(
   'update skipped atom',
   setup((ctx, h, hf, mount, parent) => {
     const valueAtom = atom<number | undefined>(undefined, 'value')
@@ -375,7 +378,7 @@ it(
   }),
 )
 
-it(
+test(
   'render HTMLElement atom',
   setup((ctx, h, hf, mount, parent) => {
     const htmlAtom = atom(<div>div</div>, 'html')
@@ -386,7 +389,7 @@ it(
   }),
 )
 
-it(
+test(
   'render SVGElement atom',
   setup((ctx, h, hf, mount, parent) => {
     const svgAtom = atom(<svg:svg>svg</svg:svg>, 'svg')
@@ -397,18 +400,20 @@ it(
   }),
 )
 
-it(
+test(
   'custom component',
   setup((ctx, h, hf, mount, parent) => {
     const Component = (props: JSX.HTMLAttributes) => <div {...props} />
 
     expect(<Component />).toBeInstanceOf(window.HTMLElement)
-    expect(((<Component draggable="true" />) as HTMLElement).draggable).toBe(true)
+    expect(((<Component draggable="true" />) as HTMLElement).draggable).toBe(
+      true,
+    )
     expect(((<Component>123</Component>) as HTMLElement).innerText).toBe('123')
   }),
 )
 
-it(
+test(
   'ref unmount callback',
   setup(async (ctx, h, hf, mount, parent) => {
     const Component = (props: JSX.HTMLAttributes) => <div {...props} />
@@ -435,7 +440,7 @@ it(
   }),
 )
 
-it(
+test(
   'child ref unmount callback',
   setup(async (ctx, h, hf, mount, parent) => {
     const Component = (props: JSX.HTMLAttributes) => <div {...props} />
@@ -463,7 +468,7 @@ it(
   }),
 )
 
-it(
+test(
   'same arguments in ref mount and unmount hooks',
   setup(async (ctx, h, hf, mount, parent) => {
     const mountArgs: unknown[] = []
@@ -500,7 +505,7 @@ it(
   }),
 )
 
-it(
+test(
   'css property and class attribute',
   setup(async (ctx, h, hf, mount, parent) => {
     const cls = 'class'
@@ -531,7 +536,7 @@ it(
   }),
 )
 
-it(
+test(
   'css property generate class name',
   setup(async (ctx, h, hf, mount, parent) => {
     const css = 'color: red;'
@@ -557,12 +562,14 @@ it(
   }),
 )
 
-it(
+test(
   'css custom property',
   setup(async (ctx, h, hf, mount, parent) => {
     const colorAtom = atom('red' as string | undefined)
 
-    const component = <div css:first-property={colorAtom} css:secondProperty={colorAtom}></div>
+    const component = (
+      <div css:first-property={colorAtom} css:secondProperty={colorAtom}></div>
+    )
 
     mount(parent, component)
     await sleep()
@@ -582,7 +589,7 @@ it(
   }),
 )
 
-it(
+test(
   'class and className attribute',
   setup(async (ctx, h, hf, mount, parent) => {
     const classAtom = atom('' as string | undefined)
@@ -617,7 +624,7 @@ it(
   }),
 )
 
-it(
+test(
   'ref mount and unmount callbacks order',
   setup(async (ctx, h, hf, mount, parent) => {
     const order: number[] = []
@@ -644,11 +651,11 @@ it(
     parent.remove()
     await sleep()
 
-    expect(order).toEqual([2, 1, 0, 0, 1, 2])
+    expect(order).toStrictEqual([2, 1, 0, 0, 1, 2])
   }),
 )
 
-it(
+test(
   'style object update',
   setup((ctx, h, hf, mount, parent) => {
     const styleTopAtom = atom<JSX.StyleProperties['top']>('0')
@@ -692,7 +699,7 @@ it(
   }),
 )
 
-it(
+test(
   'render atom fragments',
   setup(async (ctx, h, hf, mount, parent) => {
     const bool1Atom = atom(false)
@@ -730,7 +737,8 @@ it(
     await sleep()
 
     const expect1 = '<p>0</p><!--1--><!--1--><p>5</p>'
-    const expect2 = '<p>0</p><!--1--><!----><p>1</p><!--2--><!--2--><p>4</p><!----><!--1--><p>5</p>'
+    const expect2 =
+      '<p>0</p><!--1--><!----><p>1</p><!--2--><!--2--><p>4</p><!----><!--1--><p>5</p>'
     const expect3 =
       '<p>0</p><!--1--><!----><p>1</p><!--2--><!----><p>2</p><p>3</p><!----><!--2--><p>4</p><!----><!--1--><p>5</p>'
 
@@ -768,7 +776,7 @@ it(
   }),
 )
 
-it(
+test(
   'Bind',
   setup(async (ctx, h, hf, mount, parent) => {
     const div = (<div />) as HTMLDivElement
@@ -785,7 +793,11 @@ it(
       />
     )
     const testInput = (
-      <Bind element={input} value={inputState} on:input={(ctx, e) => inputState(ctx, e.currentTarget.value)} />
+      <Bind
+        element={input}
+        value={inputState}
+        on:input={(ctx, e) => inputState(ctx, e.currentTarget.value)}
+      />
     )
     const testSvg = (
       <Bind element={svg}>
@@ -811,7 +823,7 @@ it(
   }),
 )
 
-it(
+test(
   'dynamic atom fragment',
   setup((ctx, h, hf, mount, parent) => {
     const child = atom<JSX.HTMLAttributes['children']>(<span />, 'test')
@@ -819,14 +831,18 @@ it(
     const container = <div>{child}</div>
     mount(parent, container)
 
-    expect(container.outerHTML).toBe('<div><!--test--><span></span><!--test--></div>')
+    expect(container.outerHTML).toBe(
+      '<div><!--test--><span></span><!--test--></div>',
+    )
 
     child(ctx, () => atom('child atom', 'test.child'))
-    expect(container.outerHTML).toBe('<div><!--test--><!--test.child-->child atom<!--test.child--><!--test--></div>')
+    expect(container.outerHTML).toBe(
+      '<div><!--test--><!--test.child-->child atom<!--test.child--><!--test--></div>',
+    )
   }),
 )
 
-it(
+test(
   'linked list',
   setup((ctx, h, hf, mount, parent) => {
     const a = atom(true)
@@ -841,10 +857,14 @@ it(
     const container = <div>{list}</div>
     mount(parent, container)
 
-    expect(container.outerHTML).toBe('<div><!----><span>1</span><!--test--><a></a><!--test--><!----></div>')
+    expect(container.outerHTML).toBe(
+      '<div><!----><span>1</span><!--test--><a></a><!--test--><!----></div>',
+    )
 
     a(ctx, false)
-    expect(container.outerHTML).toBe('<div><!----><span>1</span><!--test--><br><!--test--><!----></div>')
+    expect(container.outerHTML).toBe(
+      '<div><!----><span>1</span><!--test--><br><!--test--><!----></div>',
+    )
 
     const node = list.create(ctx, '2')
     expect(container.outerHTML).toBe(
@@ -852,6 +872,8 @@ it(
     )
 
     list.remove(ctx, node)
-    expect(container.outerHTML).toBe('<div><!----><span>1</span><!--test--><br><!--test--><!----></div>')
+    expect(container.outerHTML).toBe(
+      '<div><!----><span>1</span><!--test--><br><!--test--><!----></div>',
+    )
   }),
 )

@@ -1,5 +1,4 @@
-import { test } from 'uvu'
-import * as assert from 'uvu/assert'
+import { test, expect } from 'vitest'
 import { createTestCtx, mockFn } from '@reatom/testing'
 
 import {
@@ -18,10 +17,10 @@ test('direct updateFromSource call should be ignored', async () => {
   setupUrlAtomSettings(ctx, () => new URL('http://example.com'), sync)
   ctx.get(urlAtom)
 
-  assert.is(sync.calls.length, 0)
+  expect(sync.calls.length).toBe(0)
   searchParamsAtom.set(ctx, 'test', '1')
-  assert.is(sync.calls.length, 1)
-  assert.is(ctx.get(urlAtom).href, 'http://example.com/?test=1')
+  expect(sync.calls.length).toBe(1)
+  expect(ctx.get(urlAtom).href).toBe('http://example.com/?test=1')
 
   const un = urlAtom.onChange(async (ctx) => {
     un()
@@ -32,11 +31,11 @@ test('direct updateFromSource call should be ignored', async () => {
   const url = new URL(ctx.get(urlAtom))
   url.searchParams.set('test', '2')
   updateFromSource(ctx, url)
-  assert.is(sync.calls.length, 1)
-  assert.is(ctx.get(urlAtom).href, 'http://example.com/?test=2')
+  expect(sync.calls.length).toBe(1)
+  expect(ctx.get(urlAtom).href).toBe('http://example.com/?test=2')
   await null
-  assert.is(sync.calls.length, 2)
-  assert.is(ctx.get(urlAtom).href, 'http://example.com/?test=3')
+  expect(sync.calls.length).toBe(2)
+  expect(ctx.get(urlAtom).href).toBe('http://example.com/?test=3')
 })
 
 test('SearchParamsAtom.lens', () => {
@@ -46,16 +45,16 @@ test('SearchParamsAtom.lens', () => {
   const testAtom = searchParamsAtom.lens('test', (value = '1') => Number(value))
 
   testAtom(ctx, 2)
-  assert.is(ctx.get(testAtom), 2)
-  assert.is(ctx.get(urlAtom).href, 'http://example.com/?test=2')
+  expect(ctx.get(testAtom)).toBe(2)
+  expect(ctx.get(urlAtom).href).toBe('http://example.com/?test=2')
 
   testAtom(ctx, 3)
-  assert.is(ctx.get(urlAtom).href, 'http://example.com/?test=3')
+  expect(ctx.get(urlAtom).href).toBe('http://example.com/?test=3')
 
   urlAtom.go(ctx, '/path')
-  assert.is(ctx.get(urlAtom).href, 'http://example.com/path')
-  assert.is(ctx.get(testAtom), 1)
-  assert.is(ctx.get(urlAtom).href, 'http://example.com/path')
+  expect(ctx.get(urlAtom).href).toBe('http://example.com/path')
+  expect(ctx.get(testAtom)).toBe(1)
+  expect(ctx.get(urlAtom).href).toBe('http://example.com/path')
 })
 
 test('SearchParamsAtom.lens path', () => {
@@ -70,19 +69,19 @@ test('SearchParamsAtom.lens path', () => {
   ctx.subscribeTrack(testAtom)
 
   urlAtom.go(ctx, '/results?test=2')
-  assert.is(ctx.get(testAtom), 2)
+  expect(ctx.get(testAtom)).toEqual(2)
 
   testAtom(ctx, 3)
-  assert.is(ctx.get(urlAtom).href, 'http://example.com/results?test=3')
+  expect(ctx.get(urlAtom).href).toEqual('http://example.com/results?test=3')
 
   urlAtom.go(ctx, '/results/some')
-  assert.is(ctx.get(testAtom), 1)
+  expect(ctx.get(testAtom)).toEqual(1)
 
   testAtom(ctx, 2)
-  assert.is(ctx.get(urlAtom).href, 'http://example.com/results/some')
+  expect(ctx.get(urlAtom).href).toEqual('http://example.com/results/some')
 
   urlAtom.go(ctx, '/results')
-  assert.is(ctx.get(urlAtom).href, 'http://example.com/results')
+  expect(ctx.get(urlAtom).href).toEqual('http://example.com/results')
 })
 
 test('SearchParamsAtom.lens subpath', () => {
@@ -101,26 +100,29 @@ test('SearchParamsAtom.lens subpath', () => {
   ctx.subscribeTrack(searchParamsAtom)
 
   urlAtom.go(ctx, '/results?test=2')
-  assert.is(ctx.get(testAtom), 2)
+  expect(ctx.get(testAtom)).toEqual(2)
 
   testAtom(ctx, 3)
-  assert.is(ctx.get(urlAtom).href, 'http://example.com/results?test=3')
+  expect(ctx.get(urlAtom).href).toEqual('http://example.com/results?test=3')
 
   urlAtom.go(ctx, '/results/some')
-  assert.is(ctx.get(urlAtom).href, 'http://example.com/results/some?test=3')
+  expect(ctx.get(urlAtom).href).toEqual(
+    'http://example.com/results/some?test=3',
+  )
 
   urlAtom.go(ctx, '/some')
-  assert.is(ctx.get(testAtom), 1)
+  expect(ctx.get(testAtom)).toEqual(1)
 
   track.unsubscribe()
 
   urlAtom.go(ctx, '/results')
-  assert.is(ctx.get(urlAtom).href, 'http://example.com/results')
+  expect(ctx.get(urlAtom).href).toEqual('http://example.com/results')
 
   testAtom(ctx, 2)
-  assert.is(ctx.get(urlAtom).href, 'http://example.com/results?test=2')
+  expect(ctx.get(urlAtom).href).toEqual('http://example.com/results?test=2')
+
   urlAtom.go(ctx, '/results/some')
-  assert.is(ctx.get(urlAtom).href, 'http://example.com/results/some')
+  expect(ctx.get(urlAtom).href).toEqual('http://example.com/results/some')
 })
 
 test('SearchParamsAtom remove query from url', () => {
@@ -139,10 +141,10 @@ test('SearchParamsAtom remove query from url', () => {
   ctx.subscribeTrack(testAtom)
 
   urlAtom.go(ctx, '/results?test=2')
-  assert.is(ctx.get(testAtom), 2)
+  expect(ctx.get(testAtom)).toEqual(2)
 
   testAtom(ctx, undefined)
-  assert.is(ctx.get(urlAtom).href, 'http://example.com/results')
+  expect(ctx.get(urlAtom).href).toEqual('http://example.com/results')
 })
 
 test('inactive subpath should not affect mutated atoms', () => {
@@ -158,17 +160,15 @@ test('inactive subpath should not affect mutated atoms', () => {
   )
 
   ctx.subscribeTrack(testAtom)
-  assert.is(ctx.get(testAtom), 10)
+  expect(ctx.get(testAtom)).toBe(10)
 
   urlAtom.go(ctx, '/other?test=2')
-  assert.is(ctx.get(testAtom), 1)
+  expect(ctx.get(testAtom)).toBe(1)
 
   testAtom(ctx, 123)
-  assert.is(ctx.get(testAtom), 123)
-  assert.is(ctx.get(urlAtom).href, 'http://example.com/other?test=2')
+  expect(ctx.get(testAtom)).toBe(123)
+  expect(ctx.get(urlAtom).href).toBe('http://example.com/other?test=2')
 
   urlAtom.go(ctx, '/other?test=3')
-  assert.is(ctx.get(testAtom), 123)
+  expect(ctx.get(testAtom)).toBe(123)
 })
-
-test.run()

@@ -1,15 +1,14 @@
-import { test } from 'uvu'
-import * as assert from 'uvu/assert'
+import { test, expect } from 'vitest'
 import { action, atom, createCtx } from '@reatom/core'
-import { mapPayloadAwaited, toAtom } from '@reatom/lens'
-import { omit, sleep } from '@reatom/utils'
+import { mapPayloadAwaited } from '@reatom/lens'
+import { sleep } from '@reatom/utils'
 import { mockFn } from '@reatom/testing'
 
 import { connectLogger, createLogBatched } from '.'
 
-test.skip(`base`, async () => {
+test.skip('base', async () => {
   const a1 = atom(0)
-  const a2 = atom(0, `a2`)
+  const a2 = atom(0, 'a2')
   const ctx = createCtx()
   const log = mockFn()
 
@@ -18,27 +17,24 @@ test.skip(`base`, async () => {
 
   connectLogger(ctx, { log })
 
-  ctx.get(() => {
+  ctx.get((): void => {
     a1(ctx, 1)
     a2(ctx, 2)
   })
 
-  // assert.equal(log.lastInput().changes, { '2.a2': 2 })
-
-  ctx.get(() => {
+  // expect(log.lastInput().changes).toEqual({ '2.a2': 2 })
+  ctx.get((): void => {
     a2(ctx, 10)
     a2(ctx, 20)
   })
 
-  // assert.equal(log.lastInput().changes, { '1.a2': 10, '2.a2': 20 })
-
-  // padStart test
-  ctx.get(() => {
+  // expect(log.lastInput().changes).toEqual({ '1.a2': 10, '2.a2': 20 })
+  ctx.get((): void => {
     let i = 0
     while (i++ < 10) a2(ctx, i)
   })
 
-  assert.equal(log.lastInput().changes, {
+  expect(log.lastInput().changes).toEqual({
     '1.a2': 1,
     '2.a2': 2,
     '3.a2': 3,
@@ -50,17 +46,16 @@ test.skip(`base`, async () => {
     '9.a2': 9,
     '10.a2': 10,
   })
-  ;`👍` //?
 })
 
-test.skip(`cause`, async () => {
+test.skip('cause', async () => {
   // should correct calculate cause for complex async transactions
   const doAsync = action(
-    (ctx, v: number) => ctx.schedule(() => Promise.resolve(v)),
-    `doAsync`,
+    (ctx, v) => ctx.schedule(() => Promise.resolve(v)),
+    'doAsync',
   )
   const asyncResAtom = doAsync.pipe(
-    mapPayloadAwaited((ctx, v) => v, `asyncResAtom`),
+    mapPayloadAwaited((ctx, v) => v, 'asyncResAtom'),
   )
   const resMapAtom = atom((ctx) => ctx.spy(asyncResAtom), 'resMapAtom')
 
@@ -78,7 +73,7 @@ test.skip(`cause`, async () => {
   doAsync(ctx, 123)
   await sleep(5)
 
-  assert.equal(log.lastInput(), {
+  expect(log.lastInput()).toEqual({
     '1.0.___timestamp___': '1',
     '1.1.doAsync': { params: [123], payload: new Promise(() => {}) },
     '1.1.___cause___': 'root',
@@ -88,10 +83,9 @@ test.skip(`cause`, async () => {
     '2.3.resMapAtom': [{ params: [123], payload: 123 }],
     '2.3.___cause___': 'doAsync.asyncResAtom <-- doAsync',
   })
-  ;`👍` //?
 })
 
-test.skip(`should skip logs without state changes`, async () => {
+test.skip('should skip logs without state changes', async () => {
   const a = atom(0, 'nAtom')
   const ctx = createCtx()
   const log = mockFn()
@@ -109,23 +103,23 @@ test.skip(`should skip logs without state changes`, async () => {
 
   a(ctx, 1)
 
-  assert.is(log.calls.length, 0)
+  expect(log.calls.length).toBe(0)
 
   await sleep(1)
 
-  assert.is(log.calls.length, 1)
+  expect(log.calls.length).toBe(1)
 
   a(ctx, 1)
 
-  assert.is(log.calls.length, 1)
+  expect(log.calls.length).toBe(1)
 
   await 0
 
-  assert.is(log.calls.length, 1)
+  expect(log.calls.length).toBe(1)
 
   a(ctx, 2)
 
-  ctx.get(() => {
+  ctx.get((): void => {
     ctx.get(a)
   })
 
@@ -138,12 +132,12 @@ test.skip(`should skip logs without state changes`, async () => {
 
   a(ctx, 3)
 
-  assert.is(log.calls.length, 1)
+  expect(log.calls.length).toBe(1)
 
   await sleep()
 
-  assert.is(log.calls.length, 2)
-  assert.equal(log.lastInput(), {
+  expect(log.calls.length).toBe(2)
+  expect(log.lastInput()).toEqual({
     '1.0.___timestamp___': '2',
     '1.1.nAtom': 2,
     '2.0.___timestamp___': '3',
@@ -151,7 +145,4 @@ test.skip(`should skip logs without state changes`, async () => {
     '2.3.nAtom2': 1,
     '2.4.nAtom': 3,
   })
-  ;`👍` //?
 })
-
-test.run()
