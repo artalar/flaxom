@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.4](https://github.com/artalar/reatom/compare/devtools-v0.11.3...devtools-v0.11.4) (2025-02-19)
+
+
+### Bug Fixes
+
+* **devtools:** optimize regexp pattern ([#1050](https://github.com/artalar/reatom/issues/1050)) ([270fbac](https://github.com/artalar/reatom/commit/270fbacb1ca5eee5db30acb3b2686429b3a6476a))
+
 ## [0.11.3](https://github.com/artalar/reatom/compare/devtools-v0.11.2...devtools-v0.11.3) (2025-02-18)
 
 ### Bug Fixes
