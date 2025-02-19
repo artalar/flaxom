@@ -66,4 +66,15 @@ test(`reatomMap. clear`, () => {
   assert.equal(ctx.get(mapAtom.sizeAtom), 0)
 })
 
+test(`reatomMap should accept map constructor as initState`, () => {
+  const ctx = createCtx()
+
+  let mapAtom = reatomMap(defaultMapEntries)
+  assert.equal(ctx.get(mapAtom.sizeAtom), 3)
+
+  mapAtom = reatomMap();
+  assert.equal(ctx.get(mapAtom.sizeAtom), 0)
+})
+
+
 test.run()
