@@ -1,0 +1,73 @@
+---
+import Select from '@astrojs/starlight/components/Select.astro'
+
+const defaultVersion = 'v3'
+const versions = [
+  {
+    code: 'v4',
+    url: 'https://v4.reatom.dev/',
+  },
+  {
+    code: 'v3',
+    url: 'https://v3.reatom.dev/',
+  },
+]
+const defaultURL = versions.find((a) => a.code === defaultVersion)!.url
+---
+
+<reatom-version-select>
+  <Select
+    icon="rocket"
+    label="Platform version"
+    value={defaultURL}
+    options={versions.map((version) => ({
+      label: version.code,
+      value: version.url,
+      selected: version.code === defaultVersion,
+    }))}
+    width="min-content"
+  />
+</reatom-version-select>
+
+<script>
+  class ReatomVersionSelect extends HTMLElement {
+    constructor() {
+      super()
+      const select = this.querySelector('select')
+      if (select) {
+        const preselectValue = this.#getCurrentCode(select.getElementsByTagName('option'))
+        if (preselectValue) {
+          select.value = preselectValue
+        }
+        
+        select.addEventListener('change', (e) => {
+          if (e.currentTarget instanceof HTMLSelectElement) {
+            window.location.href = e.currentTarget.value
+          }
+        })
+      }
+    }
+
+    #getCurrentCode(variants: HTMLCollectionOf<HTMLOptionElement>) {
+      const host = location.host
+      for (const variant of variants) {
+        const candidateURL = variant.value
+        const candidateHost = new URL(candidateURL).host
+
+        if (host === candidateHost) return candidateURL
+      }
+
+      return
+    }
+  }
+
+  customElements.define('reatom-version-select', ReatomVersionSelect)
+</script>
+
+<style>
+  /* reatom-version-select {
+        padding-inline-start: .5rem;
+        padding-inline-end: .2rem;
+        border: 1px solid var(--sl-color-gray-5);
+    } */
+</style>
