@@ -1,0 +1,30 @@
+@tailwind base;
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto',
+      'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans',
+      'Helvetica Neue', sans-serif;
+    background: #fff;
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+  }
+
+  a {
+    color: revert;
+  }
+
+  h1 {
+    font-size: revert;
+    font-weight: bold;
+  }
+}
