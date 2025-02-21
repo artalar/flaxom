@@ -217,19 +217,16 @@ const patchStyleProperty = (
 export const reatomJsx = (
   ctx: Ctx,
   DOM: DomApis = globalThis.window,
-  {
-    stylesheetContainer = DOM.document.head,
-  }: {
+  config: {
     /**
-     * The container to which the styles will be added.
+     * The node to insert styles into.
      * @default DOM.document.head
      */
     stylesheetContainer?: Node
   } = {},
 ) => {
-  const StylesheetId = 'reatom-jsx-styles'
-  let styles: Rec<string> = {}
-  let stylesheet: HTMLStyleElement | undefined
+  const styles: Rec<string> = {}
+  const stylesheet = (config.stylesheetContainer ?? DOM.document.head).appendChild( DOM.document.createElement('style') )
   let name = ''
 
   let set = (element: JSX.Element, key: string, val: any) => {
@@ -243,13 +240,6 @@ export const reatomJsx = (
       if (val == null) element.style.removeProperty(key)
       else element.style.setProperty(key, String(val))
     } else if (key === 'css') {
-      stylesheet ??= DOM.document.getElementById(StylesheetId) as any
-      if (!stylesheet) {
-        stylesheet = DOM.document.createElement('style')
-        stylesheet.id = StylesheetId
-        stylesheetContainer.appendChild(stylesheet)
-      }
-
       const prefix = name ? name + '_' : ''
       const styleKey = prefix + val
       let styleId = styles[styleKey]
@@ -445,19 +435,29 @@ export const reatomJsx = (
 }
 
 export const ctx = createCtx()
-export const { h, hf, mount } = reatomJsx(ctx)
+export const { h, hf, mount } = reatomJsx(
+  ctx,
+  globalThis.window ??
+    new Proxy(
+      {},
+      {
+        get() {
+          throw new Error(
+            'cannot use the default @reatom/jsx instance in a DOM-less environment',
+          )
+        },
+      },
+    ),
+)
 
 /**
- * This simple utility needed only for syntax highlighting and it just concatenates all passed strings.
- * Falsy values are ignored, except for `0`.
+ * Provides highlighting of css snippets in editors and strips falsy substitutions except numeric ones (0 and NaN).
  */
-export const css = (strings: TemplateStringsArray, ...values: any[]) => {
-  let result = ''
-  for (let i = 0; i < strings.length; i++) {
-    result += strings[i] + (values[i] || values[i] === 0 ? values[i] : '')
-  }
-  return result
-}
+export const css = (templs: TemplateStringsArray, ...subs: any[]) =>
+  templs.reduce(
+    (res, templ, i) => res + templ + (subs[i] == null ? '' : subs[i]),
+    '',
+  )
 
 export const Bind = <T extends Element>(
   props: { element: T } & AttributesAtomMaybe<
