@@ -1,10 +1,8 @@
 import { createTestCtx } from '@reatom/testing'
-import { suite } from 'uvu'
-import * as assert from 'uvu/assert'
+import { describe, test } from 'vitest'
+import { expect } from 'vitest'
 import { match } from './match'
 import { Ctx, CtxSpy, atom } from '@reatom/core'
-
-const test = suite('match')
 
 test('is method', () => {
   const ctx = createTestCtx()
@@ -23,18 +21,16 @@ test('is method', () => {
 
   for (const expression of expressions) {
     for (const statement of statements) {
-      assert.is(ctx.get(match(expression)), undefined)
-      assert.is(ctx.get(match(expression).is('b', statement)), undefined)
-      assert.is(ctx.get(match(expression).is('a', statement)), true)
-      assert.is(
+      expect(ctx.get(match(expression))).toBe(undefined)
+      expect(ctx.get(match(expression).is('b', statement))).toBe(undefined)
+      expect(ctx.get(match(expression).is('a', statement))).toBe(true)
+      expect(
         ctx.get(match(expression).is('a', statement).is('b', true)),
-        true,
-      )
-      assert.is(
+      ).toBe(true)
+      expect(
         ctx.get(match(expression).is('b', statement).is('a', true)),
-        true,
-      )
-      assert.is(ctx.get(match(expression).default(statement)), true)
+      ).toBe(true)
+      expect(ctx.get(match(expression).default(statement))).toBe(true)
     }
   }
 
@@ -42,10 +38,10 @@ test('is method', () => {
   const isA = match(a).is('a', true).default(false)
 
   const track = ctx.subscribeTrack(isA)
-  assert.is(track.lastInput(), true)
+  expect(track.lastInput()).toBe(true)
 
   a(ctx, 'abc')
-  assert.is(track.lastInput(), false)
+  expect(track.lastInput()).toBe(false)
   ;`👍` //?
 })
 
@@ -68,22 +64,22 @@ test('with', () => {
     .default('default')
 
   result(ctx, { type: 'unknown' })
-  assert.is(ctx.get(matched), 'default')
+  expect(ctx.get(matched)).toBe('default')
 
   result(ctx, { type: 'error' })
-  assert.is(ctx.get(matched), 'error')
+  expect(ctx.get(matched)).toBe('error')
 
   result(ctx, { type: 'ok', data: { type: 'img' } })
-  assert.is(ctx.get(matched), 'ok/img')
+  expect(ctx.get(matched)).toBe('ok/img')
 
   result(ctx, { type: 'ok', data: { type: 'text' } })
-  assert.is(ctx.get(matched), 'ok/text')
+  expect(ctx.get(matched)).toBe('ok/text')
 })
 
 test('default should checks in the end', () => {
   const ctx = createTestCtx()
 
-  assert.is(ctx.get(match(true).default(false).truthy(true)), true)
+  expect(ctx.get(match(true).default(false).truthy(true))).toBe(true)
   ;`👍` //?
 })
 
@@ -97,11 +93,9 @@ test('reactive change', () => {
 
   const track = ctx.subscribeTrack(compAtom)
 
-  assert.equal(track.inputs(), ['a'])
+  expect(track.inputs()).toEqual(['a'])
 
   boolAtom(ctx, false)
   boolAtom(ctx, true)
-  assert.equal(track.inputs(), ['a', 'b', 'a'])
+  expect(track.inputs()).toEqual(['a', 'b', 'a'])
 })
-
-test.run()

@@ -1,10 +1,8 @@
 import { createTestCtx } from '@reatom/testing'
-import { suite } from 'uvu'
-import * as assert from 'uvu/assert'
-import { atom, AtomMut } from '@reatom/core'
+import { describe, test } from 'vitest'
+import { expect } from 'vitest'
+import { atom } from '@reatom/core'
 import { select } from './select'
-
-const test = suite('select')
 
 // test('should not recompute the end atom if the source atom changed', () => {
 //   let track = 0
@@ -74,31 +72,31 @@ const test = suite('select')
 //   // assert.is(ctx.get(sum), 3)
 // })
 
-test('should filter equals', () => {
-  const n = atom(1)
-  const odd = atom((ctx) =>
-    select(
-      ctx,
-      (selectCtx) => selectCtx.spy(n),
-      (prev, next) => next % 2 === 0,
-    ),
-  )
-  const ctx = createTestCtx()
-  const track = ctx.subscribeTrack(odd)
-  track.calls.length = 0
+describe('select', () => {
+  test('should filter equals', () => {
+    const n = atom(1)
+    const odd = atom((ctx) =>
+      select(
+        ctx,
+        (selectCtx) => selectCtx.spy(n),
+        (prev, next) => next % 2 === 0,
+      ),
+    )
+    const ctx = createTestCtx()
+    const track = ctx.subscribeTrack(odd)
+    track.calls.length = 0
 
-  n(ctx, 2)
-  assert.is(track.calls.length, 0)
+    n(ctx, 2)
+    expect(track.calls.length).toBe(0)
 
-  n(ctx, 4)
-  assert.is(track.calls.length, 0)
+    n(ctx, 4)
+    expect(track.calls.length).toBe(0)
 
-  n(ctx, 5)
-  assert.is(track.calls.length, 1)
-  assert.is(track.lastInput(), 5)
+    n(ctx, 5)
+    expect(track.calls.length).toBe(1)
+    expect(track.lastInput()).toBe(5)
 
-  n(ctx, 6)
-  assert.is(track.calls.length, 1)
+    n(ctx, 6)
+    expect(track.calls.length).toBe(1)
+  })
 })
-
-test.run()
