@@ -49,7 +49,7 @@ import { action, atom, Atom } from '@reatom/core'
 // operator accepts an options by a first argument
 // and returns function witch accepts target atom
 export const delay =
-  <T,>(ms: number) =>
+  <T>(ms: number) =>
   (anAtom: Atom<T>) => {
     // to improve debugability compute name of the new atom
     const name = `${anAtom.__reatom.name}.delay`

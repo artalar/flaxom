@@ -15,18 +15,18 @@ interface RoutesScheme {
 type Routes<T extends RoutesScheme | string> = T extends ''
   ? RouteAtom
   : T extends `${string}/${string}`
-  ? never
-  : RouteAtom & {
-      routes: {
-        [K in keyof T as K extends `${infer K}/${string}`
-          ? K
-          : K]: K extends `${string}/:${infer Param}`
-          ? // @ts-ignore
-            Routes<Record<Param, T[K]>> & { param: Atom<string> }
-          : // @ts-ignore
-            Routes<T[K]>
+    ? never
+    : RouteAtom & {
+        routes: {
+          [K in keyof T as K extends `${infer K}/${string}`
+            ? K
+            : K]: K extends `${string}/:${infer Param}`
+            ? // @ts-ignore
+              Routes<Record<Param, T[K]>> & { param: Atom<string> }
+            : // @ts-ignore
+              Routes<T[K]>
+        }
       }
-    }
 
 export const unstable_reatomRoutes = <T extends RoutesScheme>(
   base: string,

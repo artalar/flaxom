@@ -227,9 +227,10 @@ export const reatomJsx = (
     stylesheetContainer?: Node
   } = {},
 ) => {
-  const StylesheetId = 'reatom-jsx-styles'
-  let styles: Rec<string> = {}
-  let stylesheet: HTMLStyleElement | undefined
+  const styles: Rec<string> = {}
+  const stylesheet = (
+    config.stylesheetContainer ?? DOM.document.head
+  ).appendChild(DOM.document.createElement('style'))
   let name = ''
 
   let set = (element: JSX.Element, key: string, val: any) => {

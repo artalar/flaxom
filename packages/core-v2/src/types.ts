@@ -11,12 +11,12 @@ export type Rec<Values = any> = Record<string, Values>
 export type Merge<Intersection> = Intersection extends (...a: any[]) => any
   ? Intersection
   : Intersection extends new (...a: any[]) => any
-  ? Intersection
-  : Intersection extends object
-  ? {
-      [Key in keyof Intersection]: Intersection[Key]
-    }
-  : Intersection
+    ? Intersection
+    : Intersection extends object
+      ? {
+          [Key in keyof Intersection]: Intersection[Key]
+        }
+      : Intersection
 
 export type Values<T> = Merge<T[keyof T]>
 
@@ -310,18 +310,19 @@ export type TransactionData = TransactionResult & {
   end: number
 }
 
-export type AtomState<T extends Atom | Cache<any>> = T extends Atom<infer State>
-  ? State
-  : T extends Cache<infer State>
-  ? State
-  : never
+export type AtomState<T extends Atom | Cache<any>> =
+  T extends Atom<infer State>
+    ? State
+    : T extends Cache<infer State>
+      ? State
+      : never
 
 export type ActionPayload<T extends ActionCreator | Action> =
   T extends ActionCreator<any[], { payload: infer Payload }>
     ? Payload
     : T extends Action<infer Payload>
-    ? Payload
-    : never
+      ? Payload
+      : never
 
 export type ActionCreatorData<T extends ActionCreator> =
   T extends ActionCreator<any[], infer Data> ? Data : never

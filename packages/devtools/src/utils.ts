@@ -6,8 +6,8 @@ export const getColor = ({ proto }: AtomCache): string =>
     ? proto.name!.endsWith('.onFulfill')
       ? '#B37400'
       : proto.name!.endsWith('.onReject')
-      ? 'tomato'
-      : '#999900'
+        ? 'tomato'
+        : '#999900'
     : '#151134'
 
 export const getStartCause = (cause: AtomCache): AtomCache =>

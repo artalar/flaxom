@@ -16,8 +16,8 @@ export type EnumAtom<
   [Variant in T as Format extends 'camelCase'
     ? `set${Capitalize<Variant>}`
     : Format extends 'snake_case'
-    ? `set_${Variant}`
-    : never]: Action<[], Variant>
+      ? `set_${Variant}`
+      : never]: Action<[], Variant>
 } & {
   reset: Action<[], T>
   enum: { [K in T]: K }

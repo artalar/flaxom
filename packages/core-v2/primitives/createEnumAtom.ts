@@ -10,8 +10,8 @@ export type EnumAtom<
     [K in T as Format extends 'camelCase'
       ? `set${Capitalize<K>}`
       : Format extends 'snake_case'
-      ? `set_${K}`
-      : never]: []
+        ? `set_${K}`
+        : never]: []
   }
 > & {
   enum: { [K in T]: K }
