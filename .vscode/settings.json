@@ -1,12 +1,9 @@
 {
   "typescript.tsdk": "node_modules/typescript/lib",
-  "editor.tabSize": 2,
-  "files.insertFinalNewline": true,
-  "files.trimFinalNewlines": true,
-  "editor.tabCompletion": "on",
   "diffEditor.codeLens": true,
   "cSpell.words": [
     "linkedom",
     "localstorage"
   ],
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
 }
