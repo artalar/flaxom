@@ -74,7 +74,7 @@ export interface LinkedListAtom<
    * but it is not recommended to use it for large (thousands elements) lists */
   map: Key extends never ? never : Atom<Map<State<Node[Key]>, LLNode<Node>>>
 
-  linkedList: (initState: Array<Node>) => LinkedList<LLNode<Node>>
+  initiate: (initState: Array<Node>) => LinkedList<LLNode<Node>>
 
   reatomMap: <T extends Rec>(
     cb: (ctx: Ctx, node: LLNode<Node>) => T,
@@ -636,7 +636,7 @@ export const reatomLinkedList = <
 
     array,
     map,
-    linkedList: createLinkedList,
+    initiate: createLinkedList,
 
     reatomMap,
     // reatomFilter,
