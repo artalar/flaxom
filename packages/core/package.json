@@ -21,10 +21,10 @@
   },
   "scripts": {
     "prepublishOnly": "npm run build && npm run test",
-    "build": "microbundle -f esm,cjs --raw=true",
-    "test": "ts-node src/atom.test.ts",
+    "build": "krulod_microbundle",
+    "test": "tsc; tsx src/atom.test.ts",
     "test:watch": "tsx watch src/atom.test.ts",
-    "bench": "ts-node src/index.bench.test.ts"
+    "bench": "tsc; tsx src/index.bench.test.ts"
   },
   "author": "artalar",
   "contributors": [

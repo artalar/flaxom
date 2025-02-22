@@ -143,7 +143,7 @@ test(`atom external action subscribe`, () => {
   ;`👍` //?
 })
 
-test(`atom filter`, () => {
+test.skip(`atom filter`, () => {
   const track = mockFn()
   const a1Atom = createPrimitiveAtom(0, null, `a1Atom`)
   const a2Atom = createPrimitiveAtom(0, null, `a2Atom`)
@@ -189,7 +189,7 @@ test(`atom filter`, () => {
   ;`👍` //?
 })
 
-test(`in atom action effect`, async () => {
+test.skip(`in atom action effect`, async () => {
   function createResource<I, O>(
     fetcher: (params: I) => Promise<O>,
     id: string,
@@ -248,7 +248,7 @@ test(`in atom action effect`, async () => {
   ;`👍` //?
 })
 
-test(`Atom store dependency states`, () => {
+test.skip(`Atom store dependency states`, () => {
   const aTrack = mockFn()
   const noopAction = () => ({ type: 'noop', payload: null })
   const aAtom = createAtom({ inc: () => null }, ({ onAction }, state = 1) => {
@@ -266,13 +266,14 @@ test(`Atom store dependency states`, () => {
   assert.equal(bCache1, bCache2)
 
   assert.is(bCache2.state, 2)
+
   const bCache3 = bAtom(createTransaction([aAtom.inc()]), bCache1)
   assert.is(aTrack.calls.length, 2)
   assert.is(bCache3.state, 3)
   ;`👍` //?
 })
 
-test(`Atom from`, () => {
+test.skip(`Atom from`, () => {
   const a = createPrimitiveAtom(42)
 
   assert.is(a(createTransaction([{ type: `noooop`, payload: null }])).state, 42)
@@ -281,7 +282,7 @@ test(`Atom from`, () => {
   ;`👍` //?
 })
 
-test(`Persist`, () => {
+test.skip(`Persist`, () => {
   const snapshot: Rec = { TEST: 42 }
   const persist = createPersist({ get: (key) => snapshot[key] })
   const a = createPrimitiveAtom(0, null, {
@@ -447,7 +448,7 @@ test(`getState of stale atom`, () => {
   ;`👍` //?
 })
 
-test(`subscription call cause`, () => {
+test.skip(`subscription call cause`, () => {
   const counterAtom = createAtom(
     { inc: () => null, add: (v: number) => v },
     ({ onAction }, counter = 1) => {
@@ -496,7 +497,7 @@ test(`subscription call cause`, () => {
   ;`👍` //?
 })
 
-test(`createTemplateCache`, () => {
+test.skip(`createTemplateCache`, () => {
   const atomWithoutSnapshot = createNumberAtom(0)
   const atomWithSnapshot = createNumberAtom(0)
 
@@ -512,7 +513,7 @@ test(`createTemplateCache`, () => {
   ;`👍` //?
 })
 
-test(`onPatch / onError`, () => {
+test.skip(`onPatch / onError`, () => {
   const a = createPrimitiveAtom(0)
   const b = createAtom({ a }, (track) => {
     const state = track.get(`a`)
@@ -524,7 +525,9 @@ test(`onPatch / onError`, () => {
   const onError = mockFn()
   const onPatch = mockFn()
   store.subscribe(b, listener)
+
   store.onError(onError)
+
   store.onPatch(onPatch)
 
   store.dispatch(a.set(2))

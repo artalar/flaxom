@@ -21,7 +21,7 @@
   },
   "scripts": {
     "prepublishOnly": "npm run build && npm run test",
-    "build": "microbundle -f esm,cjs",
+    "build": "krulod_microbundle",
     "test": "vitest run src/*.test.ts",
     "test:watch": "vitest src/*.test.ts"
   },

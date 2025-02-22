@@ -21,8 +21,8 @@
   },
   "scripts": {
     "prepublishOnly": "npm run build && npm run test",
-    "build": "microbundle",
-    "test": "ts-node src/index.test.ts",
+    "build": "krulod_microbundle",
+    "test": "tsc; tsx src/index.test.ts",
     "test:watch": "tsx watch src/index.test.ts"
   },
   "peerDependencies": {

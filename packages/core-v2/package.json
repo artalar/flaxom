@@ -16,13 +16,14 @@
   },
   "scripts": {
     "prepublishOnly": "npm run build && npm run build-primitives && npm run test",
-    "build": "microbundle -f esm,cjs",
-    "build-primitives": "microbundle --cwd primitives",
-    "test": "echo ts-node src/index.test.ts",
+    "build": "krulod_microbundle",
+    "build-primitives": "krulod_microbundle--cwd primitives",
+    "test": "echo tsc; tsx src/index.test.ts",
     "test:watch": "tsx watch src/index.test.ts"
   },
   "dependencies": {
-    "@reatom/core": "^3.1.0"
+    "@reatom/core": "^3.1.0",
+    "@reatom/hooks": "^3.6.0"
   },
   "author": "artalar",
   "license": "MIT",

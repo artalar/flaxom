@@ -10,7 +10,7 @@
   "types": "build/primitives.d.ts",
   "license": "MIT",
   "scripts": {
-    "build": "microbundle -f esm,cjs"
+    "build": "krulod_microbundle"
   },
   "peerDependencies": {
     "@reatom/core-v2": "^3.1.0"

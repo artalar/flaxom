@@ -20,14 +20,17 @@
     "node 16"
   ],
   "scripts": {
-    "sandbox": "vite",
     "prepublishOnly": "npm run build && npm run test",
-    "build": "microbundle -f esm,cjs",
-    "test": "ts-node src/index.test.ts",
+    "build": "krulod_microbundle",
+    "test": "tsc; tsx src/index.test.ts",
     "test:watch": "tsx watch src/index.test.ts"
   },
   "author": "pivaszbs",
   "maintainers": [
+    {
+      "name": "krulod",
+      "url": "https://github.com/krulod"
+    },
     {
       "name": "artalar",
       "url": "https://github.com/artalar"
@@ -56,7 +59,7 @@
   ],
   "devDependencies": {
     "@types/eslint": "^9.0.0",
-    "eslint": "^9.0.0"
+    "eslint": "^9.21.0"
   },
   "peerDependencies": {
     "eslint": "^8.0.0 || ^9.0.0"
