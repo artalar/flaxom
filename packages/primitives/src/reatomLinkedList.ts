@@ -74,6 +74,8 @@ export interface LinkedListAtom<
    * but it is not recommended to use it for large (thousands elements) lists */
   map: Key extends never ? never : Atom<Map<State<Node[Key]>, LLNode<Node>>>
 
+  linkedList: (initState: Array<Node>) => LinkedList<LLNode<Node>>
+
   reatomMap: <T extends Rec>(
     cb: (ctx: Ctx, node: LLNode<Node>) => T,
     options?:
@@ -287,23 +289,27 @@ export const reatomLinkedList = <
   const linkedList = atom(STATE!, name)
   linkedList.__reatom.initState = () => {
     try {
-      STATE = {
-        size: 0,
-        version: 1,
-        changes: [],
-        head: null,
-        tail: null,
-      }
-
-      for (const node of initState) {
-        throwModel(node)
-        addLL(STATE, node, STATE.tail)
-      }
-
-      return STATE
+      return createLinkedList(initState)
     } finally {
       STATE = null
     }
+  }
+
+  const createLinkedList = (initState: Node[]): LinkedList<LLNode<Node>> => {
+    const state = {
+      size: 0,
+      version: 1,
+      changes: [],
+      head: null,
+      tail: null,
+    }
+
+    for (const node of initState) {
+      throwModel(node)
+      addLL(state, node, state.tail)
+    }
+
+    return state;
   }
 
   const batchFn = <T>(ctx: Ctx, cb: Fn<[Ctx], T>): T => {
@@ -630,6 +636,7 @@ export const reatomLinkedList = <
 
     array,
     map,
+    linkedList: createLinkedList,
 
     reatomMap,
     // reatomFilter,
