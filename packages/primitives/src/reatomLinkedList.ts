@@ -74,7 +74,10 @@ export interface LinkedListAtom<
    * but it is not recommended to use it for large (thousands elements) lists */
   map: Key extends never ? never : Atom<Map<State<Node[Key]>, LLNode<Node>>>
 
-  initiate: (initState: Array<Node>) => LinkedList<LLNode<Node>>
+  initiate: {
+    (initState: Array<Node>): LinkedList<LLNode<Node>>
+    (ctx: Ctx, initSnapshot: Array<Params>): LinkedList<LLNode<Node>>
+  }
 
   reatomMap: <T extends Rec>(
     cb: (ctx: Ctx, node: LLNode<Node>) => T,
@@ -265,13 +268,18 @@ export const reatomLinkedList = <
         create: (ctx: Ctx, ...params: Params) => Node
         initState?: Array<Node>
         key?: Key
+      }
+    | {
+        create: (ctx: Ctx, ...params: Params) => Node
+        initSnapshot?: Array<Params>
+        key?: Key
       },
   name = __count('reatomLinkedList'),
 ): LinkedListAtom<Params, Node, Key> => {
   const {
     create: userCreate,
-    initState = [],
     key = undefined,
+    ...restOptions
   } = typeof options === 'function' ? { create: options } : options
   const _name = name
 
@@ -287,15 +295,27 @@ export const reatomLinkedList = <
   let STATE: null | LinkedList<LLNode<Node>> = null
 
   const linkedList = atom(STATE!, name)
-  linkedList.__reatom.initState = () => {
+  linkedList.__reatom.initState = (ctx) => {
     try {
-      return createLinkedList(initState)
+      if ('initState' in restOptions)
+        return createLinkedList(restOptions.initState ?? [])
+      else if ('initSnapshot' in restOptions)
+        return createLinkedList(ctx, restOptions.initSnapshot ?? [])
+      else
+        return createLinkedList([])
     } finally {
       STATE = null
     }
   }
 
-  const createLinkedList = (initState: Node[]): LinkedList<LLNode<Node>> => {
+  const createLinkedList = (
+    ctxOrInitState: Ctx | Node[],
+    initSnapshot?: Params[]
+  ): LinkedList<LLNode<Node>> => {
+    const initState = Array.isArray(ctxOrInitState)
+      ? ctxOrInitState
+      : initSnapshot!.map(params => userCreate(ctxOrInitState, ...params))
+
     const state = {
       size: 0,
       version: 1,
