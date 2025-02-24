@@ -8,6 +8,7 @@ import {
   __count,
   action,
   atom,
+  createCtx,
   isAtom,
 } from '@reatom/core';
 
@@ -47,7 +48,7 @@ export interface FormFieldOptions<State = any, Value = State>
   initState: State;
 }
 
-type FormInitStateElements =
+type FormInitStateElement =
   | string
   | number
   | boolean
@@ -61,28 +62,25 @@ type FormInitStateElements =
   // | ((state: any) => any)
   | FieldAtom
   | FormFieldOptions
-  | Rec<FormInitStateElements>
-  | Array<FormInitStateElements | Rec<FormInitStateElements>>
+  | FormFieldArray<any>
+  | Rec<FormInitStateElement>
 
-export type FormInitState = Rec<FormInitStateElements | FormInitState>;
+export type FormInitState = Rec<FormInitStateElement | FormInitState>;
 
-type FormFieldElement<T extends FormInitStateElements = FormInitStateElements> =
+type FormFieldElement<T extends FormInitStateElement = FormInitStateElement> =
   T extends FieldLikeAtom
   ? T
   : T extends Date
   ? FieldAtom<T>
+  : T extends FormFieldArray<infer Param, infer Node>
+  ? LinkedListAtom<[Param], FormFieldElement<Node>> & {
+    reset: Action<[], AtomState<T>>
+  }
   : T extends FieldOptions & { initState: infer State }
   ? T extends FieldOptions<State, State>
   ? FieldAtom<State>
   : T extends FieldOptions<State, infer Value>
   ? FieldAtom<State, Value>
-  : never
-  : T extends Array<infer Item>
-  ?
-  Item extends FormInitStateElements
-  ? LinkedListAtom<[FormFieldElement<Item>], FormFieldElement<Item>> & {
-    reset: Action<[], AtomState<T>>
-  }
   : never
   : T extends Rec
   ? { [K in keyof T]: FormFieldElement<T[K]> }
@@ -172,33 +170,34 @@ export interface FormOptions<T extends FormInitState = any> {
 
 const reatomFormFields = <T extends FormInitState>(
   initState: T,
-  { name, defaultFieldOptions }: {
+  options: {
     name: string,
     defaultFieldOptions?: FieldOptions
   }
 ): FormFields<T> => {
+  const { name, defaultFieldOptions } = options;
   const fields = Array.isArray(initState)
     ? ([] as FormFields<T>)
     : ({} as FormFields<T>);
 
-  const createFieldElement = (element: FormInitStateElements, name: string): FormFieldElement => {
+  const createFieldElement = (element: FormInitStateElement, name: string): FormFieldElement => {
     if (isAtom(element)) {
       return element
     }
     else if (isObject(element) && !(element instanceof Date)) {
-      if ('initState' in element) {
+      if (isFieldArray(element)) {
+        // @ts-expect-error bad keys type inference
+        return reatomLinkedList({
+          create: (ctx, param) => createFieldElement(element.create(ctx, param), `${name}.item`),
+          initSnapshot: element.initState.map(state => ([state] as const))
+        }, name).pipe(withReset())
+      }
+      else if ('initState' in element) {
         return reatomField(element.initState, {
           name,
           ...defaultFieldOptions,
           ...(element as FieldOptions),
         });
-      }
-      else if (Array.isArray(element)) {
-        // @ts-expect-error bad keys type inference
-        return reatomLinkedList({
-          create: (ctx, field) => field,
-          initState: element.map((f, index) => createFieldElement(f, `${name}.${index}`))
-        }, name).pipe(withReset())
       }
       else {
         // @ts-expect-error bad keys type inference
@@ -239,8 +238,56 @@ const computeFieldsList = <T extends FormInitState>(
   return acc;
 };
 
+interface FormFieldArray<Param, Node extends FormInitStateElement = FormInitStateElement> {
+  create: (ctx: Ctx, param: Param) => Node,
+  initState: Array<Param>;
+  __fieldArray: true;
+}
+
+function createFieldArray<Param extends FormInitStateElement>(
+  initState: Array<Param>
+): FormFieldArray<Param, Param>;
+
+function createFieldArray<Param, Node extends FormInitStateElement = FormInitStateElement>(
+  create: ((ctx: Ctx, params: Param) => Node)
+): FormFieldArray<Param, Node>;
+
+function createFieldArray<Param, Node extends FormInitStateElement = FormInitStateElement>(
+  options: {
+    create: (ctx: Ctx, param: Param) => Node
+    initState?: Array<Param>,
+  }
+): FormFieldArray<Param, Node>;
+
+function createFieldArray<Param, Node extends FormInitStateElement = FormInitStateElement>(
+  options:
+    | Array<Param>
+    | ((ctx: Ctx, params: Param) => Node)
+    | {
+      create: (ctx: Ctx, param: Param) => Node
+      initState?: Array<Param>,
+    }
+): FormFieldArray<Param, Node> {
+  const {
+    create,
+    initState = [],
+  } = typeof options === 'function'
+      ? { create: options }
+      : Array.isArray(options)
+        ? { create: (ctx: Ctx, param: Param) => param as unknown as Node }
+        : options;
+
+  return {
+    create,
+    initState,
+    __fieldArray: true
+  }
+}
+
+const isFieldArray = (value: any): value is FormFieldArray<any> => value?.__fieldArray;
+
 export const reatomForm = <T extends FormInitState>(
-  initState: T,
+  initState: T | ((fieldArray: typeof createFieldArray) => T),
   options: string | FormOptions<T> = {},
 ): Form<T> => {
   const {
@@ -256,7 +303,7 @@ export const reatomForm = <T extends FormInitState>(
       ? ({ name: options } as FormOptions<T>)
       : options;
 
-  const fields = reatomFormFields(initState, {
+  const fields = reatomFormFields(initState instanceof Function ? initState(createFieldArray) : initState, {
     name: `${name}.fields`,
     defaultFieldOptions: {
       validateOnBlur,
@@ -391,3 +438,33 @@ export const reatomForm = <T extends FormInitState>(
     validation,
   };
 };
+
+const form = reatomForm(fieldArray => ({
+  username: '',
+  email: reatomField(''),
+
+  addresses: fieldArray({
+    initState: [
+      {
+        country: '',
+        city: '',
+        phoneNumbers: ['123-456-7890', '987-654-3210']
+      },
+    ],
+    create: (ctx, { country, city, phoneNumbers }) => ({
+      country: reatomField(country),
+      city: reatomField(city),
+
+      phoneNumbers: fieldArray({
+        create: number => reatomField(number),
+        initState: phoneNumbers
+      })
+    }),
+  }),
+
+  testArray: fieldArray([10])
+}))
+
+const ctx = createCtx();
+form.fields.addresses
+form.fields.testArray

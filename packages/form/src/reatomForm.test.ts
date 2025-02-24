@@ -1,25 +1,21 @@
 import { test, expect } from 'vitest'
 import { createCtx } from '@reatom/core'
-import { FieldAtom, reatomField, reatomForm } from '.'
-import { reatomArray, reatomSet } from '@reatom/primitives';
-import exp from 'constants';
+import { reatomField, reatomForm } from '.'
 
 test(`adding and removing fields`, async () => {
 	const ctx = createCtx();
-	const form = reatomForm({
+	const form = reatomForm(fieldArray => ({
 		field: reatomField('initial', 'fieldAtom'),
-		list: [
-			reatomField('initial', 'fieldAtom')
-		],
-	}, {
-		name: 'testForm',
-		onSubmit: () => { }
-	});
+		list: fieldArray({
+			initState: ['initial'],
+			create: (ctx, param) => reatomField(param, 'fieldAtom')
+		}),
+	}));
 
 	expect(ctx.get(form.fields.field)).toBe('initial');
 	expect(ctx.get(form.fields.list).size).toBe(1);
 
-	form.fields.list.create(ctx, reatomField('initial', 'fieldAtom'));
+	form.fields.list.create(ctx, 'initial');
 	expect(ctx.get(form.fields.list).size).toBe(2);
 
 	form.fields.list.clear(ctx);
@@ -28,16 +24,14 @@ test(`adding and removing fields`, async () => {
 
 test('focus states', () => {
 	const ctx = createCtx()
-	const form = reatomForm({
+	const form = reatomForm(fieldArray => ({
 		field1: { initState: '', validate: () => { } },
 		field2: { initState: '', validate: () => { } },
-		list: [
-			reatomField('initial', 'fieldAtom')
-		]
-	}, {
-		name: 'testForm',
-		onSubmit: () => { }
-	})
+		list: fieldArray({
+			initState: ['initial'],
+			create: (ctx, param) => reatomField(param, 'fieldAtom')
+		}),
+	}));
 
 	form.fields.field1.change(ctx, 'value')
 	form.fields.field2.change(ctx, 'value')
@@ -83,11 +77,11 @@ test('validation states', async () => {
 			throw new Error('Contract error')
 	}
 
-	const form = reatomForm({
+	const form = reatomForm(fieldArray => ({
 		field1: { initState: '', contract, validateOnChange: true },
 		field2: { initState: '', contract, validateOnChange: true },
-		rest: new Array<FieldAtom<string>>()
-	}, {
+		rest: fieldArray<string>([])
+	}), {
 		name: 'testForm',
 		onSubmit: () => { },
 		validate: () => {
@@ -121,9 +115,7 @@ test('validation states', async () => {
 	await form.submit(ctx).catch(() => { })
 	expect(ctx.get(form.submit.error)?.message).toBe('Form validation error')
 
-	const fieldNoValidationTrigger = reatomField('');
-	rest.create(ctx, fieldNoValidationTrigger);
-
+	const fieldNoValidationTrigger = rest.create(ctx, '');
 	fieldNoValidationTrigger.change(ctx, 'value');
 
 	expect(ctx.get(form.validation)).toEqual({
@@ -146,13 +138,11 @@ test('validation states', async () => {
 
 test('default options for fields', async () => {
 	const ctx = createCtx()
-	const form = reatomForm({
+	const form = reatomForm(fieldArray => ({
 		field: { initState: 'initial', validate: () => { } },
-		array: ['one', 'two', 'free']
-	}, {
-		name: 'testForm',
-		validateOnChange: true,
-		onSubmit: () => { }
+		array: fieldArray(['one', 'two', 'free']),
+	}), {
+		validateOnChange: true
 	});
 
 	const { field, array } = form.fields;
