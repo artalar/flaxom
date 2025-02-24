@@ -3,7 +3,6 @@
   "version": "3.4.1",
   "sideEffects": false,
   "description": "Reatom for persist",
-  "source": "src/index.ts",
   "exports": {
     "types": "./build/index.d.ts",
     "require": "./build/index.js",
@@ -15,9 +14,6 @@
   "browserslist": [
     "last 1 year"
   ],
-  "minify": {
-    "mangle": false
-  },
   "scripts": {
     "prepublishOnly": "npm run build && npm run test",
     "build": "yoctobundle",
@@ -40,8 +36,5 @@
     "url": "https://github.com/artalar/reatom/issues"
   },
   "homepage": "https://www.reatom.dev/package/persist",
-  "files": [
-    "/build",
-    "/package.json"
-  ]
+  "files": ["/build"]
 }

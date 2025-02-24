@@ -7,7 +7,6 @@
   "private": false,
   "sideEffects": false,
   "description": "Reatom-specific ESLint rules",
-  "source": "src/index.ts",
   "exports": {
     "types": "./build/index.d.ts",
     "require": "./build/index.js",
@@ -53,10 +52,7 @@
     "url": "https://github.com/artalar/reatom/issues"
   },
   "homepage": "https://www.reatom.dev/package/eslint-plugin",
-  "files": [
-    "/build",
-    "/package.json"
-  ],
+  "files": ["/build"],
   "devDependencies": {
     "@types/eslint": "^9.0.0",
     "eslint": "^9.21.0"

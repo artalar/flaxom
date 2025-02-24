@@ -4,20 +4,15 @@
   "private": false,
   "sideEffects": false,
   "description": "Reatom adapter for core-v2",
-  "source": "src/index.ts",
   "main": "build/index.js",
   "module": "build/index.es.js",
   "types": "build/index.d.ts",
   "browserslist": [
     "last 1 year"
   ],
-  "minify": {
-    "mangle": false
-  },
   "scripts": {
     "prepublishOnly": "npm run build && npm run build-primitives && npm run test",
-    "build": "yoctobundle",
-    "build-primitives": "yoctobundle--cwd primitives",
+    "build": "yoctobundle && yoctobundle --cwd primitives",
     "test": "echo tsc; tsx src/index.test.ts",
     "test:watch": "tsx watch src/index.test.ts"
   },
@@ -37,7 +32,6 @@
   "homepage": "https://www.reatom.dev/compat/core-v2",
   "files": [
     "/build",
-    "/package.json",
     "/primitives"
   ]
 }

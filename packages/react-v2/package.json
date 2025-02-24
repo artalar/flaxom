@@ -8,7 +8,6 @@
     "url": "git+ssh://git@github.com/artalar/reatom.git"
   },
   "license": "MIT",
-  "source": "src/index.ts",
   "main": "build/index.js",
   "module": "build/index.es.js",
   "types": "build/index.d.ts",
@@ -66,9 +65,6 @@
     "hooks"
   ],
   "files": [
-    "README.md",
-    "package.json",
-    "src",
     "build",
     "react-dom-batched-updates",
     "react-native-batched-updates"

@@ -4,7 +4,6 @@
   "private": false,
   "sideEffects": false,
   "description": "Reatom testing package",
-  "source": "src/index.ts",
   "exports": {
     "types": "./build/index.d.ts",
     "require": "./build/index.js",
@@ -16,9 +15,6 @@
   "browserslist": [
     "last 1 year"
   ],
-  "minify": {
-    "mangle": false
-  },
   "scripts": {
     "prepublishOnly": "npm run build && npm run test",
     "build": "yoctobundle",
@@ -31,8 +27,5 @@
   },
   "author": "artalar",
   "license": "MIT",
-  "files": [
-    "/build",
-    "/package.json"
-  ]
+  "files": ["/build"]
 }

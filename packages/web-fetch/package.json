@@ -4,7 +4,6 @@
   "private": true,
   "sideEffects": false,
   "description": "Simple HTTP client for Reatom",
-  "source": "src/index.ts",
   "exports": {
     "require": "./build/index.js",
     "default": "./build/index.mjs"
@@ -46,8 +45,5 @@
     "url": "https://github.com/artalar/reatom/issues"
   },
   "homepage": "https://github.com/artalar/reatom/packages/web-fetch",
-  "files": [
-    "/build",
-    "/package.json"
-  ]
+  "files": ["/build"]
 }

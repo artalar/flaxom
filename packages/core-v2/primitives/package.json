@@ -9,9 +9,6 @@
   "module": "build/primitives.module.js",
   "types": "build/primitives.d.ts",
   "license": "MIT",
-  "scripts": {
-    "build": "yoctobundle"
-  },
   "peerDependencies": {
     "@reatom/core-v2": "^3.1.0"
   }

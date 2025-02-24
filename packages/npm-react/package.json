@@ -4,7 +4,6 @@
   "private": false,
   "sideEffects": false,
   "description": "Reatom adapter for React",
-  "source": "src/index.ts",
   "exports": {
     "types": "./build/index.d.ts",
     "require": "./build/index.js",
@@ -16,9 +15,6 @@
   "browserslist": [
     "last 1 year"
   ],
-  "minify": {
-    "mangle": false
-  },
   "scripts": {
     "prepublishOnly": "npm run build && npm run test",
     "build": "yoctobundle",
@@ -45,10 +41,7 @@
     "url": "https://github.com/artalar/reatom/issues"
   },
   "homepage": "https://www.reatom.dev/package/npm-react",
-  "files": [
-    "/build",
-    "/package.json"
-  ],
+  "files": ["/build"],
   "devDependencies": {
     "@types/react": "^18.2.77",
     "react": "^18.2.0"

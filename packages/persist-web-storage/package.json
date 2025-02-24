@@ -3,7 +3,6 @@
   "version": "3.4.4",
   "sideEffects": false,
   "description": "Reatom adapter for localStorage and sessionStorage",
-  "source": "src/index.ts",
   "exports": {
     "types": "./build/index.d.ts",
     "require": "./build/index.js",
@@ -15,9 +14,6 @@
   "browserslist": [
     "last 1 year"
   ],
-  "minify": {
-    "mangle": false
-  },
   "scripts": {
     "prepublishOnly": "npm run build && npm run test",
     "build": "yoctobundle && cp src/types.d.ts build/types.d.ts",
@@ -39,8 +35,5 @@
     "url": "https://github.com/artalar/reatom/issues"
   },
   "homepage": "https://www.reatom.dev/package/persist-web-storage",
-  "files": [
-    "/build",
-    "/package.json"
-  ]
+  "files": ["/build"]
 }

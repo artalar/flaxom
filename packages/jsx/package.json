@@ -4,7 +4,6 @@
   "private": false,
   "sideEffects": false,
   "description": "Reatom for jsx",
-  "source": "src/index.ts",
   "exports": {
     ".": {
       "types": "./build/index.d.ts",
@@ -25,9 +24,6 @@
   "browserslist": [
     "last 1 year"
   ],
-  "minify": {
-    "mangle": false
-  },
   "scripts": {
     "prepublishOnly": "npm run build && npm run test",
     "build": "yoctobundle && cp src/jsx.d.ts build/ && cp -r build jsx-runtime/ && cp -r build jsx-dev-runtime/",
@@ -66,7 +62,6 @@
   "homepage": "https://www.reatom.dev/package/jsx",
   "files": [
     "/build",
-    "/package.json",
     "/jsx-runtime",
     "/jsx-dev-runtime"
   ]

@@ -4,7 +4,6 @@
   "description": null,
   "private": false,
   "sideEffects": false,
-  "source": "src/index.ts",
   "exports": {
     "types": "./build/index.d.ts",
     "require": "./build/index.js",
@@ -16,9 +15,6 @@
   "browserslist": [
     "last 1 year"
   ],
-  "minify": {
-    "mangle": false
-  },
   "scripts": {
     "prepublishOnly": "npm run build && npm run test",
     "build": "yoctobundle",
@@ -46,8 +42,5 @@
     "state-manager",
     "reatom"
   ],
-  "files": [
-    "/build",
-    "/package.json"
-  ]
+  "files": ["/build"]
 }
