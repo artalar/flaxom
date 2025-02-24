@@ -6,7 +6,7 @@
       "outputs": ["build/**"]
     },
     "test": {
-      "dependsOn": ["^build", "testing#build"],
+      "dependsOn": ["^build", "@reatom/testing#build"],
       "outputs": [],
       "passThroughEnv": ["PLAYWRIGHT_*"],
       "inputs": ["src/**/*.tsx", "src/**/*.ts", "test/**/*.ts", "test/**/*.tsx"]
