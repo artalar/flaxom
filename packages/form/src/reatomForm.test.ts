@@ -1,6 +1,7 @@
-import { test, expect } from 'vitest'
+import { test, expect, describe } from 'vitest'
 import { createCtx } from '@reatom/core'
-import { reatomField, reatomForm } from '.'
+import { reatomField, reatomForm, withField } from '.'
+import { reatomBoolean } from '@reatom/primitives';
 
 test(`adding and removing fields`, async () => {
 	const ctx = createCtx();
@@ -168,6 +169,91 @@ test('default options for fields', async () => {
 	});
 })
 
+describe('fieldArray and array literals as a fieldArray', () => {
+	test('flat array literals', () => {
+		const ctx = createCtx()
+		const form = reatomForm({
+			array: ['hey']
+		})
+
+		const arrayField = form.fields.array;
+		expect(ctx.get(arrayField.array).length).toBe(1);
+
+		const field = ctx.get(arrayField.array)[0]!;
+		expect(ctx.get(field.value)).toBe('hey');
+
+		arrayField.create(ctx, 'new');
+		expect(ctx.get(arrayField.array).length).toBe(2);
+
+		const newField = ctx.get(arrayField.array)[1]!;
+		expect(ctx.get(newField.value)).toBe('new');
+	})
+
+	test('nested array literals and using fieldArray deep inside', () => {
+		const ctx = createCtx()
+		const form = reatomForm(fieldArray => ({
+			nestedArray: [
+				{
+					array: ['hey'],
+					emptyArray: new Array<string>(),
+					emptyArrayExplicit: fieldArray<string>([])
+				}
+			]
+		}))
+
+		const nestedArray = ctx.get(form.fields.nestedArray.array);
+		expect(nestedArray.length).toBe(1);
+
+		const array = nestedArray[0]!.array.array;
+		expect(ctx.get(array).length).toBe(1);
+
+		expect(ctx.get(ctx.get(array)[0]!.value)).toBe('hey');
+
+		nestedArray[0]!.array.create(ctx, 'new');
+		expect(ctx.get(array).length).toBe(2);
+
+		expect(ctx.get(ctx.get(array)[1]!.value)).toBe('new');
+
+		const emptyArray = nestedArray[0]!.emptyArray.array;
+		expect(ctx.get(emptyArray).length).toBe(0);
+
+		const emptyArrayExplicit = nestedArray[0]!.emptyArrayExplicit.array;
+		expect(ctx.get(emptyArrayExplicit).length).toBe(0);
+
+		nestedArray[0]!.emptyArray.create(ctx, 'new');
+		expect(ctx.get(emptyArray).length).toBe(1);
+	})
+
+	test('nested array literals and fieldArray in initState', () => {
+		const ctx = createCtx()
+
+		const form = reatomForm(fieldArray => ({		
+			addresses: [
+				{
+					country: '',
+					street: '',
+					city: '',
+					tags: ['defaultTag', 'defaultTag2'],
+					phoneNumbers: fieldArray({
+						initState: Array<{ number: string, priority: boolean }>(),
+						create: (ctx, { number, priority }) => ({
+							number,
+							priority: reatomBoolean(priority).pipe(withField(priority))
+						})
+					}),
+				}
+			]
+		}));
+
+		const addresses = ctx.get(form.fields.addresses.array);
+		const phoneNumbers = addresses[0]!.phoneNumbers;
+		expect(ctx.get(phoneNumbers.array).length).toBe(0);
+
+		phoneNumbers.create(ctx, { number: '778899', priority: true });
+		expect(ctx.get(phoneNumbers.array).length).toBe(1);
+
+	})
+})
 
 test('reset', () => {
 	const ctx = createCtx()

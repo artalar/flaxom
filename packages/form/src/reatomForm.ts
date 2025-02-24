@@ -63,6 +63,7 @@ type FormInitStateElement =
   | FieldAtom
   | FormFieldOptions
   | FormFieldArray<any>
+  | Array<FormInitStateElement>
   | Rec<FormInitStateElement>
 
 export type FormInitState = Rec<FormInitStateElement | FormInitState>;
@@ -72,6 +73,10 @@ type FormFieldElement<T extends FormInitStateElement = FormInitStateElement> =
   ? T
   : T extends Date
   ? FieldAtom<T>
+  : T extends Array<infer Item>
+  ? Item extends FormInitStateElement
+  ? FormFieldElement<FormFieldArray<Item, Item>>
+  : never
   : T extends FormFieldArray<infer Param, infer Node>
   ? LinkedListAtom<[Param], FormFieldElement<Node>> & {
     reset: Action<[], AtomState<T>>
@@ -185,7 +190,10 @@ const reatomFormFields = <T extends FormInitState>(
       return element
     }
     else if (isObject(element) && !(element instanceof Date)) {
-      if (isFieldArray(element)) {
+      if (Array.isArray(element)) {
+        return createFieldElement(createFieldArray(element), name)
+      }
+      else if (isFieldArray(element)) {
         // @ts-expect-error bad keys type inference
         return reatomLinkedList({
           create: (ctx, param) => createFieldElement(element.create(ctx, param), `${name}.item`),
@@ -274,7 +282,10 @@ function createFieldArray<Param, Node extends FormInitStateElement = FormInitSta
   } = typeof options === 'function'
       ? { create: options }
       : Array.isArray(options)
-        ? { create: (ctx: Ctx, param: Param) => param as unknown as Node }
+        ? { 
+          create: (ctx: Ctx, param: Param) => param as unknown as Node,
+          initState: options
+        }
         : options;
 
   return {
@@ -438,33 +449,3 @@ export const reatomForm = <T extends FormInitState>(
     validation,
   };
 };
-
-const form = reatomForm(fieldArray => ({
-  username: '',
-  email: reatomField(''),
-
-  addresses: fieldArray({
-    initState: [
-      {
-        country: '',
-        city: '',
-        phoneNumbers: ['123-456-7890', '987-654-3210']
-      },
-    ],
-    create: (ctx, { country, city, phoneNumbers }) => ({
-      country: reatomField(country),
-      city: reatomField(city),
-
-      phoneNumbers: fieldArray({
-        create: number => reatomField(number),
-        initState: phoneNumbers
-      })
-    }),
-  }),
-
-  testArray: fieldArray([10])
-}))
-
-const ctx = createCtx();
-form.fields.addresses
-form.fields.testArray
