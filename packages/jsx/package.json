@@ -30,8 +30,8 @@
   },
   "scripts": {
     "prepublishOnly": "npm run build && npm run test",
-    "build": "krulod_microbundle && cp src/jsx.d.ts build/ && cp -r build jsx-runtime/ && cp -r build jsx-dev-runtime/",
-    "test": "echo 'disabled temporarily'",
+    "build": "yoctobundle && cp src/jsx.d.ts build/ && cp -r build jsx-runtime/ && cp -r build jsx-dev-runtime/",
+    "test": "echo 'TESTS ARE TEMPORARILY DISABLED'",
     "test:watch": "vitest src/*"
   },
   "dependencies": {

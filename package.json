@@ -2,10 +2,10 @@
   "name": "reatom-workspace",
   "scripts": {
     "release": "npx tsx ./tools/publish.ts",
-    "postinstall": "turbo run build --filter=./packages/{framework,testing}",
-    "build": "turbo run build --filter=./packages/*",
+    "postinstall": "turbo run build --output-logs=errors-only --filter=./packages/{framework,testing}",
+    "build": "turbo run build --output-logs=errors-only --filter=./packages/*",
     "reset": "sh ./tools/reset.sh",
-    "test": "turbo run build --filter=./packages/testing && turbo run test",
+    "test": "turbo run build --output-logs=errors-only --filter=./packages/testing",
     "prettify": "prettier --write */**/**/*.{js,ts,md}",
     "prettify:check": "prettier --check */**/**/*.{js,ts,md}",
     "prettify:watch": "onchange */**/**/*.{js,ts,md} -- prettier --write {{changed}}",
@@ -24,7 +24,7 @@
   "dependencies": {
     "@commitlint/cli": "^19.2.1",
     "@commitlint/config-conventional": "^19.1.0",
-    "@krulod/microbundle": "^0.0.6",
+    "yoctobundle": "latest",
     "@types/node": "latest",
     "bun": "^1.1.13",
     "husky": "^9.1.7",

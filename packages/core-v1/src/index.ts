@@ -2,10 +2,10 @@ export * from './declareAction'
 export * from './declareAtom'
 export * from './createStore'
 export {
-  GenId,
-  TreeId,
-  Unit,
-  InferType,
+  type GenId,
+  type TreeId,
+  type Unit,
+  type InferType,
   getTree,
   getIsAtom,
   getIsAction,

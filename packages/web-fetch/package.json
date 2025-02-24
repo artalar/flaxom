@@ -18,7 +18,7 @@
   ],
   "scripts": {
     "prepublishOnly": "npm run build && npm run test",
-    "build": "krulod_microbundle",
+    "build": "yoctobundle",
     "test": "tsx src/index.test.ts",
     "test:watch": "tsx watch src/index.test.ts"
   },

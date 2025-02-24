@@ -20,7 +20,7 @@
   },
   "scripts": {
     "prepublishOnly": "npm run build && npm run test",
-    "build": "krulod_microbundle && cp src/types.d.ts build/types.d.ts",
+    "build": "yoctobundle && cp src/types.d.ts build/types.d.ts",
     "test": "tsc; tsx src/index.test.ts",
     "test:watch": "tsx watch src/index.test.ts"
   },

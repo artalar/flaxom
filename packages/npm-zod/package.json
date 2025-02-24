@@ -8,7 +8,7 @@
   "exports": {
     "types": "./build/index.d.ts",
     "require": "./build/index.js",
-    "default": "./build/index.module.js"
+    "default": "./build/index.mjs"
   },
   "main": "build/index.js",
   "module": "build/index.module.js",
@@ -21,7 +21,7 @@
   },
   "scripts": {
     "prepublishOnly": "npm run build && npm run test",
-    "build": "krulod_microbundle",
+    "build": "yoctobundle",
     "test": "tsc; tsx src/index.test.ts",
     "test:watch": "tsx watch src/index.test.ts"
   },

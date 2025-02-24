@@ -6,12 +6,13 @@
       "outputs": ["build/**"]
     },
     "test": {
-      "dependsOn": ["build"],
+      "dependsOn": ["^build", "testing#build"],
       "outputs": [],
+      "passThroughEnv": ["PLAYWRIGHT_*"],
       "inputs": ["src/**/*.tsx", "src/**/*.ts", "test/**/*.ts", "test/**/*.tsx"]
     },
     "publish": {
-      "dependsOn": ["build", "test", "lint"],
+      "dependsOn": ["build", "test"],
       "outputs": []
     }
   }

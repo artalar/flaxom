@@ -16,8 +16,8 @@
   },
   "scripts": {
     "prepublishOnly": "npm run build && npm run build-primitives && npm run test",
-    "build": "krulod_microbundle",
-    "build-primitives": "krulod_microbundle--cwd primitives",
+    "build": "yoctobundle",
+    "build-primitives": "yoctobundle--cwd primitives",
     "test": "echo tsc; tsx src/index.test.ts",
     "test:watch": "tsx watch src/index.test.ts"
   },

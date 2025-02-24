@@ -21,7 +21,7 @@
   },
   "scripts": {
     "prepublishOnly": "npm run build && npm run test",
-    "build": "krulod_microbundle",
+    "build": "yoctobundle",
     "test": "vitest run src/*.test.ts",
     "test:watch": "vitest src/*.test.ts"
   },

@@ -1,5 +1,5 @@
 import * as v3 from '@reatom/core'
-import { Tree, TreeId } from './kernel'
+import type { Tree, TreeId } from './kernel'
 import { Atom } from './declareAtom'
 import { PayloadActionCreator } from './declareAction'
 import { Store } from './createStore'

@@ -21,7 +21,7 @@
   },
   "scripts": {
     "prepublishOnly": "npm run build && npm run test",
-    "build": "krulod_microbundle",
+    "build": "yoctobundle",
     "test": "echo 'ok'"
   },
   "dependencies": {

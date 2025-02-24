@@ -21,7 +21,7 @@
   },
   "scripts": {
     "prepublishOnly": "npm run build",
-    "build": "krulod_microbundle",
+    "build": "yoctobundle",
     "test": "tsc; tsx src/index.test.ts",
     "test:watch": "tsx watch src/index.test.ts"
   },
