@@ -152,3 +152,18 @@ describe('reatomLinkedList', () => {
     expect(ctx.get(list).size).toBe(0)
   })
 })
+
+test('should respect initSnapshot for initializing', () => {
+  const ctx = createTestCtx()
+  const list = reatomLinkedList({
+    create: (ctx, id: string) => ({ id: atom(id) }),
+    key: 'id',
+    initSnapshot: [['1'], ['2']]
+  })
+  const track = ctx.subscribeTrack(atom((ctx) => [...ctx.spy(list.map).keys()]))
+
+  expect(track.lastInput()).toEqual( ['1', '2'])
+
+  ctx.get(list.map).get('1')?.id(ctx, '0')
+  expect(track.lastInput()).toEqual(['0', '2'])
+})
