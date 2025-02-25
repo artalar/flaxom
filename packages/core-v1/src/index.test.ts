@@ -162,10 +162,24 @@ test('main api, createStore', () => {
     countDoubled: 0,
     toggled: false,
   })
+  expect(store.getState(root)).toEqual({
+    count: 0,
+    countDoubled: 0,
+    toggled: false,
+  })
   expect(store.getState(countDoubled)).toBe(0)
   expect(store.getState(count)).toBe(0)
 
+  const state1 = store.getState(root)
   store.dispatch(increment())
+  const state2 = store.getState(root)
+  expect(state1).not.toBe(state2)
+
+  expect(store.getState(root)).toEqual({
+    count: 1,
+    countDoubled: 2,
+    toggled: false,
+  })
   expect(store.getState(root)).toEqual({
     count: 1,
     countDoubled: 2,
@@ -187,7 +201,18 @@ test('main api, createStore', () => {
     countDoubled: 4,
     toggled: false,
   })
+  expect(store.getState()).toEqual({
+    [getTree(count).id]: 2,
+    [getTree(countDoubled).id]: 4,
+    [getTree(toggled).id]: false,
+    [getTree(root).id]: {
+      count: 2,
+      countDoubled: 4,
+      toggled: false,
+    },
+  })
   expect(storeSubscriber.calls.length).toBe(1)
+  expect(storeSubscriber.calls[0]!.i[0]).toEqual(increment())
   expect(subscriberToggled.calls.length).toBe(0)
 
   store.dispatch(toggle())
@@ -197,6 +222,16 @@ test('main api, createStore', () => {
     toggled: true,
   })
   expect(storeSubscriber.calls.length).toBe(2)
+  expect(storeSubscriber.calls[1]!.i[0]).toEqual(toggle())
+  expect(subscriberToggled.calls.length).toBe(1)
+  expect(subscriberToggled.calls[0]!.i[0]).toBe(true)
+
+  const state3 = store.getState(root)
+  store.dispatch(declareAction()())
+  const state4 = store.getState(root)
+  expect(state3).toEqual(state4)
+
+  expect(storeSubscriber.calls.length).toBe(3)
   expect(subscriberToggled.calls.length).toBe(1)
 })
 

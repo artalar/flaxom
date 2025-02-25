@@ -79,21 +79,21 @@ describe('match', () => {
 
     expect(ctx.get(match(true).default(false).truthy(true))).toBe(true)
   })
-})
 
-test('reactive change', () => {
-  const ctx = createTestCtx()
+  test('reactive change', () => {
+    const ctx = createTestCtx()
 
-  const boolAtom = atom(true)
-  const compAtom = match(true)
-    .is(boolAtom, () => 'a')
-    .default(() => 'b')
+    const boolAtom = atom(true)
+    const compAtom = match(true)
+      .is(boolAtom, () => 'a')
+      .default(() => 'b')
 
-  const track = ctx.subscribeTrack(compAtom)
+    const track = ctx.subscribeTrack(compAtom)
 
-  expect(track.inputs()).toEqual(['a'])
+    expect(track.inputs()).toEqual(['a'])
 
-  boolAtom(ctx, false)
-  boolAtom(ctx, true)
-  expect(track.inputs()).toEqual(['a', 'b', 'a'])
+    boolAtom(ctx, false)
+    boolAtom(ctx, true)
+    expect(track.inputs()).toEqual(['a', 'b', 'a'])
+  })
 })
