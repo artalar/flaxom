@@ -286,3 +286,79 @@ test('reset', () => {
 		validating: false,
 	})
 })
+
+describe('init array with reset', () => {
+	test('flat fields with array', () => {
+		const ctx = createCtx()
+		const form = reatomForm({
+			dummy: 1,
+			list: [
+				{
+					kek: 'lel',
+					arr: ['1', '2']
+				}
+			]
+		})
+
+		form.reset(ctx, { list: [] })
+
+		expect(ctx.get(form.fields.list.array).length).toEqual(0)
+
+		form.fields.dummy.change(ctx, 2);
+
+		form.reset(ctx, { 
+			list: [
+				{ kek: 'lel', arr: ['1'] }
+			] 
+		})
+
+		expect(ctx.get(form.fields.list.array).length).toEqual(1)
+		expect(ctx.get(ctx.get(ctx.get(form.fields.list.array)[0]!.arr.array)[0]!.value)).toEqual('1')
+		expect(ctx.get(form.fields.dummy)).toEqual(1)
+	})
+
+	test('nested fields with array', () => {
+		const ctx = createCtx()
+
+		const form = reatomForm({
+			list: [
+				{
+					nestedList: [
+						{ number: '123', priority: Boolean(true) }
+					]
+				}
+			]
+		})
+
+		form.reset(ctx, {
+			list: [
+				{
+					nestedList: []
+				},
+				{
+					nestedList: [
+						{ number: '321', priority: false },
+						{ number: '456', priority: true }
+					]
+				}
+			]
+		})
+
+		const listArray = ctx.get(form.fields.list.array)
+		expect(listArray.length).toEqual(2)
+
+		const firstItemNestedList = ctx.get(listArray[0]!.nestedList.array)
+		expect(firstItemNestedList.length).toEqual(0)
+
+		const secondItemNestedList = ctx.get(listArray[1]!.nestedList.array)
+		expect(secondItemNestedList.length).toEqual(2)
+
+		const firstNestedItem = secondItemNestedList[0]!
+		expect(ctx.get(firstNestedItem.number)).toEqual('321')
+		expect(ctx.get(firstNestedItem.priority)).toEqual(false)
+
+		const secondNestedItem = secondItemNestedList[1]!
+		expect(ctx.get(secondNestedItem.number)).toEqual('456')
+		expect(ctx.get(secondNestedItem.priority)).toEqual(true)
+	})
+})

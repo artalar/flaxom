@@ -1,6 +1,8 @@
 import {
   type Action,
   type Atom,
+  AtomCache,
+  AtomMut,
   AtomState,
   type Ctx,
   CtxSpy,
@@ -24,9 +26,14 @@ import {
 } from '@reatom/async';
 
 import {
+  LLNode,
+  LL_NEXT,
+  LL_PREV,
+  LinkedList,
   LinkedListAtom,
   isLinkedListAtom,
   reatomLinkedList,
+  withComputed,
 } from '@reatom/primitives';
 
 import { parseAtoms, withReset, type ParseAtoms } from '@reatom/lens';
@@ -68,6 +75,12 @@ type FormInitStateElement =
 
 export type FormInitState = Rec<FormInitStateElement | FormInitState>;
 
+type FormFieldArrayAtom<Param, Node extends FormInitStateElement = FormInitStateElement> 
+  = LinkedListAtom<[Param], FormFieldElement<Node>> & {
+  reset: Action<[], AtomState<FormFieldArrayAtom<Param, Node>>>
+  initState: AtomMut<LinkedList<LLNode<FormFieldElement<Node>>>>
+}
+
 type FormFieldElement<T extends FormInitStateElement = FormInitStateElement> =
   T extends FieldLikeAtom
   ? T
@@ -78,9 +91,7 @@ type FormFieldElement<T extends FormInitStateElement = FormInitStateElement> =
   ? FormFieldElement<FormFieldArray<Item, Item>>
   : never
   : T extends FormFieldArray<infer Param, infer Node>
-  ? LinkedListAtom<[Param], FormFieldElement<Node>> & {
-    reset: Action<[], AtomState<T>>
-  }
+  ? FormFieldArrayAtom<Param, Node>
   : T extends FieldOptions & { initState: infer State }
   ? T extends FieldOptions<State, State>
   ? FieldAtom<State>
@@ -99,12 +110,18 @@ export type FormState<T extends FormInitState = FormInitState> = ParseAtoms<
   FormFields<T>
 >;
 
-export type DeepPartial<T> = {
-  [K in keyof T]?: T[K] extends Rec ? DeepPartial<T[K]> : T[K];
+export type DeepPartial<T, Skip = never> = {
+  [K in keyof T]?: T[K] extends Skip ? T[K] : T[K] extends Rec ? DeepPartial<T[K]> : T[K];
 };
 
+type DeepExtractLLNode<T> = {
+  [K in keyof T]: T[K] extends Array<infer Node> 
+    ? Array<DeepExtractLLNode<Omit<Node, typeof LL_NEXT | typeof LL_PREV>>> 
+    : T[K]
+}
+
 export type FormPartialState<T extends FormInitState = FormInitState> =
-  DeepPartial<FormState<T>>;
+  DeepPartial<DeepExtractLLNode<FormState<T>>, Array<unknown>>;
 
 export interface SubmitAction extends AsyncAction<[], void> {
   error: Atom<Error | undefined>;
@@ -124,7 +141,7 @@ export interface Form<T extends FormInitState = any> {
   init: Action<[initState: FormPartialState<T>], void>;
 
   /** Action to reset the state, the value, the validation, and the focus states. */
-  reset: Action<[], void>;
+  reset: Action<[initState?: FormPartialState<T>], void>;
 
   /** Submit async handler. It checks the validation of all the fields in `fieldsList`, calls the form's `validate` options handler, and then the `onSubmit` options handler. Check the additional options properties of async action: https://www.reatom.dev/package/async/. */
   submit: SubmitAction;
@@ -194,11 +211,28 @@ const reatomFormFields = <T extends FormInitState>(
         return createFieldElement(createFieldArray(element), name)
       }
       else if (isFieldArray(element)) {
-        // @ts-expect-error bad keys type inference
-        return reatomLinkedList({
+        const linkedListAtom = reatomLinkedList({
           create: (ctx, param) => createFieldElement(element.create(ctx, param), `${name}.item`),
           initSnapshot: element.initState.map(state => ([state] as const))
-        }, name).pipe(withReset())
+        }, name);
+
+        const initState = atom<AtomState<typeof linkedListAtom> | null>(
+          null, `${linkedListAtom.__reatom.name}.initState`
+        ).pipe(
+          withComputed((ctx, state) => state ? state : ctx.spy(linkedListAtom))
+        );
+
+        // @ts-expect-error bad keys type inference
+        return Object.assign(linkedListAtom, {
+          initState,
+          reset: action((ctx) => {
+            ctx.get((read, actualize) => {
+              actualize!(ctx, linkedListAtom.__reatom, (patchCtx: Ctx, patch: AtomCache) => {
+                patch.state = ctx.get(initState)
+              });
+            })
+          })
+        });
       }
       else if ('initState' in element) {
         return reatomField(element.initState, {
@@ -227,15 +261,43 @@ const reatomFormFields = <T extends FormInitState>(
 const computeFieldsList = <T extends FormInitState>(
   ctx: CtxSpy,
   fields: FormFields<T>,
-  acc: Array<FieldAtom> = [],
+  acc: Array<FieldAtom> = []
 ): Array<FieldAtom> => {
-  const computeElement = (element: FormFieldElement, acc: Array<FieldAtom> = []) => {
+  const computeElement = (
+    element: FormFieldElement, 
+    acc: Array<FieldAtom> = [],
+  ) => {
     if (isLinkedListAtom(element)) {
-      const elements = ctx.spy((element as LinkedListAtom<[FormFieldElement], FormFieldElement>).array);
+      const elements = ctx.spy(element.array);
       acc.push(...elements.flatMap(e => computeElement(e, acc)));
     }
     else if (isAtom(element)) acc.push(element);
     else computeFieldsList(ctx, element, acc);
+
+    return acc;
+  }
+
+  for (const [_, field] of entries(fields))
+    acc.push(...computeElement(field));
+
+  return acc;
+};
+
+const getFieldArraysList = <T extends FormInitState>(
+  ctx: Ctx,
+  fields: FormFields<T>,
+  acc: Array<FormFieldArrayAtom<unknown>> = []
+) => {
+  const computeElement = (
+    element: FormFieldElement, 
+    acc: Array<FormFieldArrayAtom<unknown>> = [],
+  ) => {
+    if (isLinkedListAtom(element)) {
+      acc.push(element as FormFieldArrayAtom<unknown>);
+      acc.push(...ctx.get(element.array).flatMap(e => computeElement(e, acc)));
+    }
+    else if (!isAtom(element))
+      getFieldArraysList(ctx, element)
 
     return acc;
   }
@@ -330,6 +392,7 @@ export const reatomForm = <T extends FormInitState>(
   );
 
   const fieldsList = atom(ctx => computeFieldsList(ctx, fields), `${name}.fieldsList`);
+  const fieldArraysList = atom(ctx => getFieldArraysList(ctx, fields), `${name}.fieldArraysList`);
 
   const focus = atom((ctx, state = fieldInitFocus) => {
     const formFocus = { ...fieldInitFocus };
@@ -361,8 +424,13 @@ export const reatomForm = <T extends FormInitState>(
 
   const submitted = atom(false, `${name}.submitted`);
 
-  const reset = action((ctx) => {
+  const reset = action((ctx, initState?: FormPartialState<T>) => {
+    if(initState)
+      reinitState(ctx, initState, fields);
+
+    ctx.get(fieldArraysList).forEach((fieldArray) => fieldArray.reset(ctx));
     ctx.get(fieldsList).forEach((fieldAtom) => fieldAtom.reset(ctx));
+
     submitted(ctx, false);
     submit.errorAtom.reset(ctx);
     submit.abort(ctx, `${name}.reset`);
@@ -371,8 +439,8 @@ export const reatomForm = <T extends FormInitState>(
   const reinitState = (ctx: Ctx, initState: FormPartialState<T>, fields: FormFields) => {
     for (const [key, value] of Object.entries(initState as Rec)) {
       if (isLinkedListAtom(fields[key])) {
-        // CAUTION: Currently, resetting reatomLinkedList leads to an unconditional error
-        fields[key].reset(ctx); // TODO: add recursive reset for structures inside the default value of reatomLinkedList
+        // @ts-expect-error bad type for initiate
+        fields[key].initState(ctx, fields[key].initiate(ctx, value.map(v => [v])));
       }
       else if (
         isObject(value) &&
@@ -389,7 +457,7 @@ export const reatomForm = <T extends FormInitState>(
   };
 
   const init = action((ctx, initState: FormPartialState<T>) => {
-    reinitState(ctx, initState, fields as FormFields);
+    reinitState(ctx, initState, fields);
   }, `${name}.init`);
 
   const submit = reatomAsync(async (ctx) => {
