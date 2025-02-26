@@ -1,6 +1,7 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "declarationMap": true
+    "declarationMap": true,
+    "jsx": "react-jsx"
   }
 }

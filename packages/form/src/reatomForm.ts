@@ -75,8 +75,12 @@ type FormInitStateElement =
 
 export type FormInitState = Rec<FormInitStateElement | FormInitState>;
 
-type FormFieldArrayAtom<Param, Node extends FormInitStateElement = FormInitStateElement> 
-  = LinkedListAtom<[Param], FormFieldElement<Node>> & {
+type ExtractFieldArray<T> = {
+  [K in keyof T]: T[K] extends FormFieldArray<infer Param, infer Node> ? Param[] : ExtractFieldArray<T[K]>
+}
+
+export type FormFieldArrayAtom<Param, Node extends FormInitStateElement = FormInitStateElement> 
+  = LinkedListAtom<[ExtractFieldArray<Param>], FormFieldElement<Node>> & {
   reset: Action<[], AtomState<FormFieldArrayAtom<Param, Node>>>
   initState: AtomMut<LinkedList<LLNode<FormFieldElement<Node>>>>
 }
@@ -111,12 +115,12 @@ export type FormState<T extends FormInitState = FormInitState> = ParseAtoms<
 >;
 
 export type DeepPartial<T, Skip = never> = {
-  [K in keyof T]?: T[K] extends Skip ? T[K] : T[K] extends Rec ? DeepPartial<T[K]> : T[K];
+  [K in keyof T]?: T[K] extends Skip ? T[K] : T[K] extends Rec ? DeepPartial<T[K], Skip> : T[K];
 };
 
 type DeepExtractLLNode<T> = {
-  [K in keyof T]: T[K] extends Array<infer Node> 
-    ? Array<DeepExtractLLNode<Omit<Node, typeof LL_NEXT | typeof LL_PREV>>> 
+  [K in keyof T]: T[K] extends Array<infer LLNode> 
+    ? Array<DeepExtractLLNode<Omit<LLNode, typeof LL_NEXT | typeof LL_PREV>>> 
     : T[K]
 }
 
@@ -211,8 +215,9 @@ const reatomFormFields = <T extends FormInitState>(
         return createFieldElement(createFieldArray(element), name)
       }
       else if (isFieldArray(element)) {
+        let id = 0;
         const linkedListAtom = reatomLinkedList({
-          create: (ctx, param) => createFieldElement(element.create(ctx, param), `${name}.item`),
+          create: (ctx, param) => createFieldElement(element.create(ctx, param), `${name}.${++id}`),
           initSnapshot: element.initState.map(state => ([state] as const))
         }, name);
 
