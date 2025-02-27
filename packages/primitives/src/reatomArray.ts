@@ -1,7 +1,11 @@
 import { Action, AtomMut, action, atom } from '@reatom/core'
 import { withAssign } from './withAssign'
 
-export interface ArrayAtom<T> extends AtomMut<Array<T>> {
+export interface ArrayLikeAtom<T = any> extends AtomMut<Array<T>> {
+  __reatomArray: true
+}
+
+export interface ArrayAtom<T> extends ArrayLikeAtom<T> {
   toReversed: Action<[], T[]>
   toSorted: Action<[compareFn?: (a: T, b: T) => number], T[]>
   toSpliced: Action<[start: number, deleteCount: number, ...items: T[]], T[]>
@@ -18,6 +22,8 @@ export const reatomArray = <T>(
 ): ArrayAtom<T> =>
   atom(initState, name).pipe(
     withAssign((target, name) => ({
+      __reatomArray: true as const,
+      
       toReversed: action(
         (ctx) => target(ctx, (prev) => prev.slice().reverse()),
         `${name}.toReversed`,
@@ -76,3 +82,5 @@ export const reatomArray = <T>(
       }, `${name}.unshift`),
     })),
   )
+
+export const isArrayAtom = (thing: any): thing is ArrayLikeAtom => thing?.__reatomArray === true
