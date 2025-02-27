@@ -32,12 +32,17 @@ export type AtomSelfBinded<
   [K in keyof Deps]: Deps[K] extends Atom
     ? never
     : Deps[K] extends ActionCreator
-    ? never
-    : K extends `_${string}`
-    ? never
-    : ActionCreator<Parameters<Deps[K]>, { payload: ReturnType<Deps[K]> }> & {
-        dispatch: (...args: Parameters<Deps[K]>) => Action<ReturnType<Deps[K]>>
-      }
+      ? never
+      : K extends `_${string}`
+        ? never
+        : ActionCreator<
+            Parameters<Deps[K]>,
+            { payload: ReturnType<Deps[K]> }
+          > & {
+            dispatch: (
+              ...args: Parameters<Deps[K]>
+            ) => Action<ReturnType<Deps[K]>>
+          }
 }
 
 export type AtomOptions<State = any> =

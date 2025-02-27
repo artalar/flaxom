@@ -16,8 +16,8 @@ export const filter: {
     T extends Action<infer Params, infer Payload>
       ? LensAction<Params, Payload>
       : T extends Atom<infer State>
-      ? LensAtom<State>
-      : never
+        ? LensAtom<State>
+        : never
   >
 } =
   (predicate?: Fn, name?: string) =>
@@ -39,8 +39,8 @@ export const filter: {
               prevState ?? [],
             )
           : isInit || predicate!(ctx, state, prevState)
-          ? state
-          : prevState
+            ? state
+            : prevState
       },
       mapName(anAtom, 'filter', name),
     )

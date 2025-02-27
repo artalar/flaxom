@@ -189,7 +189,7 @@ test('should respect initSnapshot for initializing', () => {
   const list = reatomLinkedList({
     create: (ctx, id: string) => ({ id: atom(id) }),
     key: 'id',
-    initSnapshot: [['1'], ['2']]
+    initSnapshot: [['1'], ['2']],
   })
   const track = ctx.subscribeTrack(atom((ctx) => [...ctx.spy(list.map).keys()]))
 

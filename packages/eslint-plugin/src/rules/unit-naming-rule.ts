@@ -119,7 +119,9 @@ export const unitNamingRule: Rule.RuleModule = {
         const expectedUnit = idScopes.at(-1)
         if (!expectedUnit) return
         const unitIsProp = (expectedUnit as any).parent.type === 'Property'
-        const expectedObject = unitIsProp ? idScopes.at(-2)?.name ?? null : null
+        const expectedObject = unitIsProp
+          ? (idScopes.at(-2)?.name ?? null)
+          : null
         const expectedDomain = domainScopes.findLast(
           (scope) => scope !== null,
         ) || { is: 'absent' }

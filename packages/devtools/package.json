@@ -12,9 +12,6 @@
   "browserslist": [
     "last 1 year"
   ],
-  "minify": {
-    "mangle": false
-  },
   "scripts": {
     "prepublishOnly": "npm run build && npm run test",
     "build": "rm -rf build && tsc && bun build src/index.tsx --outdir ./build --sourcemap=external  --loader .css:text --target browser",
@@ -49,7 +46,6 @@
   ],
   "files": [
     "/build",
-    "/package.json",
     "/devtools1.png",
     "/devtools2.png"
   ],
@@ -57,6 +53,7 @@
     "@observablehq/inspector": "^5.0.0",
     "@reatom/framework": "latest",
     "@reatom/jsx": "latest",
+    "@reatom/npm-zod": "^3.10.3",
     "jsondiffpatch": "^0.6.0",
     "zod": "^3.23.8"
   }

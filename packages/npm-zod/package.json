@@ -4,11 +4,10 @@
   "private": false,
   "sideEffects": false,
   "description": "Reatom for npm-zod",
-  "source": "src/index.ts",
   "exports": {
     "types": "./build/index.d.ts",
     "require": "./build/index.js",
-    "default": "./build/index.module.js"
+    "default": "./build/index.mjs"
   },
   "main": "build/index.js",
   "module": "build/index.module.js",
@@ -16,14 +15,10 @@
   "browserslist": [
     "last 1 year"
   ],
-  "minify": {
-    "mangle": false
-  },
   "scripts": {
-    "sandbox": "vite",
     "prepublishOnly": "npm run build && npm run test",
-    "build": "microbundle",
-    "test": "ts-node src/index.test.ts",
+    "build": "yoctobundle",
+    "test": "tsc; tsx src/index.test.ts",
     "test:watch": "tsx watch src/index.test.ts"
   },
   "dependencies": {
@@ -55,8 +50,5 @@
     "state-manager",
     "reatom"
   ],
-  "files": [
-    "/build",
-    "/package.json"
-  ]
+  "files": ["/build"]
 }

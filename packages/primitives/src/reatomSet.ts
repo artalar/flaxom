@@ -21,6 +21,7 @@ export interface SetAtom<T> extends AtomMut<Set<T>> {
   sizeAtom: Atom<number>
 }
 
+// @ts-ignore TODO is it already ok to remove this?
 interface ProposalSet<T> extends Set<T> {
   difference(other: Set<T>): Set<T>
   intersection(other: Set<T>): Set<T>

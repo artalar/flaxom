@@ -1,5 +1,5 @@
 import * as v3 from '@reatom/core'
-import { Tree, TreeId } from './kernel'
+import type { Tree, TreeId } from './kernel'
 import { Atom } from './declareAtom'
 import { PayloadActionCreator } from './declareAction'
 import { Store } from './createStore'
@@ -57,8 +57,8 @@ export function nameToIdDefault(name: string | [string] | symbol): TreeId {
     ? // TODO: https://github.com/microsoft/TypeScript/issues/1863
       (name as unknown as string)
     : Array.isArray(name)
-    ? safetyStr(name[0], 'name')
-    : `${safetyStr(name, 'name')} [${++id}]`
+      ? safetyStr(name[0], 'name')
+      : `${safetyStr(name, 'name')} [${++id}]`
 }
 let _nameToId: GenId
 export function nameToId(name: string | [string] | symbol): TreeId {

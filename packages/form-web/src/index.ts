@@ -158,122 +158,111 @@ export const withHtmlRegistration: {
     )
     const unsubscribeAtom = atom<null | Unsubscribe>(null)
 
-    const register: HTMLFieldAtom['register'] = action(
-      (ctx, el) => {
-        // TODO warn?
-        if (el === ctx.get(elementAtom)) return
+    const register: HTMLFieldAtom['register'] = action((ctx, el) => {
+      // TODO warn?
+      if (el === ctx.get(elementAtom)) return
 
-        if (el === null) {
-          const un = ctx.get(unsubscribeAtom)
-          unsubscribeAtom(ctx, null)
-          un?.()
-          return
-        }
-        // TODO
-        // throwReatomError(
-        //   !(el instanceof HTMLInputElement),
-        //   'unsupported element kind',
-        // )
-        if (
-          [HTMLInputElement, HTMLTextAreaElement, HTMLSelectElement].every(
-            (HTMLElement) => el instanceof HTMLElement === false,
-          )
-        ) {
-          throw new Error('Unsupported element kind')
-        }
+      if (el === null) {
+        const un = ctx.get(unsubscribeAtom)
+        unsubscribeAtom(ctx, null)
+        un?.()
+        return
+      }
+      // TODO
+      // throwReatomError(
+      //   !(el instanceof HTMLInputElement),
+      //   'unsupported element kind',
+      // )
+      if (
+        [HTMLInputElement, HTMLTextAreaElement, HTMLSelectElement].every(
+          (HTMLElement) => el instanceof HTMLElement === false,
+        )
+      ) {
+        throw new Error('Unsupported element kind')
+      }
 
-        let lastInput = ctx.get(fieldAtom)
-        if (type === 'select' && lastInput.length === 0) {
-          lastInput = fieldAtom(ctx, getElementValue(el, type))
-        }
+      let lastInput = ctx.get(fieldAtom)
+      if (type === 'select' && lastInput.length === 0) {
+        lastInput = fieldAtom(ctx, getElementValue(el, type))
+      }
 
-        // TODO https://developer.mozilla.org/en-US/docs/Web/API/HTMLObjectElement/setCustomValidity
-        const validateNative = action(
-          (ctx) => {
-            const validation = ctx.get(fieldAtom.validationAtom)
+      // TODO https://developer.mozilla.org/en-US/docs/Web/API/HTMLObjectElement/setCustomValidity
+      const validateNative = action((ctx) => {
+        const validation = ctx.get(fieldAtom.validationAtom)
 
-            return validation.validating ||
-              !validation.valid ||
-              el.checkValidity()
-              ? validation
-              : fieldAtom.validationAtom(ctx, (state) => ({
-                  ...state,
-                  valid: false,
-                  error: el.validationMessage,
-                }))
-          },
-          name?.concat('.validateNative'),
+        return validation.validating || !validation.valid || el.checkValidity()
+          ? validation
+          : fieldAtom.validationAtom(ctx, (state) => ({
+              ...state,
+              valid: false,
+              error: el.validationMessage,
+            }))
+      }, name?.concat('.validateNative'))
+
+      elementAtom(ctx, el)
+      attributesAtom.merge(ctx, getAttributes(el))
+
+      const handleFocus = () => fieldAtom.focus(ctx)
+      const handleBlur = () => fieldAtom.blur(ctx)
+      const changeInput = action((ctx) => {
+        const _lastInput = lastInput
+        ctx.schedule(
+          () => setElementValue(el, type, (lastInput = _lastInput)),
+          -1,
         )
 
-        elementAtom(ctx, el)
-        attributesAtom.merge(ctx, getAttributes(el))
+        const input = getElementValue(el, type)
 
-        const handleFocus = () => fieldAtom.focus(ctx)
-        const handleBlur = () => fieldAtom.blur(ctx)
-        const changeInput = action(
-          (ctx) => {
-            const _lastInput = lastInput
-            ctx.schedule(
-              () => setElementValue(el, type, (lastInput = _lastInput)),
-              -1,
-            )
-
-            const input = getElementValue(el, type)
-
-            if (ctx.get(fieldAtom) !== fieldAtom.change(ctx, input)) {
-              lastInput = input
-            } else {
-              setElementValue(el, type, lastInput)
-            }
-          },
-          name?.concat('.changeInput'),
-        )
-        const handleChange = () => changeInput(ctx)
-        const handleChangeAttributes = (
-          ctx: Ctx,
-          { state }: { state: typeof attributes },
-        ) => {
-          Object.assign(el, state)
-          ctx.schedule(() => {
-            // TODO
-            console.warn('Element assign rollback is not implemented')
-          }, -1)
-        }
-
-        // TODO codestyle
-        const un = ctx.subscribe(fieldAtom, () => {})
-        ctx.schedule(un, -1)
-
-        ctx.schedule(() => {
-          // TODO el to attributesAtom by MutationObserver (optional)
-          // FIXME ctx origin!
-          addOnUpdate(fieldAtom.validate, validateNative)
-          addOnUpdate(attributesAtom, handleChangeAttributes)
-
-          Object.assign(el, ctx.get(attributesAtom))
+        if (ctx.get(fieldAtom) !== fieldAtom.change(ctx, input)) {
+          lastInput = input
+        } else {
           setElementValue(el, type, lastInput)
+        }
+      }, name?.concat('.changeInput'))
+      const handleChange = () => changeInput(ctx)
+      const handleChangeAttributes = (
+        ctx: Ctx,
+        { state }: { state: typeof attributes },
+      ) => {
+        Object.assign(el, state)
+        ctx.schedule(() => {
+          // TODO
+          console.warn('Element assign rollback is not implemented')
+        }, -1)
+      }
 
-          el.addEventListener('focus', handleFocus)
-          el.addEventListener('blur', handleBlur)
-          el.addEventListener('input', handleChange)
+      // TODO codestyle
+      const un = ctx.subscribe(fieldAtom, () => {})
+      ctx.schedule(un, -1)
+
+      ctx.schedule(() => {
+        // TODO el to attributesAtom by MutationObserver (optional)
+        // FIXME ctx origin!
+        addOnUpdate(fieldAtom.validate, validateNative)
+        addOnUpdate(attributesAtom, handleChangeAttributes)
+
+        Object.assign(el, ctx.get(attributesAtom))
+        setElementValue(el, type, lastInput)
+
+        el.addEventListener('focus', handleFocus)
+        el.addEventListener('blur', handleBlur)
+        el.addEventListener('input', handleChange)
+      })
+
+      unsubscribeAtom(ctx, () => () => {
+        fieldAtom.validate.__reatom.updateHooks!.delete(validateNative)
+        attributesAtom.__reatom.updateHooks!.delete(handleChangeAttributes)
+
+        el.removeEventListener('focus', handleFocus)
+        el.removeEventListener('blur', handleBlur)
+        el.removeEventListener('input', handleChange)
+
+        ctx.get(() => {
+          un()
+          elementAtom(ctx, null)
         })
-
-        unsubscribeAtom(ctx, () => () => {
-          fieldAtom.validate.__reatom.updateHooks!.delete(validateNative)
-          attributesAtom.__reatom.updateHooks!.delete(handleChangeAttributes)
-
-          el.removeEventListener('focus', handleFocus)
-          el.removeEventListener('blur', handleBlur)
-          el.removeEventListener('input', handleChange)
-
-          ctx.get(() => {
-            un()
-            elementAtom(ctx, null)
-          })
-        })
-      },
-      name?.concat('.register'),
-    )
+      })
+    }, name?.concat('.register'))
 
     ;(fieldAtom.reset.__reatom.updateHooks ??= new Set()).add((ctx) => {
       const el = ctx.get(elementAtom)
@@ -350,34 +339,40 @@ export type HTMLForm = Form & {
     [K in keyof T]: T[K] extends string
       ? HTMLFieldAtom<string>
       : T[K] extends number
-      ? HTMLFieldAtom<number>
-      : T[K] extends boolean
-      ? HTMLFieldAtom<boolean>
-      : T[K] extends []
-      ? HTMLFieldAtom<Array<string>, HTMLSelectElement>
-      : T[K] extends Array<infer T extends string>
-      ? HTMLFieldAtom<Array<T>, HTMLSelectElement>
-      : T[K] extends Rec<boolean>
-      ? AtomMut<undefined | keyof T[K]> & {
-          [k in keyof T[K]]: HTMLFieldAtom<boolean>
-        }
-      : T[K] extends HTMLFieldOptions<string> &
-          HTMLInputAttributes<INPUT_TEXT_TYPES>
-      ? HTMLFieldAtom<string>
-      : T[K] extends HTMLFieldOptions<number> & HTMLInputAttributes<'number'>
-      ? HTMLFieldAtom<number>
-      : T[K] extends HTMLFieldOptions<boolean> &
-          HTMLInputAttributes<'checkbox' | 'radio'>
-      ? HTMLFieldAtom<boolean>
-      : T[K] extends HTMLFieldOptions<[]> & Partial<HTMLSelectElement>
-      ? HTMLFieldAtom<string[], HTMLSelectElement>
-      : T[K] extends HTMLFieldOptions<Array<infer T extends string>> &
-          Partial<HTMLSelectElement>
-      ? HTMLFieldAtom<Array<T>, HTMLSelectElement>
-      : T[K] extends HTMLFieldOptions<Rec<boolean>> &
-          HTMLInputAttributes<'radio'>
-      ? AtomMut<keyof T[K]> & { [k in keyof T[K]]: HTMLFieldAtom<boolean> }
-      : never
+        ? HTMLFieldAtom<number>
+        : T[K] extends boolean
+          ? HTMLFieldAtom<boolean>
+          : T[K] extends []
+            ? HTMLFieldAtom<Array<string>, HTMLSelectElement>
+            : T[K] extends Array<infer T extends string>
+              ? HTMLFieldAtom<Array<T>, HTMLSelectElement>
+              : T[K] extends Rec<boolean>
+                ? AtomMut<undefined | keyof T[K]> & {
+                    [k in keyof T[K]]: HTMLFieldAtom<boolean>
+                  }
+                : T[K] extends HTMLFieldOptions<string> &
+                      HTMLInputAttributes<INPUT_TEXT_TYPES>
+                  ? HTMLFieldAtom<string>
+                  : T[K] extends HTMLFieldOptions<number> &
+                        HTMLInputAttributes<'number'>
+                    ? HTMLFieldAtom<number>
+                    : T[K] extends HTMLFieldOptions<boolean> &
+                          HTMLInputAttributes<'checkbox' | 'radio'>
+                      ? HTMLFieldAtom<boolean>
+                      : T[K] extends HTMLFieldOptions<[]> &
+                            Partial<HTMLSelectElement>
+                        ? HTMLFieldAtom<string[], HTMLSelectElement>
+                        : T[K] extends HTMLFieldOptions<
+                              Array<infer T extends string>
+                            > &
+                              Partial<HTMLSelectElement>
+                          ? HTMLFieldAtom<Array<T>, HTMLSelectElement>
+                          : T[K] extends HTMLFieldOptions<Rec<boolean>> &
+                                HTMLInputAttributes<'radio'>
+                            ? AtomMut<keyof T[K]> & {
+                                [k in keyof T[K]]: HTMLFieldAtom<boolean>
+                              }
+                            : never
   }
   register: Action<[null | HTMLFormElement]>
 }
@@ -428,34 +423,31 @@ export const reatomHTMLForm = ({
   )
   const unsubscribeAtom = atom<null | Unsubscribe>(null)
 
-  const register: HTMLForm['register'] = action(
-    (ctx, el) => {
-      if (el === null) {
-        const un = ctx.get(unsubscribeAtom)
-        unsubscribeAtom(ctx, null)
-        un?.()
-        return
-      }
+  const register: HTMLForm['register'] = action((ctx, el) => {
+    if (el === null) {
+      const un = ctx.get(unsubscribeAtom)
+      unsubscribeAtom(ctx, null)
+      un?.()
+      return
+    }
 
-      throwReatomError(ctx.get(elementAtom), 'form already registered')
+    throwReatomError(ctx.get(elementAtom), 'form already registered')
 
-      elementAtom(ctx, el)
+    elementAtom(ctx, el)
 
-      const handleSubmit = (event: SubmitEvent) => {
-        onHTMLSubmit(ctx, event)
-      }
+    const handleSubmit = (event: SubmitEvent) => {
+      onHTMLSubmit(ctx, event)
+    }
 
-      ctx.schedule(() => {
-        el.addEventListener('submit', handleSubmit)
-      })
+    ctx.schedule(() => {
+      el.addEventListener('submit', handleSubmit)
+    })
 
-      unsubscribeAtom(ctx, () => () => {
-        el.removeEventListener('submit', handleSubmit)
-        elementAtom(ctx, null)
-      })
-    },
-    name?.concat('.register'),
-  )
+    unsubscribeAtom(ctx, () => () => {
+      el.removeEventListener('submit', handleSubmit)
+      elementAtom(ctx, null)
+    })
+  }, name?.concat('.register'))
 
   // @ts-expect-error
   const reatomHTMLField: HTMLForm['reatomHTMLField'] = (options, fieldName) => {
@@ -526,13 +518,10 @@ export const reatomHTMLForm = ({
       {} as ReturnType<HTMLForm['reatomHTMLFields']>,
     )
 
-  const onHTMLSubmit = action(
-    (ctx, event: SubmitEvent) => {
-      preventDefault && event.preventDefault()
-      form.onSubmit(ctx)
-    },
-    name?.concat('.onHTMLSubmit'),
-  )
+  const onHTMLSubmit = action((ctx, event: SubmitEvent) => {
+    preventDefault && event.preventDefault()
+    form.onSubmit(ctx)
+  }, name?.concat('.onHTMLSubmit'))
 
   const touched = new WeakSet()
   form.fieldsListAtom.onChange((ctx, list) => {

@@ -16,12 +16,12 @@ export type Plain<Intersection> = Intersection extends (
       [Key in keyof Intersection]: Intersection[Key]
     }
   : Intersection extends new (...a: any[]) => any
-  ? Intersection
-  : Intersection extends object
-  ? {
-      [Key in keyof Intersection]: Intersection[Key]
-    }
-  : Intersection
+    ? Intersection
+    : Intersection extends object
+      ? {
+          [Key in keyof Intersection]: Intersection[Key]
+        }
+      : Intersection
 
 export type Values<T> = T[keyof T]
 

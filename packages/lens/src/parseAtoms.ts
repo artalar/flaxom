@@ -11,27 +11,29 @@ type Builtin = Date | RegExp | Function
 export type ParseAtoms<T> = T extends Primitive | Builtin
   ? T
   : T extends Action
-  ? T
-  : T extends LinkedListLikeAtom<infer T>
-  ? T extends LinkedList<infer T>
-    ? Array<T>
-    : never
-  : T extends Atom<infer T>
-  ? ParseAtoms<T>
-  : T extends Map<infer K, infer T>
-  ? Map<K, ParseAtoms<T>>
-  : T extends Set<infer T>
-  ? Set<ParseAtoms<T>>
-  : T extends Array<infer T>
-  ? Array<ParseAtoms<T>>
-  : T extends object
-  ? {
-      [K in keyof T]: T[K] extends object & { constructor: Function }
-        ? T[K]
-        : ParseAtoms<T[K]>
-      // [K in keyof T]: ParseAtoms<T[K]>
-    }
-  : T
+    ? T
+    : T extends LinkedListLikeAtom<infer T>
+      ? T extends LinkedList<infer T>
+        ? Array<T>
+        : never
+      : T extends Atom<infer T>
+        ? ParseAtoms<T>
+        : T extends Map<infer K, infer T>
+          ? Map<K, ParseAtoms<T>>
+          : T extends Set<infer T>
+            ? Set<ParseAtoms<T>>
+            : T extends Array<infer T>
+              ? Array<ParseAtoms<T>>
+              : T extends object
+                ? {
+                    [K in keyof T]: T[K] extends object & {
+                      constructor: Function
+                    }
+                      ? T[K]
+                      : ParseAtoms<T[K]>
+                    // [K in keyof T]: ParseAtoms<T[K]>
+                  }
+                : T
 
 export const parseAtoms = <Value>(
   ctx: Ctx,

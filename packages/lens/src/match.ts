@@ -17,12 +17,12 @@ export type BuiltIns = Primitive | Date | RegExp
 export type PartialDeep<T> = T extends BuiltIns
   ? T | undefined
   : T extends object
-  ? T extends ReadonlyArray<any>
-    ? never
-    : {
-        [K in keyof T]?: PartialDeep<T[K]>
-      }
-  : unknown
+    ? T extends ReadonlyArray<any>
+      ? never
+      : {
+          [K in keyof T]?: PartialDeep<T[K]>
+        }
+    : unknown
 
 interface Match<Expression = any, State = never, Default = undefined>
   extends Atom<State | Default> {
@@ -71,8 +71,8 @@ export function match<T>(
     const value = isAtom(expression)
       ? ctxSpy.spy(expression)
       : typeof expression === 'function'
-      ? (expression as Fn)(ctxSpy)
-      : expression
+        ? (expression as Fn)(ctxSpy)
+        : expression
 
     const list = [...cases, _truthy, _falsy, _default].filter(Boolean)
 
@@ -81,8 +81,8 @@ export function match<T>(
         return isAtom(statement)
           ? ctxSpy.spy(statement)
           : typeof statement === 'function'
-          ? statement(ctxSpy, value)
-          : statement
+            ? statement(ctxSpy, value)
+            : statement
       }
     }
     return undefined
@@ -94,8 +94,8 @@ export function match<T>(
         clause: isAtom(clause)
           ? (ctx, value) => Object.is(value, ctx.spy(clause))
           : typeof clause === 'function'
-          ? clause
-          : (ctx, value) => Object.is(value, clause),
+            ? clause
+            : (ctx, value) => Object.is(value, clause),
         statement,
       })
       return matchAtom

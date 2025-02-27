@@ -1,20 +1,18 @@
 {
   "$schema": "https://turborepo.org/schema.json",
-  "pipeline": {
+  "tasks": {
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["build/**"]
     },
     "test": {
-      "dependsOn": ["build"],
+      "dependsOn": ["^build", "@reatom/testing#build"],
       "outputs": [],
+      "passThroughEnv": ["PLAYWRIGHT_*"],
       "inputs": ["src/**/*.tsx", "src/**/*.ts", "test/**/*.ts", "test/**/*.tsx"]
     },
-    "lint": {
-      "outputs": []
-    },
     "publish": {
-      "dependsOn": ["build", "test", "lint"],
+      "dependsOn": ["build", "test"],
       "outputs": []
     }
   }

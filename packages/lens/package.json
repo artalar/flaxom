@@ -3,8 +3,7 @@
   "version": "3.11.6",
   "private": false,
   "sideEffects": false,
-  "description": "Reatom for lens",
-  "source": "src/index.ts",
+  "description": "FRP operators and other utilities for the Reatom state manager",
   "exports": {
     "types": "./build/index.d.ts",
     "require": "./build/index.js",
@@ -13,16 +12,11 @@
   "main": "build/index.js",
   "module": "build/index.mjs",
   "types": "build/index.d.ts",
-  "browserslist": [
-    "last 1 year"
-  ],
-  "minify": {
-    "mangle": false
-  },
+  "browserslist": ["last 1 year"],
   "scripts": {
     "prepublishOnly": "npm run build && npm run test",
-    "build": "microbundle -f esm,cjs",
-    "test": "ts-node src/index.test.ts",
+    "build": "yoctobundle",
+    "test": "tsc; tsx src/index.test.ts",
     "test:watch": "tsx watch src/index.test.ts"
   },
   "dependencies": {
@@ -42,8 +36,5 @@
     "url": "https://github.com/artalar/reatom/issues"
   },
   "homepage": "https://www.reatom.dev/package/lens",
-  "files": [
-    "/build",
-    "/package.json"
-  ]
+  "files": ["/build"]
 }

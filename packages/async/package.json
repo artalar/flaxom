@@ -4,7 +4,6 @@
   "private": false,
   "sideEffects": false,
   "description": "Reatom for async",
-  "source": "src/index.ts",
   "exports": {
     "types": "./build/index.d.ts",
     "require": "./build/index.js",
@@ -16,12 +15,9 @@
   "browserslist": [
     "last 1 year"
   ],
-  "minify": {
-    "mangle": false
-  },
   "scripts": {
     "prepublishOnly": "npm run build && npm run test",
-    "build": "microbundle -f esm,cjs",
+    "build": "yoctobundle",
     "test": "vitest run src/*.test.ts",
     "test:watch": "vitest src/*.test.ts"
   },
@@ -45,8 +41,5 @@
     "url": "https://github.com/artalar/reatom/issues"
   },
   "homepage": "https://www.reatom.dev/package/async",
-  "files": [
-    "/build",
-    "/package.json"
-  ]
+  "files": ["/build"]
 }

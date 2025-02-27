@@ -112,7 +112,7 @@ export const reatomPersist = (
       ) => {
         const rec = ctx.get(storageAtom).get(ctx, key)
 
-        return rec?.id === state?.id ? state : rec ?? state
+        return rec?.id === state?.id ? state : (rec ?? state)
       }
 
       const fromPersistRecord = (
@@ -188,13 +188,11 @@ export const reatomPersist = (
           return state
         }
 
-        onConnect(
-          anAtom,
-          (ctx) =>
-            ctx.get(storageAtom).subscribe?.(ctx, key, () => {
-              // this will rerun the computed
-              persistRecordAtom(ctx, (state) => state)
-            }),
+        onConnect(anAtom, (ctx) =>
+          ctx.get(storageAtom).subscribe?.(ctx, key, () => {
+            // this will rerun the computed
+            persistRecordAtom(ctx, (state) => state)
+          }),
         )
       } else {
         anAtom.__reatom.initState = fromPersistRecord
@@ -289,12 +287,11 @@ export const createMemStorage = ({
         snapshotAtom(ctx, (snapshot) => ({ ...snapshot, [key]: rec }))
       }
 
-      ctx.schedule(
-        () =>
-          ctx
-            .get(listenersAtom)
-            .get(key)
-            ?.forEach((cb) => cb(rec)),
+      ctx.schedule(() =>
+        ctx
+          .get(listenersAtom)
+          .get(key)
+          ?.forEach((cb) => cb(rec)),
       )
     },
     subscribe: subscribe

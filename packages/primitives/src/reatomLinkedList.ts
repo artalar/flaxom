@@ -301,8 +301,7 @@ export const reatomLinkedList = <
         return createLinkedList(restOptions.initState ?? [])
       else if ('initSnapshot' in restOptions)
         return createLinkedList(ctx, restOptions.initSnapshot ?? [])
-      else
-        return createLinkedList([])
+      else return createLinkedList([])
     } finally {
       STATE = null
     }
@@ -310,11 +309,11 @@ export const reatomLinkedList = <
 
   const createLinkedList = (
     ctxOrInitState: Ctx | Node[],
-    initSnapshot?: Params[]
+    initSnapshot?: Params[],
   ): LinkedList<LLNode<Node>> => {
     const initState = Array.isArray(ctxOrInitState)
       ? ctxOrInitState
-      : initSnapshot!.map(params => userCreate(ctxOrInitState, ...params))
+      : initSnapshot!.map((params) => userCreate(ctxOrInitState, ...params))
 
     const state = {
       size: 0,
@@ -329,7 +328,7 @@ export const reatomLinkedList = <
       addLL(state, node, state.tail)
     }
 
-    return state;
+    return state
   }
 
   const batchFn = <T>(ctx: Ctx, cb: Fn<[Ctx], T>): T => {

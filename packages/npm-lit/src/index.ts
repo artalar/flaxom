@@ -47,7 +47,7 @@ export const withReatom = <T extends Constructor<LitElement>>(
       }
       this.ctx = {
         ...ctx,
-        spy: (anAtom) => {
+        spy: (anAtom: any) => {
           this.deps.push(anAtom)
           return ctx.get(anAtom)
         },

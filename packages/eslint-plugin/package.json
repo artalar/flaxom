@@ -7,7 +7,6 @@
   "private": false,
   "sideEffects": false,
   "description": "Reatom-specific ESLint rules",
-  "source": "src/index.ts",
   "exports": {
     "types": "./build/index.d.ts",
     "require": "./build/index.js",
@@ -20,14 +19,17 @@
     "node 16"
   ],
   "scripts": {
-    "sandbox": "vite",
     "prepublishOnly": "npm run build && npm run test",
-    "build": "microbundle -f esm,cjs",
-    "test": "ts-node src/index.test.ts",
+    "build": "yoctobundle",
+    "test": "tsc; tsx src/index.test.ts",
     "test:watch": "tsx watch src/index.test.ts"
   },
   "author": "pivaszbs",
   "maintainers": [
+    {
+      "name": "krulod",
+      "url": "https://github.com/krulod"
+    },
     {
       "name": "artalar",
       "url": "https://github.com/artalar"
@@ -50,13 +52,10 @@
     "url": "https://github.com/artalar/reatom/issues"
   },
   "homepage": "https://www.reatom.dev/package/eslint-plugin",
-  "files": [
-    "/build",
-    "/package.json"
-  ],
+  "files": ["/build"],
   "devDependencies": {
     "@types/eslint": "^9.0.0",
-    "eslint": "^9.0.0"
+    "eslint": "^9.21.0"
   },
   "peerDependencies": {
     "eslint": "^8.0.0 || ^9.0.0"

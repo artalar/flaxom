@@ -152,12 +152,10 @@ export interface Action<Params extends any[] = any[], Payload = any>
 
 export type AtomState<T> = T extends Atom<infer State> ? State : never
 
-export type ActionParams<T> = T extends Action<infer Params, any>
-  ? Params
-  : never
-export type ActionPayload<T> = T extends Action<any, infer Payload>
-  ? Payload
-  : never
+export type ActionParams<T> =
+  T extends Action<infer Params, any> ? Params : never
+export type ActionPayload<T> =
+  T extends Action<any, infer Payload> ? Payload : never
 
 type DefinitelyReturnType<T> = T extends Fn<any[], infer T> ? T : never
 export type IsAction<T> = T extends Fn &
@@ -169,11 +167,12 @@ export type AtomReturn<T extends Atom> = T extends Fn
   ? ReturnType<T>
   : AtomState<T>
 
-export type CtxParams<T, Else = never> = T extends Fn<[Ctx, ...infer Params]>
-  ? Params
-  : T extends [Ctx, ...infer Params]
-  ? Params
-  : Else
+export type CtxParams<T, Else = never> =
+  T extends Fn<[Ctx, ...infer Params]>
+    ? Params
+    : T extends [Ctx, ...infer Params]
+      ? Params
+      : Else
 
 export interface Unsubscribe {
   (): void

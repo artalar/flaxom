@@ -10,9 +10,9 @@ export default defineConfig({
       instances: [
         {
           name: 'chromium',
-          browser: 'chromium'
-        }
-      ]
+          browser: 'chromium',
+        },
+      ],
     },
     include: ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
   },

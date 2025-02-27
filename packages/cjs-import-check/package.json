@@ -1,10 +1,5 @@
 {
-  "name": "@reatom-private/cjs-import-check",
-  "version": "1.0.0",
-  "main": "index.js",
-  "type": "commonjs",
-  "private": true,
-  "license": "MIT",
+  "name": "cjs-import-check",
   "dependencies": {
     "@reatom/framework": "^3.4.37"
   },

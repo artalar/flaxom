@@ -1,81 +1,39 @@
 {
-  "name": "reatom",
-  "private": true,
-  "description": "Expressive and deterministic state manager",
+  "name": "reatom-workspace",
   "scripts": {
     "release": "npx tsx ./tools/publish.ts",
-    "postinstall": "turbo run build --filter=core --filter=framework --filter=testing",
-    "build": "turbo run build",
-    "reset": "./reset.sh",
-    "test": "turbo run build --filter=testing && turbo run test",
+    "postinstall": "turbo run build --output-logs=errors-only --filter=./packages/{framework,testing}",
+    "build": "turbo run build --output-logs=errors-only --filter=./packages/*",
+    "reset": "sh ./tools/reset.sh",
+    "test": "turbo run build --output-logs=errors-only --filter=./packages/testing",
     "prettify": "prettier --write */**/**/*.{js,ts,md}",
     "prettify:check": "prettier --check */**/**/*.{js,ts,md}",
     "prettify:watch": "onchange */**/**/*.{js,ts,md} -- prettier --write {{changed}}",
     "package-generator": "tsx tools/new-package.ts",
     "update": "npx npm-check-updates -u",
-    "prepare": "git config blame.ignoreRevsFile .git-blame-ignore-revs && husky install",
+    "prepare": "husky",
     "actualize-issue-templates": "npx tsx ./tools/actualize-issue-templates.ts"
   },
   "workspaces": [
-    "packages/*"
+    "./packages/*"
   ],
-  "author": "artalar",
-  "license": "MIT",
-  "readme": "README.md",
-  "repository": {
-    "type": "git",
-    "url": "git+ssh://git@github.com/artalar/reatom.git"
-  },
+  "packageManager": "npm@8.0.0",
   "engines": {
     "npm": ">=8.0.0"
   },
-  "bugs": {
-    "url": "https://github.com/artalar/reatom/issues"
-  },
-  "homepage": "https://github.com/artalar/reatom/tree/v3",
-  "devDependencies": {
+  "dependencies": {
     "@commitlint/cli": "^19.2.1",
     "@commitlint/config-conventional": "^19.1.0",
-    "@cookie-baker/core": "^0.2.1",
+    "yoctobundle": "latest",
     "@types/node": "latest",
-    "@types/prettier": "^2.7.3",
-    "@types/react": "^18.2.69",
-    "@types/react-dom": "^18.2.22",
-    "@types/use-sync-external-store": "^0.0.6",
-    "@vitejs/plugin-react": "^4.2.1",
     "bun": "^1.1.13",
-    "core-js": "^3.37.1",
-    "history": "^5.3.0",
-    "husky": "^8.0.3 ",
-    "linkedom": "^0.18.5",
-    "lit": "^3.1.2",
-    "microbundle": "^0.15.1",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "rimraf": "^5.0.5",
-    "svelte": "^4.2.12",
-    "tsx": "^4.19.2",
-    "turbo": "^1.13.0",
-    "typescript": "^5.4.3",
-    "use-sync-external-store": "^1.2.0",
+    "husky": "^9.1.7",
+    "prettier": "^3.5.2",
+    "tsx": "^4.19.3",
+    "turbo": "^2.4.2",
+    "typescript": "^5.7.3",
     "uvu": "^0.5.6",
-    "vite": "^5.2.6",
-    "vitest": "^2.1.9",
-    "zx": "^7.2.3"
-  },
-  "peerDependencies": {
-    "prettier": "*"
-  },
-  "keywords": [
-    "state",
-    "store",
-    "state-manager",
-    "state manager",
-    "reactive",
-    "reactivity",
-    "flux",
-    "atom",
-    "reatom",
-    "@reatom"
-  ]
+    "vitest": "^3.0.6",
+    "zx": "^8.3.2"
+  }
 }

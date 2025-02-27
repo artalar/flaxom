@@ -85,8 +85,8 @@ export const delay: {
     let state = ctx.cause.pubs.length
       ? prevState
       : proto.isAction
-      ? []
-      : depState
+        ? []
+        : depState
 
     if (!ctx.cause.pubs.length) {
       state = proto.isAction ? [] : depState

@@ -91,8 +91,8 @@ export const plain = <T extends Atom>(
 ): T extends Action<infer Params, infer Payload>
   ? Action<Params, Payload>
   : T extends AtomMut<infer State>
-  ? AtomMut<State>
-  : Atom<AtomState<T>> => {
+    ? AtomMut<State>
+    : Atom<AtomState<T>> => {
   const theAtom =
     typeof anAtom === 'function'
       ? // @ts-expect-error

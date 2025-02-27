@@ -507,7 +507,7 @@ export const withRetry =
             (error) => {
               const timeout = isAbort(error)
                 ? -1
-                : onReject(ctx, error, ctx.get(retriesAtom)) ?? -1
+                : (onReject(ctx, error, ctx.get(retriesAtom)) ?? -1)
 
               if (timeout < 0) {
                 retriesAtom(ctx, 0)

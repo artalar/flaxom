@@ -4,13 +4,10 @@
   "private": true,
   "sideEffects": false,
   "source": "index.ts",
-  "main": "build/react-native-batched-updates.js",
-  "module": "build/react-native-batched-updates.module.js",
-  "types": "build/react-native-batched-updates.d.ts",
+  "main": "build/index.js",
+  "module": "build/index.mjs",
+  "types": "build/index.d.ts",
   "license": "MIT",
-  "scripts": {
-    "build": "microbundle -f esm,cjs"
-  },
   "peerDependencies": {
     "@reatom/react-v2": "^3.1.0"
   }

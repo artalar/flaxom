@@ -4,25 +4,21 @@
   "private": false,
   "sideEffects": false,
   "description": "Reatom adapter for core-v2",
-  "source": "src/index.ts",
   "main": "build/index.js",
   "module": "build/index.es.js",
   "types": "build/index.d.ts",
   "browserslist": [
     "last 1 year"
   ],
-  "minify": {
-    "mangle": false
-  },
   "scripts": {
     "prepublishOnly": "npm run build && npm run build-primitives && npm run test",
-    "build": "microbundle -f esm,cjs",
-    "build-primitives": "microbundle --cwd primitives",
-    "test": "echo ts-node src/index.test.ts",
+    "build": "yoctobundle && yoctobundle --cwd primitives",
+    "test": "echo tsc; tsx src/index.test.ts",
     "test:watch": "tsx watch src/index.test.ts"
   },
   "dependencies": {
-    "@reatom/core": "^3.1.0"
+    "@reatom/core": "^3.1.0",
+    "@reatom/hooks": "^3.6.0"
   },
   "author": "artalar",
   "license": "MIT",
@@ -36,7 +32,6 @@
   "homepage": "https://www.reatom.dev/compat/core-v2",
   "files": [
     "/build",
-    "/package.json",
     "/primitives"
   ]
 }
