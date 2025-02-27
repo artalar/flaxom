@@ -333,7 +333,7 @@ export const concurrent: {
       const prevController = ctx.get(abortControllerAtom)
       const controller = new AbortController()
       // do it outside of the schedule to save the call stack
-      const abort = toAbortError('concurrent')
+      const abort = toAbortError('concurrent ' + ctx.cause.proto.name)
 
       if (strategy === 'first-in-win') {
         if (prevController) {
@@ -386,7 +386,7 @@ export const concurrent: {
       }
       return result
     },
-    isAtom(fn) ? `${fn.__reatom.name}._concurrent` : '_concurrent',
+    isAtom(fn) ? `${fn.__reatom.name}._concurrent` : __count('_concurrent'),
   )
 
   const result = Object.assign(
