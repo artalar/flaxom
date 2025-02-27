@@ -51,7 +51,7 @@ test('toAbortError', () => {
   const err = new Error('test')
   const abortErr = toAbortError(err)
   assert.is(abortErr.name, 'AbortError')
-  assert.is(abortErr.message, 'test')
+  assert.is(abortErr.message, 'test [1]')
   assert.is(abortErr.cause, err)
   ;('👍') //?
 })
