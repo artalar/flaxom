@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.9.0](https://github.com/artalar/reatom/compare/primitives-v3.8.0...primitives-v3.9.0) (2025-02-27)
+
+
+### Features
+
+* **primitives:** add static `LinkedList` factory for `reatomLinkedList` ([#1055](https://github.com/artalar/reatom/issues/1055)) ([2634b6f](https://github.com/artalar/reatom/commit/2634b6f460b735ef5916947274e93a8b655c0aff))
+
 ## [3.8.0](https://github.com/artalar/reatom/compare/primitives-v3.7.3...primitives-v3.8.0) (2025-02-10)
 
 ### Features

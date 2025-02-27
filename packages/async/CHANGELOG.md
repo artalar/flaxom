@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.16.7](https://github.com/artalar/reatom/compare/async-v3.16.6...async-v3.16.7) (2025-02-27)
+
+
+### Bug Fixes
+
+* **async:** abort message format ([bb10f43](https://github.com/artalar/reatom/commit/bb10f43892a87f3c4ba3c8878b483304e5f76066))
+
 ## [3.16.6](https://github.com/artalar/reatom/compare/async-v3.16.5...async-v3.16.6) (2025-02-10)
 
 ### Bug Fixes
