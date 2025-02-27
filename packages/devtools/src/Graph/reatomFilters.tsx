@@ -368,7 +368,7 @@ export const reatomFilters = (
     name: `${name}.filters`,
   })
 
-  const playing = reatomBoolean(true, `${name}.playing`)
+  const recording = reatomBoolean(true, `${name}.recording`)
 
   const trackSize = action((ctx) => {
     const target = ctx.get(filters.size)
@@ -566,7 +566,7 @@ export const reatomFilters = (
           >
             clear lines
           </ActionButton>
-          <ActionLabel model={playing}>playing</ActionLabel>
+          <ActionLabel model={recording}>recording</ActionLabel>
           <ActionLabel model={filters.preview}>preview</ActionLabel>
           <ActionLabel model={filters.time}>time</ActionLabel>
           <label
@@ -600,7 +600,7 @@ export const reatomFilters = (
   )
 
   return assign(filters, {
-    playing,
+    recording,
     element: <FiltersComponent />,
   })
 }

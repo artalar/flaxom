@@ -402,7 +402,7 @@ export const Graph = ({
 
     await null
 
-    if (!ctx.get(filters.playing)) return
+    if (!ctx.get(filters.recording)) return
 
     let isTimeStampWritten =
       !ctx.get(filters.time) || lastTimestamp === Date.now()
