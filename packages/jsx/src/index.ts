@@ -444,7 +444,7 @@ export const reatomJsx = (
   return { h, hf, mount }
 }
 
-export const ctx = createCtx()
+export const ctx = createCtx({ restrictMultipleContexts: false })
 export const { h, hf, mount } = reatomJsx(ctx)
 
 /**
