@@ -337,6 +337,17 @@ export const Graph = ({
     `${name}.list`,
   )
 
+  const listEl = (
+    <ul
+      css={`
+        padding: 0;
+        content-visibility: auto;
+      `}
+    >
+      {list}
+    </ul>
+  )
+
   const lines = reatomLines(`${name}.lines`)
   list.clear.onCall(() => {
     followingsMap.clear()
@@ -349,7 +360,7 @@ export const Graph = ({
   )
 
   const filters = reatomFilters(
-    { list: list as unknown as LinkedListAtom, lines, redrawLines, initSize },
+    { list: list as unknown as LinkedListAtom,listEl, lines, redrawLines, initSize },
     `${name}.filters`,
   )
   const valuesSearch = atom((ctx) => {
@@ -465,22 +476,6 @@ export const Graph = ({
       {lines}
     </svg:svg>
   ) as SVGElement
-
-  const listEl = (
-    <ul
-      // ref={subscribe}
-      css={`
-        padding: 0;
-        content-visibility: auto;
-
-        /* & [data-stack] + [data-stack] {
-          display: none;
-        } */
-      `}
-    >
-      {list}
-    </ul>
-  )
 
   const container = (
     <section

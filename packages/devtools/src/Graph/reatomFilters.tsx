@@ -335,11 +335,13 @@ export const reatomFilters = (
     lines,
     redrawLines,
     initSize,
+    listEl,
   }: {
     list: LinkedListAtom
     lines: Lines
     redrawLines: Action<[], void>
     initSize: number
+    listEl: JSX.Element
   },
   name: string,
 ) => {
@@ -374,6 +376,14 @@ export const reatomFilters = (
 
     if (size <= target) return
 
+    const scrollEl = listEl.parentElement!
+    const removedCount = size - target
+    let scrollTop = scrollEl.scrollTop
+    for (let i = 0; i < removedCount; i++) {
+      const child = listEl.children[i] as HTMLElement
+      scrollTop -= child.offsetHeight
+    }
+
     list.batch(ctx, () => {
       while (size > target) {
         const { head } = ctx.get(list)
@@ -381,6 +391,10 @@ export const reatomFilters = (
         list.remove(ctx, head)
         size--
       }
+    })
+
+    ctx.schedule(() => {
+      scrollEl.scrollTop = scrollTop
     })
   }, `${name}.trackSize`)
 
