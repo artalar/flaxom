@@ -547,7 +547,7 @@ export const fetchList = reatomAsync(
 
 ### Sharing cache
 
-In this example, we'll explore how to create an asynchronous model with a shared cache that can be used across different components. The key feature is that some components can request the same data but with different parameters.
+In this example, we'll explore how to create an asynchronous model with a shared cache that can be used across different components. The key feature is that some components can request the one data with one parameters, and another component can request a different data with different parameters, but they share the same cache.
 
 Imagine you have an application where multiple components request user data. Most components display data for the current user, but there's a special component that needs to show data for a different user.
 
@@ -563,6 +563,7 @@ import {
   createMemStorage,
   reatomPersist,
 } from '@reatom/framework'
+import { withLocalStorage } from '@reatom/persist-web-storage'
 
 // API request simulation
 const fetchUserData = async (userId: number): Promise<string> => {
@@ -597,26 +598,28 @@ const reatomUser = (initialUserId: number, name: string) => {
   }
 }
 
-// Usage example
-const mainUserModel = reatomUser(1, 'mainUserModel')
-const customUserModel = reatomUser(2, 'customUserModel')
+// Current user model
+const ownerModel = reatomUser(0, 'ownerModel')
+ownerModel.idAtom.pipe(withLocalStorage('user-id'))
 
-const UserLoading = reatomComponent(
-  (ctx) => (ctx.spy(mainUserModel.isLoadingAtom) ? <p>Loading...</p> : null),
-  'UserLoading',
+// Custom user model
+const customUserModel = reatomUser(0, 'customUserModel')
+
+// View layer
+const OwnerLoading = reatomComponent(
+  ({ ctx }) => (ctx.spy(ownerModel.isLoadingAtom) ? <p>Loading...</p> : null),
+  'OwnerLoading',
 )
-
-export const UserData = reatomComponent((ctx) => {
+export const OwnerData = reatomComponent(({ ctx }) => {
   return (
     <div>
-      <UserLoading />
-      <p>Your data: {ctx.spy(mainUserModel.dataAtom)}</p>
+      <OwnerLoading />
+      <p>Your data: {ctx.spy(ownerModel.dataAtom)}</p>
     </div>
   )
-}, 'UserData')
+}, 'OwnerData')
 
-// In your component for another user
-export const CustomUserCard = reatomComponent((ctx) => {
+export const CustomUserCard = reatomComponent(({ ctx }) => {
   return (
     <div>
       <h2>User inspector</h2>
@@ -625,7 +628,7 @@ export const CustomUserCard = reatomComponent((ctx) => {
         value={ctx.spy(customUserModel.idAtom)}
         onChange={(e) => customUserModel.idAtom.set(e.target.valueAsNumber)}
       />
-      <p>User data: {ctx.spy(mainUserModel.dataAtom)}</p>
+      <p>User data: {ctx.spy(ownerModel.dataAtom)}</p>
     </div>
   )
 }, 'CustomUserCard')
@@ -634,10 +637,25 @@ export const CustomUserCard = reatomComponent((ctx) => {
 #### How It Works
 
 1. **Factory Pattern**: The `reatomUser` factory function allows us to create multiple model instances without code duplication, each tracking different user IDs.
-2. **Shared Cache**: We create a single `userModelStorage` that will be used for caching all user data requests. For example, CustomUserCard will not fetch new data, if user will put their own ID, as it is already cached by UserData.
+2. **Shared Cache**: We create a single `userModelStorage` that will be used for caching all user data requests. For example, CustomUserCard will not fetch new data, if user will put their own ID, as it is already cached by OwnerData.
 3. **In memory cache**: Using createMemStorage didn't persist (stringify) used cache, so you can easily use [atomization](https://www.reatom.dev/recipes/atomization/) without extra `toSnapshot`, `fromSnapshot`.
 
 This pattern is particularly useful for applications that need to display variations of the same data type in different contexts, while still maintaining efficient resource usage.
+
+Another example of using this shared cache, is mimic `useRequest` logic from [tanstack-query](https://tanstack.com/query/) and create a new instance of the query with `useMemo`. You can do it safely in many components, read and mutate `dataAtom` individually, only cache will be shared.
+
+```ts
+export const UserCard = reatomComponent<{ id: number }>(({ ctx, id }) => {
+  const model = useMemo(() => reatomUser(id), [id])
+  return (
+    <div>
+      <h2>User #{id}</h2>
+      {ctx.spy(model.isLoadingAtom) && <p>Loading...</p>}
+      <p>{ctx.spy(model.dataAtom)}</p>
+    </div>
+  )
+}, 'UserCard')
+```
 
 ## withRetry
 
