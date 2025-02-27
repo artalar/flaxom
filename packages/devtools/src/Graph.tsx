@@ -189,9 +189,10 @@ export const Graph = ({
 
               try {
                 const searchValue = ctx.spy(search)
-                
-                const result = !searchValue || new RegExp(searchValue, 'i').test(name!)
-                                                                                 
+
+                const result =
+                  !searchValue || new RegExp(searchValue, 'i').test(name!)
+
                 if (_type === 'filter' && !result) {
                   state.display = 'none'
                 }
@@ -389,6 +390,8 @@ export const Graph = ({
     }
 
     await null
+
+    if (!ctx.get(filters.playing)) return
 
     let isTimeStampWritten =
       !ctx.get(filters.time) || lastTimestamp === Date.now()
