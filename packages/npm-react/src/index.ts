@@ -353,7 +353,7 @@ export const reatomComponent = <T extends object>(
 
         return () => {
           unsubscribe()
-          finalController.abort(toAbortError(`${name} unmount`))
+          finalController.abort(toAbortError('unmount ' + name))
         }
       }, [ctx, renderAtom])
 
