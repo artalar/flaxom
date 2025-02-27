@@ -89,7 +89,7 @@ export const onConnect = (
         disconnectHooks.delete(cleanupHook) &&
         connectHooks.has(connectHook)
       ) {
-        controller.abort(toAbortError(`${anAtom.__reatom.name} disconnect`))
+        controller.abort(toAbortError('disconnect ' + anAtom.__reatom.name))
         typeof cleanup === 'function' && cleanup()
       }
     }
