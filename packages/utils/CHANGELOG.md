@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.11.3](https://github.com/artalar/reatom/compare/utils-v3.11.2...utils-v3.11.3) (2025-02-27)
+
+
+### Bug Fixes
+
+* **utils:** abort message uniqueness ([879777b](https://github.com/artalar/reatom/commit/879777b643bca8fb1427a44412f3c1f3fb479587))
+
 ## [3.11.2](https://github.com/artalar/reatom/compare/utils-v3.11.1...utils-v3.11.2) (2025-01-14)
 
 ### Bug Fixes

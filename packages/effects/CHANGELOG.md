@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.11.3](https://github.com/artalar/reatom/compare/effects-v3.11.2...effects-v3.11.3) (2025-02-27)
+
+
+### Bug Fixes
+
+* **effects:** abort message format ([41c8b77](https://github.com/artalar/reatom/commit/41c8b770a10e265ef9cbc24e953fd5f728ff1996))
+
 ## [3.11.2](https://github.com/artalar/reatom/compare/effects-v3.11.1...effects-v3.11.2) (2025-02-10)
 
 ### Bug Fixes

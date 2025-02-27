@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.6.1](https://github.com/artalar/reatom/compare/hooks-v3.6.0...hooks-v3.6.1) (2025-02-27)
+
+
+### Bug Fixes
+
+* **hooks:** abort message format ([bd0d248](https://github.com/artalar/reatom/commit/bd0d24830ae97ff7aefacd1208f9a4eb807e08bd))
+
 ## [3.6.0](https://github.com/artalar/reatom/compare/hooks-v3.5.5...hooks-v3.6.0) (2024-10-31)
 
 ### Features
