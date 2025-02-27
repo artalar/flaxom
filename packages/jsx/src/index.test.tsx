@@ -178,7 +178,10 @@ it(
       </>
     )
 
-    const childAtom = atom<JSX.Element | undefined>(<Component></Component>, 'child')
+    const childAtom = atom<JSX.Element | undefined>(
+      <Component></Component>,
+      'child',
+    )
     const app = <div>{childAtom}</div>
 
     mount(parent, app)
@@ -228,7 +231,9 @@ it(
   'array children',
   setup((ctx, h, hf, mount, parent) => {
     const n = atom(1)
-    const list = atom((ctx) => <>{...Array.from({ length: ctx.spy(n) }, (_, i) => <li>{i + 1}</li>)}</>)
+    const list = atom((ctx) => (
+      <>{...Array.from({ length: ctx.spy(n) }, (_, i) => <li>{i + 1}</li>)}</>
+    ))
 
     const element = (
       <ul>
@@ -272,7 +277,6 @@ it(
     expect(isConnected(ctx, two)).toBeFalsy()
 
     list.create(ctx, <>3</>)
-
   }),
 )
 
@@ -294,7 +298,9 @@ it(
     )
 
     expect(element.childNodes.length).toBe(4)
-    expect(element.innerHTML).toBe('<!--true--><!--true--><!--false--><!--false-->')
+    expect(element.innerHTML).toBe(
+      '<!--true--><!--true--><!--false--><!--false-->',
+    )
     expect(element.textContent).toBe('')
   }),
 )
@@ -403,7 +409,9 @@ it(
     const Component = (props: JSX.HTMLAttributes) => <div {...props} />
 
     expect(<Component />).toBeInstanceOf(window.HTMLElement)
-    expect(((<Component draggable="true" />) as HTMLElement).draggable).toBe(true)
+    expect(((<Component draggable="true" />) as HTMLElement).draggable).toBe(
+      true,
+    )
     expect(((<Component>123</Component>) as HTMLElement).innerText).toBe('123')
   }),
 )
@@ -562,7 +570,9 @@ it(
   setup(async (ctx, h, hf, mount, parent) => {
     const colorAtom = atom('red' as string | undefined)
 
-    const component = <div css:first-property={colorAtom} css:secondProperty={colorAtom}></div>
+    const component = (
+      <div css:first-property={colorAtom} css:secondProperty={colorAtom}></div>
+    )
 
     mount(parent, component)
     await sleep()
@@ -730,7 +740,8 @@ it(
     await sleep()
 
     const expect1 = '<p>0</p><!--1--><!--1--><p>5</p>'
-    const expect2 = '<p>0</p><!--1--><!----><p>1</p><!--2--><!--2--><p>4</p><!----><!--1--><p>5</p>'
+    const expect2 =
+      '<p>0</p><!--1--><!----><p>1</p><!--2--><!--2--><p>4</p><!----><!--1--><p>5</p>'
     const expect3 =
       '<p>0</p><!--1--><!----><p>1</p><!--2--><!----><p>2</p><p>3</p><!----><!--2--><p>4</p><!----><!--1--><p>5</p>'
 
@@ -785,7 +796,11 @@ it(
       />
     )
     const testInput = (
-      <Bind element={input} value={inputState} on:input={(ctx, e) => inputState(ctx, e.currentTarget.value)} />
+      <Bind
+        element={input}
+        value={inputState}
+        on:input={(ctx, e) => inputState(ctx, e.currentTarget.value)}
+      />
     )
     const testSvg = (
       <Bind element={svg}>
@@ -819,10 +834,14 @@ it(
     const container = <div>{child}</div>
     mount(parent, container)
 
-    expect(container.outerHTML).toBe('<div><!--test--><span></span><!--test--></div>')
+    expect(container.outerHTML).toBe(
+      '<div><!--test--><span></span><!--test--></div>',
+    )
 
     child(ctx, () => atom('child atom', 'test.child'))
-    expect(container.outerHTML).toBe('<div><!--test--><!--test.child-->child atom<!--test.child--><!--test--></div>')
+    expect(container.outerHTML).toBe(
+      '<div><!--test--><!--test.child-->child atom<!--test.child--><!--test--></div>',
+    )
   }),
 )
 
@@ -841,10 +860,14 @@ it(
     const container = <div>{list}</div>
     mount(parent, container)
 
-    expect(container.outerHTML).toBe('<div><!----><span>1</span><!--test--><a></a><!--test--><!----></div>')
+    expect(container.outerHTML).toBe(
+      '<div><!----><span>1</span><!--test--><a></a><!--test--><!----></div>',
+    )
 
     a(ctx, false)
-    expect(container.outerHTML).toBe('<div><!----><span>1</span><!--test--><br><!--test--><!----></div>')
+    expect(container.outerHTML).toBe(
+      '<div><!----><span>1</span><!--test--><br><!--test--><!----></div>',
+    )
 
     const node = list.create(ctx, '2')
     expect(container.outerHTML).toBe(
@@ -852,6 +875,8 @@ it(
     )
 
     list.remove(ctx, node)
-    expect(container.outerHTML).toBe('<div><!----><span>1</span><!--test--><br><!--test--><!----></div>')
+    expect(container.outerHTML).toBe(
+      '<div><!----><span>1</span><!--test--><br><!--test--><!----></div>',
+    )
   }),
 )
