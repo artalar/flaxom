@@ -8,7 +8,7 @@ export const CONTAINER = globalThis.document?.createElement?.('div')
 CONTAINER.id = '_ReatomDevtools'
 export const ROOT = CONTAINER.attachShadow({ mode: 'open' })
 
-export const ctx = createCtx()
+export const ctx = createCtx({ restrictMultipleContexts: false })
 
 export const { h, hf, mount } = reatomJsx(ctx, undefined, {
   stylesheetContainer: ROOT,
