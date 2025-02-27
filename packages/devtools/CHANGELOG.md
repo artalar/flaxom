@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.0](https://github.com/artalar/reatom/compare/devtools-v0.11.4...devtools-v0.12.0) (2025-02-27)
+
+
+### Features
+
+* **devtools:** add pause checkbox ([968ef72](https://github.com/artalar/reatom/commit/968ef72c1655af59e5bfadaa2bbd1a73f5fd289d))
+
 ## [0.11.4](https://github.com/artalar/reatom/compare/devtools-v0.11.3...devtools-v0.11.4) (2025-02-27)
 
 
