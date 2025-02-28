@@ -1,1 +1,3 @@
-console.log('add-settled sources already tested by @reatom/effects')
+import { test } from 'vitest'
+
+test('all-settled sources already tested by @reatom/effects', () => {})

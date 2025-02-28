@@ -18,8 +18,8 @@
   "scripts": {
     "prepublishOnly": "npm run build",
     "build": "microbundle -f esm,cjs",
-    "test": "ts-node src/index.test.ts",
-    "test:watch": "tsx watch src/index.test.ts"
+    "test": "vitest run src/*",
+    "test:watch": "vitest src/*"
   },
   "dependencies": {
     "@reatom/async": "^3.16.7",

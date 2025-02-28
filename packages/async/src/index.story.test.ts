@@ -95,7 +95,6 @@ describe('optimistic update', () => {
 
     // cleanup test
     dataTrack.unsubscribe()
-    ;`👍` //?
   })
 })
 
@@ -118,7 +117,6 @@ describe('concurrent pooling', () => {
       await sleep(5)
       const progress = (tasks.get(taskId) ?? -10) + 10
       tasks.set(taskId, progress)
-
       return progress
     },
   }
@@ -158,6 +156,5 @@ describe('concurrent pooling', () => {
 
     // TODO time flickering
     // expect(track.inputs()).toEqual(expectedProgress)
-    ;`👍` //?
   })
 })

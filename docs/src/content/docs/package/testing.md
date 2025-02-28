@@ -17,8 +17,6 @@ npm i @reatom/testing
 
 ## Usage
 
-We recommend to use [uvu](https://github.com/lukeed/uvu) as helper library for test description, as it could be used in any runtime (and even browser!) and super fast. To clarify, with uvu you allow to run your test files with node / deno / bun / graalvm / [esbuild-kit/tsx](https://github.com/esbuild-kit/tsx) and browser just out of the box. But `@reatom/testing` is not coupled to uvu, you could use any testing framework.
-
 ```ts
 import { createTestCtx, mockFn } from '@reatom/testing'
 ```
@@ -52,11 +50,6 @@ declare function mockFn<I extends any[], O>(
 [source](https://github.com/artalar/reatom/blob/v3/packages/testing/src/index.story.test.ts)
 
 ```ts
-import { test } from 'uvu'
-import * as assert from 'uvu/assert'
-import { action, atom } from '@reatom/core'
-import { createTestCtx } from '@reatom/testing'
-
 test('createTestCtx', async () => {
   const add = action<number>()
   const countAtom = atom((ctx, state = 0) => {
@@ -66,30 +59,28 @@ test('createTestCtx', async () => {
   const ctx = createTestCtx()
   const track = ctx.subscribeTrack(countAtom)
 
-  assert.is(track.calls.length, 1)
-  assert.is(track.lastInput(), 0)
+  expect(track.calls.length).toEqual(1)
+  expect(track.lastInput()).toEqual(0)
 
   add(ctx, 10)
-  assert.is(track.calls.length, 2)
-  assert.is(track.lastInput(), 10)
+  expect(track.calls.length).toEqual(2)
+  expect(track.lastInput()).toEqual(10)
 
   ctx.mockAction(add, (ctx, param) => 100)
   add(ctx, 10)
-  assert.is(track.calls.length, 3)
-  assert.is(track.lastInput(), 110)
+  expect(track.calls.length).toEqual(3)
+  expect(track.lastInput()).toEqual(110)
 
   const unmock = ctx.mock(countAtom, 123)
-  assert.is(track.calls.length, 4)
-  assert.is(track.lastInput(), 123)
+  expect(track.calls.length).toEqual(4)
+  expect(track.lastInput()).toEqual(123)
   add(ctx, 10)
-  assert.is(track.calls.length, 4)
-  assert.is(track.lastInput(), 123)
+  expect(track.calls.length).toEqual(4)
+  expect(track.lastInput()).toEqual(123)
 
   unmock()
   add(ctx, 10)
-  assert.is(track.calls.length, 5)
-  assert.is(track.lastInput(), 223)
+  expect(track.calls.length).toEqual(5)
+  expect(track.lastInput()).toEqual(223)
 })
-
-test.run()
 ```

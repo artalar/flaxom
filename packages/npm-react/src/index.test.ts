@@ -1,7 +1,4 @@
-import { test } from 'uvu'
-import * as assert from 'uvu/assert'
-
-import {} from './'
+import { test, expect } from 'vitest'
 
 // export const Counter = (props) => {
 //   const [count, setCount] = useState(props.value ?? 0)
@@ -28,8 +25,4 @@ import {} from './'
 //   )
 // })
 
-test(`base API`, async () => {
-  // TODO
-})
-
-test.run()
+test(`base API`, async () => {})

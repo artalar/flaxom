@@ -1,5 +1,4 @@
-import { test } from 'uvu'
-import * as assert from 'uvu/assert'
+import { test, expect, vi } from 'vitest'
 import { mockFn } from '@reatom/testing'
 
 import {
@@ -67,24 +66,20 @@ test(`action`, () => {
   const ctx = createCtx()
 
   ctx.subscribe(a2, () => {})
-  assert.is(fn.calls.length, 0)
+  expect(fn.calls.length).toBe(0)
 
   act1(ctx)
-  assert.is(fn.calls.length, 1)
+  expect(fn.calls.length).toBe(1)
 
   act1(ctx)
-  assert.is(fn.calls.length, 2)
+  expect(fn.calls.length).toBe(2)
 
   act2(ctx)
-  assert.is(fn.calls.length, 3)
-  assert.equal(
-    fn.calls.map(({ i }) => i[0]),
-    [1, 1, 2],
-  )
+  expect(fn.calls.length).toBe(3)
+  expect(fn.calls.map(({ i }) => i[0])).toEqual([1, 1, 2])
 
   a1(ctx, (s) => s + 1)
-  assert.is(fn.calls.length, 3)
-  ;`👍` //?
+  expect(fn.calls.length).toBe(3)
 })
 
 test(`linking`, () => {
@@ -94,27 +89,28 @@ test(`linking`, () => {
   const fn = mockFn()
 
   ctx.subscribe((logs) => {
-    logs.forEach((patch) =>
-      assert.is.not(patch.cause, null, `"${patch.proto.name}" cause is null`),
-    )
+    logs.forEach((patch) => {
+      if (patch.cause === null)
+        throw new Error(`"${patch.proto.name}" cause is null`)
+      expect(patch.cause).not.toBe(null)
+    })
   })
 
   const un = ctx.subscribe(a2, fn)
   var a1Cache = ctx.get((read) => read(a1.__reatom))!
   var a2Cache = ctx.get((read) => read(a2.__reatom))!
 
-  assert.is(fn.calls.length, 1)
-  assert.is(fn.lastInput(), 0)
-  assert.is(a2Cache.pubs[0], a1Cache)
-  assert.equal(a1Cache.subs, new Set([a2.__reatom]))
+  expect(fn.calls.length).toBe(1)
+  expect(fn.lastInput()).toBe(0)
+  expect(a2Cache.pubs[0]).toBe(a1Cache)
+  expect(a1Cache.subs).toEqual(new Set([a2.__reatom]))
 
   un()
 
-  assert.is(a1Cache, ctx.get((read) => read(a1.__reatom))!)
-  assert.is(a2Cache, ctx.get((read) => read(a2.__reatom))!)
+  expect(a1Cache).toBe(ctx.get((read) => read(a1.__reatom))!)
+  expect(a2Cache).toBe(ctx.get((read) => read(a2.__reatom))!)
 
-  assert.is(ctx.get((read) => read(a1.__reatom))!.subs.size, 0)
-  ;`👍` //?
+  expect(ctx.get((read) => read(a1.__reatom))!.subs.size).toBe(0)
 })
 
 test(`nested deps`, () => {
@@ -129,32 +125,28 @@ test(`nested deps`, () => {
   const touchedAtoms: Array<AtomProto> = []
 
   ctx.subscribe((logs) => {
-    logs.forEach((patch) =>
-      assert.is.not(patch.cause, null, `"${patch.proto.name}" cause is null`),
-    )
+    logs.forEach((patch) => {
+      if (patch.cause === null)
+        throw new Error(`"${patch.proto.name}" cause is null`)
+      expect(patch.cause).not.toBe(null)
+    })
   })
 
   const un = ctx.subscribe(a6, fn)
-
   for (const a of [a1, a2, a3, a4, a5, a6]) {
-    assert.is(
-      isConnected(ctx, a),
-      true,
-      `"${a.__reatom.name}" should not be stale`,
-    )
+    expect(isConnected(ctx, a)).toBe(true)
+    if (!isConnected(ctx, a))
+      throw new Error(`"${a.__reatom.name}" should not be stale`)
   }
 
-  assert.is(fn.calls.length, 1)
-  assert.equal(
-    ctx.get((read) => read(a1.__reatom))!.subs,
+  expect(fn.calls.length).toBe(1)
+  expect(ctx.get((read) => read(a1.__reatom))!.subs).toEqual(
     new Set([a2.__reatom, a3.__reatom]),
   )
-  assert.equal(
-    ctx.get((read) => read(a2.__reatom))!.subs,
+  expect(ctx.get((read) => read(a2.__reatom))!.subs).toEqual(
     new Set([a4.__reatom, a5.__reatom]),
   )
-  assert.equal(
-    ctx.get((read) => read(a3.__reatom))!.subs,
+  expect(ctx.get((read) => read(a3.__reatom))!.subs).toEqual(
     new Set([a4.__reatom, a5.__reatom]),
   )
 
@@ -162,23 +154,20 @@ test(`nested deps`, () => {
 
   a1(ctx, 1)
 
-  assert.is(fn.calls.length, 2)
-  assert.is(touchedAtoms.length, new Set(touchedAtoms).size)
+  expect(fn.calls.length).toBe(2)
+  expect(touchedAtoms.length).toBe(new Set(touchedAtoms).size)
 
   un()
 
   for (const a of [a1, a2, a3, a4, a5, a6]) {
-    assert.is(
-      isConnected(ctx, a),
-      false,
-      `"${a.__reatom.name}" should be stale`,
-    )
+    expect(isConnected(ctx, a)).toBe(false)
+    if (isConnected(ctx, a))
+      throw new Error(`"${a.__reatom.name}" should be stale`)
   }
-  ;`👍` //?
 })
 
 test(`transaction batch`, () => {
-  const track = mockFn()
+  const track = vi.fn()
   const pushNumber = action<number>()
   const numberAtom = atom((ctx) => {
     ctx.spy(pushNumber).forEach(({ payload }) => track(payload))
@@ -186,36 +175,32 @@ test(`transaction batch`, () => {
   const ctx = createCtx()
   ctx.subscribe(numberAtom, () => {})
 
-  assert.is(track.calls.length, 0)
+  expect(track).toHaveBeenCalledTimes(0)
 
   pushNumber(ctx, 1)
-  assert.is(track.calls.length, 1)
-  assert.is(track.lastInput(), 1)
+  expect(track).toHaveBeenCalledTimes(1)
+  expect(track).lastCalledWith(1)
 
-  ctx.get(() => {
+  ctx.get((): void => {
     pushNumber(ctx, 2)
-    assert.is(track.calls.length, 1)
+    expect(track).toHaveBeenCalledTimes(1)
     pushNumber(ctx, 3)
-    assert.is(track.calls.length, 1)
+    expect(track).toHaveBeenCalledTimes(1)
   })
-  assert.is(track.calls.length, 3)
-  assert.is(track.lastInput(), 3)
+  expect(track).toHaveBeenCalledTimes(3)
+  expect(track).lastCalledWith(3)
 
-  ctx.get(() => {
+  ctx.get((): void => {
     pushNumber(ctx, 4)
-    assert.is(track.calls.length, 3)
+    expect(track).toHaveBeenCalledTimes(3)
     ctx.get(numberAtom)
-    assert.is(track.calls.length, 4)
+    expect(track).toHaveBeenCalledTimes(4)
     pushNumber(ctx, 5)
-    assert.is(track.calls.length, 4)
+    expect(track).toHaveBeenCalledTimes(4)
   })
-  assert.is(track.calls.length, 5)
-  assert.is(track.lastInput(), 5)
-  assert.equal(
-    track.calls.map(({ i }) => i[0]),
-    [1, 2, 3, 4, 5],
-  )
-  ;`👍` //?
+  expect(track).toHaveBeenCalledTimes(5)
+  expect(track).lastCalledWith(5)
+  expect(track.mock.calls.map((call) => call[0])).toEqual([1, 2, 3, 4, 5])
 })
 
 test(`late effects batch`, async () => {
@@ -224,24 +209,23 @@ test(`late effects batch`, async () => {
     // @ts-ignores
     callLateEffect: (cb, ...a) => setTimeout(() => cb(...a)),
   })
-  const fn = mockFn()
+  const fn = vi.fn()
   ctx.subscribe(a, fn)
 
-  assert.is(fn.calls.length, 1)
-  assert.is(fn.lastInput(), 0)
+  expect(fn).toHaveBeenCalledTimes(1)
+  expect(fn).toHaveBeenLastCalledWith(0)
 
   a(ctx, (s) => s + 1)
   a(ctx, (s) => s + 1)
   await Promise.resolve()
   a(ctx, (s) => s + 1)
 
-  assert.is(fn.calls.length, 1)
+  expect(fn).toHaveBeenCalledTimes(1)
 
   await new Promise((r) => setTimeout(r))
 
-  assert.is(fn.calls.length, 2)
-  assert.is(fn.lastInput(), 3)
-  ;`👍` //?
+  expect(fn).toHaveBeenCalledTimes(2)
+  expect(fn).toHaveBeenLastCalledWith(3)
 })
 
 test(`display name`, () => {
@@ -262,7 +246,7 @@ test(`display name`, () => {
         : ctx.spy(firstNameAtom),
     `displayName`,
   )
-  const effect = mockFn()
+  const effect = vi.fn()
 
   onConnect(firstNameAtom, () => effect(`firstNameAtom init`))
   onDisconnect(firstNameAtom, () => effect(`firstNameAtom cleanup`))
@@ -275,36 +259,27 @@ test(`display name`, () => {
 
   const un = ctx.subscribe(displayNameAtom, () => {})
 
-  assert.equal(
-    effect.calls.map(({ i }) => i[0]),
-    ['firstNameAtom init', 'fullNameAtom init', 'displayNameAtom init'],
-  )
-  effect.calls = []
+  expect(effect.mock.calls.map((i) => i[0])).toEqual([
+    'firstNameAtom init',
+    'fullNameAtom init',
+    'displayNameAtom init',
+  ])
+  effect.mockClear()
 
   firstNameAtom(ctx, `Joooooooooooohn`)
-  assert.equal(
-    effect.calls.map(({ i }) => i[0]),
-    [`fullNameAtom cleanup`],
-  )
-  effect.calls = []
+  expect(effect).toHaveBeenCalledWith(`fullNameAtom cleanup`)
+  effect.mockClear()
 
   firstNameAtom(ctx, `Jooohn`)
-  assert.equal(
-    effect.calls.map(({ i }) => i[0]),
-    [`fullNameAtom init`],
-  )
-  effect.calls = []
+  expect(effect).toHaveBeenCalledWith(`fullNameAtom init`)
+  effect.mockClear()
 
   un()
-  assert.equal(
-    effect.calls.map(({ i }) => i[0]),
-    [
-      'displayNameAtom cleanup',
-      'fullNameAtom cleanup',
-      'firstNameAtom cleanup',
-    ],
-  )
-  ;`👍` //?
+  expect(effect.mock.calls.map((i) => i[0])).toEqual([
+    'displayNameAtom cleanup',
+    'fullNameAtom cleanup',
+    'firstNameAtom cleanup',
+  ])
 })
 
 test(// this test written is more just for example purposes
@@ -314,26 +289,25 @@ test(// this test written is more just for example purposes
     ctx.spy(listAtom).reduce((acc, a) => acc + ctx.spy(a), 0),
   )
   const ctx = createCtx()
-  const sumListener = mockFn((sum: number) => {})
+  const sumListener = vi.fn((sum: number) => {})
 
   ctx.subscribe(sumAtom, sumListener)
 
-  assert.is(sumListener.calls.length, 1)
+  expect(sumListener).toHaveBeenCalledTimes(1)
 
   let i = 0
   while (i++ < 3) {
     listAtom(ctx, (list) => [...list, atom(1)])
 
-    assert.is(sumListener.lastInput(), i)
+    expect(sumListener).toHaveBeenLastCalledWith(i)
   }
 
-  assert.is(sumListener.calls.length, 4)
+  expect(sumListener).toHaveBeenCalledTimes(4)
 
   ctx.get(listAtom).at(0)!(ctx, (s) => s + 1)
 
-  assert.is(sumListener.calls.length, 5)
-  assert.is(sumListener.lastInput(), 4)
-  ;`👍` //?
+  expect(sumListener).toHaveBeenCalledTimes(5)
+  expect(sumListener).toHaveBeenLastCalledWith(4)
 })
 
 test('no uncaught errors from schedule promise', () => {
@@ -343,8 +317,7 @@ test('no uncaught errors from schedule promise', () => {
   })
   const ctx = createCtx()
 
-  assert.throws(() => doTest(ctx))
-  ;`👍` //?
+  expect(() => doTest(ctx)).toThrow()
 })
 
 test('async cause track', () => {
@@ -360,17 +333,15 @@ test('async cause track', () => {
 
   act1(ctx)
 
-  assert.is(
+  expect(
     track.lastInput().find((patch: AtomCache) => patch.proto.name === 'a1')
       ?.cause.proto.name,
-    'act2',
-  )
-  ;`👍` //?
+  ).toBe('act2')
 })
 
 test('disconnect tail deps', () => {
   const aAtom = atom(0, 'aAtom')
-  const track = mockFn((ctx: CtxSpy) => ctx.spy(aAtom))
+  const track = vi.fn((ctx: CtxSpy) => ctx.spy(aAtom))
   const bAtom = atom(track, 'bAtom')
   const isActiveAtom = atom(true, 'isActiveAtom')
   const bAtomControlled = atom((ctx, state?: any) =>
@@ -379,19 +350,18 @@ test('disconnect tail deps', () => {
   const ctx = createCtx()
 
   ctx.subscribe(bAtomControlled, () => {})
-  assert.is(track.calls.length, 1)
-  assert.is(isConnected(ctx, bAtom), true)
+  expect(track).toHaveBeenCalledTimes(1)
+  expect(isConnected(ctx, bAtom)).toBe(true)
 
   isActiveAtom(ctx, false)
   aAtom(ctx, (s) => (s += 1))
-  assert.is(track.calls.length, 1)
-  assert.is(isConnected(ctx, bAtom), false)
-  ;`👍` //?
+  expect(track).toHaveBeenCalledTimes(1)
+  expect(isConnected(ctx, bAtom)).toBe(false)
 })
 
 test('deps shift', () => {
   const deps = [atom(0), atom(0), atom(0)]
-  const track = mockFn()
+  const track = vi.fn()
 
   deps.forEach((dep, i) =>
     (dep.__reatom.disconnectHooks ??= new Set()).add(() => track(i)),
@@ -401,14 +371,13 @@ test('deps shift', () => {
   const ctx = createCtx()
 
   ctx.subscribe(a, () => {})
-  assert.is(track.calls.length, 0)
+  expect(track).toHaveBeenCalledTimes(0)
 
   deps[0]!(ctx, (s) => s + 1)
-  assert.is(track.calls.length, 0)
+  expect(track).toHaveBeenCalledTimes(0)
 
   deps.shift()!(ctx, (s) => s + 1)
-  assert.is(track.calls.length, 1)
-  ;`👍` //?
+  expect(track).toHaveBeenCalledTimes(1)
 })
 
 test('subscribe to cached atom', () => {
@@ -419,11 +388,7 @@ test('subscribe to cached atom', () => {
   ctx.get(a2)
   ctx.subscribe(a2, () => {})
 
-  assert.is(
-    ctx.get((r) => r(a1.__reatom)?.subs.size),
-    1,
-  )
-  ;`👍` //?
+  expect(ctx.get((r) => r(a1.__reatom)?.subs.size)).toBe(1)
 })
 
 test('update propagation for atom with listener', () => {
@@ -431,51 +396,31 @@ test('update propagation for atom with listener', () => {
   const a2 = atom((ctx) => ctx.spy(a1))
   const a3 = atom((ctx) => ctx.spy(a2))
 
-  // onConnect(a1, (v) => {
-  //   1 //?
-  // })
-  // onDisconnect(a1, (v) => {
-  //   ;-1 //?
-  // })
-  // onConnect(a2, (v) => {
-  //   2 //?
-  // })
-  // onDisconnect(a2, (v) => {
-  //   ;-2 //?
-  // })
-  // onConnect(a3, (v) => {
-  //   3 //?
-  // })
-  // onDisconnect(a3, (v) => {
-  //   ;-3 //?
-  // })
-
   const ctx = createCtx()
-  const cb2 = mockFn()
-  const cb3 = mockFn()
+  const cb2 = vi.fn()
+  const cb3 = vi.fn()
 
   const un1 = ctx.subscribe(a2, cb2)
   const un2 = ctx.subscribe(a3, cb3)
 
-  assert.is(cb2.calls.length, 1)
-  assert.is(cb3.calls.length, 1)
+  expect(cb2.mock.calls.length).toBe(1)
+  expect(cb3.mock.calls.length).toBe(1)
 
   a1(ctx, 1)
 
-  assert.is(cb2.calls.length, 2)
-  assert.is(cb2.lastInput(), 1)
-  assert.is(cb3.calls.length, 2)
-  assert.is(cb3.lastInput(), 1)
+  expect(cb2.mock.calls.length).toBe(2)
+  expect(cb2.mock.calls[1]?.[0]).toBe(1)
+  expect(cb3.mock.calls.length).toBe(2)
+  expect(cb3.mock.calls[1]?.[0]).toBe(1)
 
   un2()
-  assert.is(ctx.get((r) => r(a2.__reatom))!.subs.size, 0)
+  expect(ctx.get((r) => r(a2.__reatom))!.subs.size).toBe(0)
   a1(ctx, 2)
-  assert.is(cb2.calls.length, 3)
-  assert.is(cb2.lastInput(), 2)
+  expect(cb2.mock.calls.length).toBe(3)
+  expect(cb2.mock.calls[2]?.[0]).toBe(2)
 
   ctx.subscribe(a3, cb3)
-  assert.is(ctx.get((r) => r(a2.__reatom))!.subs.size, 1)
-  ;`👍` //?
+  expect(ctx.get((r) => r(a2.__reatom))!.subs.size).toBe(1)
 })
 
 test('update queue', () => {
@@ -485,21 +430,20 @@ test('update queue', () => {
     if (v < 3) ctx.schedule(track, 0)
   })
   let iterations = 0
-  const track = mockFn(() => {
+  const track = vi.fn(() => {
     if (iterations++ > 5) throw new Error('circle')
     a1(ctx, (s) => ++s)
   })
   const ctx = createCtx()
 
   ctx.subscribe(a2, () => {})
-  assert.is(track.calls.length, 0)
+  expect(track.mock.calls.length).toBe(0)
 
   a1(ctx, 0)
-  assert.is(track.calls.length, 3)
+  expect(track.mock.calls.length).toBe(3)
 
   iterations = 5
-  assert.throws(() => a1(ctx, 0))
-  ;`👍` //?
+  expect(() => a1(ctx, 0)).toThrow()
 })
 
 test('do not create extra patch', () => {
@@ -510,8 +454,7 @@ test('do not create extra patch', () => {
 
   ctx.subscribe(track)
   ctx.get(() => ctx.get(a))
-  assert.is(track.calls.length, 0)
-  ;`👍` //?
+  expect(track.calls.length).toBe(0)
 })
 
 test('should catch', async () => {
@@ -519,7 +462,7 @@ test('should catch', async () => {
     throw new Error()
   })
   const ctx = createCtx()
-  assert.throws(() => ctx.get(a))
+  expect(() => ctx.get(a)).toThrow()
 
   const p = ctx.get(() => ctx.schedule(() => ctx.get(a)))
 
@@ -527,7 +470,7 @@ test('should catch', async () => {
     () => 'then',
     () => 'catch',
   )
-  assert.is(res1, 'catch')
+  expect(res1).toBe('catch')
 
   const res2 = await ctx
     .get(() => ctx.schedule(() => ctx.get(a)))
@@ -535,8 +478,7 @@ test('should catch', async () => {
       () => 'then',
       () => 'catch',
     )
-  assert.is(res2, 'catch')
-  ;`👍` //?
+  expect(res2).toBe('catch')
 })
 
 test('no extra tick by schedule', async () => {
@@ -550,7 +492,7 @@ test('no extra tick by schedule', async () => {
 
   await null
 
-  assert.is(isDoneSync, true)
+  expect(isDoneSync).toBe(true)
 
   let isDoneAsync = false
   createCtx()
@@ -560,7 +502,7 @@ test('no extra tick by schedule', async () => {
   await null
   await null
 
-  assert.is(isDoneAsync, true)
+  expect(isDoneAsync).toBe(true)
 
   let isDoneAsyncInTr = false
   const ctx = createCtx()
@@ -571,8 +513,7 @@ test('no extra tick by schedule', async () => {
   await null
   await null
 
-  assert.is(isDoneAsyncInTr, true)
-  ;`👍` //?
+  expect(isDoneAsyncInTr).toBe(true)
 })
 
 test('update callback should accept the fresh state', () => {
@@ -581,10 +522,10 @@ test('update callback should accept the fresh state', () => {
   b.__reatom.computer = (ctx) => ctx.spy(a)
   const ctx = createCtx()
 
-  assert.is(ctx.get(b), 0)
+  expect(ctx.get(b)).toBe(0)
 
   a(ctx, 1)
-  assert.is(ctx.get(b), 1)
+  expect(ctx.get(b)).toBe(1)
 
   a(ctx, 2)
   let state
@@ -592,9 +533,8 @@ test('update callback should accept the fresh state', () => {
     state = s
     return s
   })
-  assert.is(ctx.get(b), 2)
-  assert.is(state, 2)
-  ;`👍` //?
+  expect(ctx.get(b)).toBe(2)
+  expect(state).toBe(2)
 })
 
 test('updateHooks should be called only for computers', () => {
@@ -612,11 +552,10 @@ test('updateHooks should be called only for computers', () => {
 
   const ctx = createCtx()
 
-  assert.is(ctx.get(a), 1)
-  assert.is(ctx.get(b), 2)
-  assert.is(ctx.get(c), 3)
-  assert.equal(track.inputs(), ['c'])
-  ;`👍` //?
+  expect(ctx.get(a)).toBe(1)
+  expect(ctx.get(b)).toBe(2)
+  expect(ctx.get(c)).toBe(3)
+  expect(track.inputs()).toEqual(['c'])
 })
 
 test('hooks', () => {
@@ -632,20 +571,19 @@ test('hooks', () => {
 
   ctx.get(theAtom)
   ctx.get(theAction)
-  assert.is(atomHook.calls.length, 0)
-  assert.is(actionHook.calls.length, 0)
+  expect(atomHook.calls.length).toBe(0)
+  expect(actionHook.calls.length).toBe(0)
 
   theAtom(ctx, 1)
-  assert.is(atomHook.calls.length, 1)
-  assert.is(atomHook.lastInput(0).subscribe, ctx.subscribe)
-  assert.is(atomHook.lastInput(1), 1)
+  expect(atomHook.calls.length).toBe(1)
+  expect(atomHook.lastInput(0).subscribe).toBe(ctx.subscribe)
+  expect(atomHook.lastInput(1)).toBe(1)
 
   theAction(ctx, 1)
-  assert.is(actionHook.calls.length, 1)
-  assert.is(actionHook.lastInput(0).subscribe, ctx.subscribe)
-  assert.is(actionHook.lastInput(1), 'param:1')
-  assert.equal(actionHook.lastInput(2), [1])
-  ;`👍` //?
+  expect(actionHook.calls.length).toBe(1)
+  expect(actionHook.lastInput(0).subscribe).toBe(ctx.subscribe)
+  expect(actionHook.lastInput(1)).toBe('param:1')
+  expect(actionHook.lastInput(2)).toEqual([1])
 })
 
 test('update hook for atom without cache', () => {
@@ -655,8 +593,7 @@ test('update hook for atom without cache', () => {
   const ctx = createCtx()
 
   a(ctx, 1)
-  assert.is(hook.calls.length, 1)
-  ;`👍` //?
+  expect(hook.calls.length).toBe(1)
 })
 
 test('cause available inside a computation', () => {
@@ -664,7 +601,7 @@ test('cause available inside a computation', () => {
   const a = atom(0, 'a')
   const b = atom((ctx) => {
     ctx.spy(a)
-    if (test) assert.is(ctx.cause?.cause?.proto, a.__reatom)
+    if (test) expect(ctx.cause?.cause?.proto).toBe(a.__reatom)
   }, 'b')
   const ctx = createCtx()
 
@@ -672,7 +609,6 @@ test('cause available inside a computation', () => {
   a(ctx, 123)
   test = true
   ctx.get(b)
-  ;`👍` //?
 })
 
 test('ctx collision', () => {
@@ -680,8 +616,7 @@ test('ctx collision', () => {
   const ctx1 = createCtx()
   const ctx2 = createCtx()
 
-  assert.throws(() => ctx1.get(() => ctx2.get(a)))
-  ;`👍` //?
+  expect(() => ctx1.get(() => ctx2.get(a))).toThrow()
 })
 
 test('conditional deps duplication', () => {
@@ -703,17 +638,16 @@ test('conditional deps duplication', () => {
   const track = mockFn()
 
   ctx.subscribe(filteredListAtom, track)
-  assert.equal(track.lastInput(), [1, 3])
+  expect(track.lastInput()).toEqual([1, 3])
 
   filterAtom(ctx, 'even')
-  assert.equal(track.lastInput(), [2])
+  expect(track.lastInput()).toEqual([2])
 
   filterAtom(ctx, 'odd')
-  assert.equal(track.lastInput(), [1, 3])
+  expect(track.lastInput()).toEqual([1, 3])
 
   filterAtom(ctx, 'even')
-  assert.equal(track.lastInput(), [2])
-  ;`👍` //?
+  expect(track.lastInput()).toEqual([2])
 })
 
 test('nested schedule', async () => {
@@ -725,7 +659,6 @@ test('nested schedule', async () => {
 
   const ctx = createCtx()
   await act(ctx)
-  ;`👍` //?
 })
 
 test('dynamic spy callback prevValue', () => {
@@ -740,11 +673,10 @@ test('dynamic spy callback prevValue', () => {
   })
   const ctx = createCtx()
   ctx.subscribe(b, () => {})
-  assert.is(testPrev, undefined)
+  expect(testPrev).toBe(undefined)
 
   a(ctx, 1)
-  assert.is(testPrev, undefined)
-  ;`👍` //?
+  expect(testPrev).toBe(undefined)
 })
 
 test('should drop actualization of stale atom during few updates in one transaction', () => {
@@ -753,9 +685,9 @@ test('should drop actualization of stale atom during few updates in one transact
   const ctx = createCtx()
 
   ctx.get(() => {
-    assert.is(ctx.get(b), 0)
+    expect(ctx.get(b)).toBe(0)
     a(ctx, 1)
-    assert.is(ctx.get(b), 1)
+    expect(ctx.get(b)).toBe(1)
   })
 })
 
@@ -772,13 +704,12 @@ test('nested condition branches', () => {
   ctx.subscribe(e, track)
   track.calls.length = 0
 
-  assert.ok(isConnected(ctx, b))
-  assert.not.ok(isConnected(ctx, c))
+  expect(isConnected(ctx, b)).toBeTruthy()
+  expect(isConnected(ctx, c)).toBeFalsy()
 
   a(ctx, false)
-  assert.not.ok(isConnected(ctx, b))
-  assert.ok(isConnected(ctx, c))
-  ;`👍` //?
+  expect(isConnected(ctx, b)).toBeFalsy()
+  expect(isConnected(ctx, c)).toBeTruthy()
 })
 
 test('disconnect of the last version of pubs', async () => {
@@ -804,10 +735,10 @@ test('disconnect of the last version of pubs', async () => {
 
   uns()
 
-  assert.equal(logs, ['', 'dep', 'end disconnected', 'dep disconnected'])
+  expect(logs).toEqual(['', 'dep', 'end disconnected', 'dep disconnected'])
 })
 
-test('computed deps change during unconnection', () => {
+test('computed deps change during disconnection', () => {
   const ctx = createCtx()
 
   const reatomSome = (name: string) => {
@@ -822,12 +753,12 @@ test('computed deps change during unconnection', () => {
   const data = atom((ctx) => ctx.spy(ctx.spy(toggler).data), 'data')
   const subscription = atom((ctx) => ctx.spy(data), 'subscription')
 
-  assert.is(ctx.get(subscription), 0)
+  expect(ctx.get(subscription)).toBe(0)
 
   toggler(ctx, some2)
   ctx.subscribe(subscription, () => {})
   some2.params(ctx, 1)
-  assert.is(ctx.get(subscription), 1)
+  expect(ctx.get(subscription)).toBe(1)
 })
 
 test('extra log for init update', () => {
@@ -840,10 +771,10 @@ test('extra log for init update', () => {
   const b = atom('')
 
   ctx.get(a)
-  assert.is(logger.lastInput().length, 1)
+  expect(logger.lastInput().length).toBe(1)
 
   b(ctx, '')
-  assert.is(logger.lastInput().length, 2)
+  expect(logger.lastInput().length).toBe(2)
 })
 
 // test(`maximum call stack`, () => {
@@ -851,27 +782,19 @@ test('extra log for init update', () => {
 //   let i = 0
 //   const reducer = (ctx: CtxSpy): any => {
 //     let dep = atoms.get(ctx.cause!.proto)
-//     if (!dep)
-//       atoms.set(ctx.cause!.proto, (dep = ++i > 10_000 ? atom(0) : atom(reducer)))
+//     if (!dep) atoms.set(ctx.cause!.proto, (dep = ++i > 10_000 ? atom(0) : atom(reducer)))
 //     return ctx.spy(dep)
 //   }
 //   const testAtom = atom(reducer)
 //   const ctx = createCtx()
-
-//   assert.throws(
-//     () => {
-//       try {
-//         ctx.get(testAtom)
-//       } catch (error) {
-//         i //?
-//         error.message //?
-//         throw error
-//       }
-//     },
-//     /Maximum call stack/,
-//     '',
-//   )
-//   ;`👍` //?
+//
+//   expect(() => {
+//     try {
+//       ctx.get(testAtom)
+//     } catch (error) {
+//       i //?
+//       error.message //?
+//       throw error
+//     }
+//   }).toThrow(/Maximum call stack/)
 // })
-
-test.run()

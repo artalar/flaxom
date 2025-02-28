@@ -22,8 +22,8 @@
   "scripts": {
     "prepublishOnly": "npm run build && npm run test",
     "build": "microbundle -f esm,cjs --raw=true",
-    "test": "ts-node src/atom.test.ts",
-    "test:watch": "tsx watch src/atom.test.ts",
+    "test": "vitest run src/*",
+    "test:watch": "vitest src/*",
     "bench": "ts-node src/index.bench.test.ts"
   },
   "author": "artalar",

@@ -1,9 +1,7 @@
-import { test } from 'uvu'
-import * as assert from 'uvu/assert'
+import { test, expect } from 'vitest'
 import { createTestCtx, mockFn } from '@reatom/testing'
 import { onConnect } from '@reatom/hooks'
 import { atom } from '@reatom/core'
-
 import { onEvent } from './'
 
 test('onEvent', async () => {
@@ -15,9 +13,9 @@ test('onEvent', async () => {
     const controller = new AbortController()
     onConnect(a, (ctx) => onEvent(ctx, controller.signal, 'abort', cb))
     const un = ctx.subscribe(a, () => {})
-    assert.is(cb.calls.length, 0)
+    expect(cb.calls.length).toBe(0)
     controller.abort()
-    assert.is(cb.lastInput()?.type, 'abort')
+    expect(cb.lastInput()?.type).toBe('abort')
     un()
   }
 
@@ -28,11 +26,8 @@ test('onEvent', async () => {
     onConnect(a, (ctx) => onEvent(ctx, controller.signal, 'abort', cb))
     const un = ctx.subscribe(a, () => {})
     un()
-    assert.is(cb.calls.length, 0)
+    expect(cb.calls.length).toBe(0)
     controller.abort()
-    assert.is(cb.calls.length, 0)
+    expect(cb.calls.length).toBe(0)
   }
-  ;('👍') //?
 })
-
-test.run()

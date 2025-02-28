@@ -2,7 +2,6 @@ import React from 'react'
 import { createCtx, connectLogger, atom, action } from '@reatom/framework'
 import { reatomContext, useAction, useAtom } from '@reatom/npm-react'
 import * as ReactDOMClient from 'react-dom/client'
-
 import { unstable_batchedUpdates } from 'react-dom'
 import { setupBatch } from '@reatom/npm-react'
 
@@ -19,7 +18,7 @@ const onInput = action(
   'onInput',
 )
 
-export default function App() {
+function App() {
   const [input] = useAtom(inputAtom)
   const [greeting] = useAtom(greetingAtom)
   const handleInput = useAction(onInput)

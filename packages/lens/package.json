@@ -22,8 +22,8 @@
   "scripts": {
     "prepublishOnly": "npm run build && npm run test",
     "build": "microbundle -f esm,cjs",
-    "test": "ts-node src/index.test.ts",
-    "test:watch": "tsx watch src/index.test.ts"
+    "test": "vitest run src/*",
+    "test:watch": "vitest src/*"
   },
   "dependencies": {
     "@reatom/core": "^3.4.0",
@@ -31,6 +31,9 @@
     "@reatom/hooks": "^3.3.1",
     "@reatom/primitives": "^3.6.0",
     "@reatom/utils": "^3.1.0"
+  },
+  "devDependencies": {
+    "@reatom/npm-zod": "^3.10.3"
   },
   "author": "artalar",
   "license": "MIT",

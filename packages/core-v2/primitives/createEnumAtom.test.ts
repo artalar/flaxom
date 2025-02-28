@@ -1,13 +1,10 @@
-import { test } from 'uvu'
-import * as assert from 'uvu/assert'
-
 import { createEnumAtom } from './createEnumAtom'
+import { test, expect } from 'vitest'
 
 test(`enum object`, async () => {
   const enumAtom = createEnumAtom(['a', 'b'])
 
-  assert.equal(enumAtom.enum, { a: 'a', b: 'b' })
-  ;`👍` //?
+  expect(enumAtom.enum).toEqual({ a: 'a', b: 'b' })
 })
 
 test(`camelCase`, async () => {
@@ -20,8 +17,7 @@ test(`camelCase`, async () => {
 
   sortFilterAtom.setUpdated.dispatch()
 
-  assert.is(sortFilterAtom.getState(), 'updated')
-  ;`👍` //?
+  expect(sortFilterAtom.getState()).toEqual('updated')
 })
 
 test(`snake_case`, async () => {
@@ -32,12 +28,9 @@ test(`snake_case`, async () => {
 
   sortFilterAtom.enum
 
-  assert.is(sortFilterAtom.getState(), 'full_name')
+  expect(sortFilterAtom.getState()).toEqual('full_name')
 
   sortFilterAtom.set_updated.dispatch()
 
-  assert.is(sortFilterAtom.getState(), 'updated')
-  ;`👍` //?
+  expect(sortFilterAtom.getState()).toEqual('updated')
 })
-
-test.run()

@@ -38,7 +38,6 @@ test('withCache', async () => {
   fetchData(ctx, { b: 0, a: 400 })
   expect(ctx.get(fetchData.pendingAtom)).toBe(0)
   expect(ctx.get(fetchData.dataAtom)).toBe(400)
-  ;`👍` //?
 })
 
 test('withCache dataAtom mapper', async () => {
@@ -56,7 +55,6 @@ test('withCache dataAtom mapper', async () => {
 
   await fetchData(ctx)
   expect(ctx.get(fetchData.dataAtom)).toBe(2)
-  ;`👍` //?
 })
 
 test('withCache swr true (default)', async () => {
@@ -81,7 +79,6 @@ test('withCache swr true (default)', async () => {
   fetchData(ctx)
   expect(track.calls.length).toBe(2)
   expect(ctx.get(fetchData.dataAtom)).toBe(2)
-  ;`👍` //?
 })
 
 test('withCache swr false', async () => {
@@ -111,7 +108,6 @@ test('withCache swr false', async () => {
   expect(i).toBe(2)
   expect(track.calls.length).toBe(3)
   expect(ctx.get(fetchData.dataAtom)).toBe(1)
-  ;`👍` //?
 })
 
 test('withCache parallel', async () => {
@@ -134,7 +130,6 @@ test('withCache parallel', async () => {
   expect(effect.calls.length).toBe(2)
   expect(await p2).toEqual([2, 2])
   expect(track.inputs()).toEqual([1, 2])
-  ;`👍` //?
 })
 
 test('withCache withAbort vary params', async () => {
@@ -169,7 +164,6 @@ test('withCache withAbort vary params', async () => {
   fetchData(ctx, 2)
   expect(track.calls.length).toBe(3)
   expect(ctx.get(fetchData.dataAtom)).toBe(2)
-  ;`👍` //?
 })
 
 test('withCache withAbort same params', async () => {
@@ -197,7 +191,6 @@ test('withCache withAbort same params', async () => {
 
   await fetchData(ctx, 2)
   expect(ctx.get(fetchData.dataAtom)).toBe(2)
-  ;`👍` //?
 })
 
 test('withCache and action mocking', async () => {
@@ -220,7 +213,6 @@ test('withCache and action mocking', async () => {
   fetchData(ctx, 1)
   expect(ctx.get(fetchData.pendingAtom)).toBe(0)
   expect(ctx.get(fetchData.dataAtom)).toBe(10)
-  ;`👍` //?
 })
 
 test('withPersist', async () => {
@@ -249,7 +241,6 @@ test('withPersist', async () => {
   await fetchData2(ctx, 1, 2)
   expect(effect.calls.length).toBe(effectCalls)
   expect(data2Track.lastInput()).toBe(3)
-  ;`👍` //?
 })
 
 test('do not cache aborted promise', async () => {
@@ -277,7 +268,6 @@ test('do not cache aborted promise', async () => {
   await sleep()
   expect(effect.calls.length).toBe(4)
   expect(ctx.get(fetchData.dataAtom)).toBe(1)
-  ;`👍` //?
 })
 
 test('should be able to manage cache manually', async () => {
