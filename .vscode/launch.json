@@ -5,7 +5,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "with core",
+      "name": "coreless",
       "type": "node",
       "request": "launch",
       "runtimeExecutable": "tsx",
@@ -14,14 +14,15 @@
       "skipFiles": [
         "<node_internals>/**",
         "${workspaceFolder}/node_modules/**",
+        "${workspaceFolder}/packages/core/**",
         "${workspaceFolder}/packages/testing/**"
       ]
     },
     {
-      "name": "without core",
+      "name": "vitest",
       "type": "node",
       "request": "launch",
-      "runtimeExecutable": "tsx",
+      "runtimeExecutable": "vitest",
       "program": "${file}",
       "internalConsoleOptions": "openOnSessionStart",
       "skipFiles": [

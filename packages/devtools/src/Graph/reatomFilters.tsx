@@ -10,6 +10,8 @@ import {
   AtomMut,
   concurrent,
   sleep,
+  BooleanAtom,
+  reatomBoolean,
 } from '@reatom/framework'
 import { h, hf, JSX, css } from '../jsx'
 import { reatomZod, ZodAtomization } from '@reatom/npm-zod'
@@ -53,11 +55,19 @@ const initState: FiltersJSON = {
   valuesSearch: '',
   exclude: '',
   size: 1000,
-  list: [{ search: `(^_)|(\._)`, type: 'hide', color: DEFAULT_COLOR, active: true }],
+  list: [
+    { search: `(^_)|(\._)`, type: 'hide', color: DEFAULT_COLOR, active: true },
+  ],
 }
 const version = 'v25'
 
-const FilterView = ({ filter, remove }: { filter: Filter; remove?: Fn<[Ctx]> }) => (
+const FilterView = ({
+  filter,
+  remove,
+}: {
+  filter: Filter
+  remove?: Fn<[Ctx]>
+}) => (
   <tr>
     <td
       css={`
@@ -214,7 +224,9 @@ const FilterView = ({ filter, remove }: { filter: Filter; remove?: Fn<[Ctx]> }) 
   </tr>
 )
 
-const FilterButton = (props: JSX.IntrinsicElements['button'] & { 'css:background': string }) => (
+const FilterButton = (
+  props: JSX.IntrinsicElements['button'] & { 'css:background': string },
+) => (
   <button
     {...props}
     css={`
@@ -294,7 +306,11 @@ const Checkbox = (props: JSX.IntrinsicElements['input']) => (
   />
 )
 
-const ActionLabel = ({ model, children, ...props }: JSX.IntrinsicElements['label'] & { model: AtomMut<boolean> }) => (
+const ActionLabel = ({
+  model,
+  children,
+  ...props
+}: JSX.IntrinsicElements['label'] & { model: AtomMut<boolean> }) => (
   <label
     {...props}
     css={`
@@ -319,11 +335,13 @@ export const reatomFilters = (
     lines,
     redrawLines,
     initSize,
+    listEl,
   }: {
     list: LinkedListAtom
     lines: Lines
     redrawLines: Action<[], void>
     initSize: number
+    listEl: JSX.Element
   },
   name: string,
 ) => {
@@ -332,7 +350,9 @@ export const reatomFilters = (
   try {
     const snapshotString = localStorage.getItem(KEY)
     const snapshotObject = snapshotString && JSON.parse(snapshotString)
-    var snapshot: undefined | FiltersJSON = Filters.parse(snapshotObject || { ...initState, size: initSize })
+    var snapshot: undefined | FiltersJSON = Filters.parse(
+      snapshotObject || { ...initState, size: initSize },
+    )
   } catch {
     snapshot = { ...initState, size: initSize }
   }
@@ -348,11 +368,21 @@ export const reatomFilters = (
     name: `${name}.filters`,
   })
 
+  const recording = reatomBoolean(true, `${name}.recording`)
+
   const trackSize = action((ctx) => {
     const target = ctx.get(filters.size)
     let { size } = ctx.get(list)
 
     if (size <= target) return
+
+    const scrollEl = listEl.parentElement!
+    const removedCount = size - target
+    let scrollTop = scrollEl.scrollTop
+    for (let i = 0; i < removedCount; i++) {
+      const child = listEl.children[i] as HTMLElement
+      scrollTop -= child.offsetHeight
+    }
 
     list.batch(ctx, () => {
       while (size > target) {
@@ -361,6 +391,10 @@ export const reatomFilters = (
         list.remove(ctx, head)
         size--
       }
+    })
+
+    ctx.schedule(() => {
+      scrollEl.scrollTop = scrollTop
     })
   }, `${name}.trackSize`)
 
@@ -463,7 +497,10 @@ export const reatomFilters = (
           `}
         >
           {filters.list.reatomMap((ctx, filter) => (
-            <FilterView filter={filter} remove={(ctx) => filters.list.remove(ctx, filter)} />
+            <FilterView
+              filter={filter}
+              remove={(ctx) => filters.list.remove(ctx, filter)}
+            />
           ))}
         </table>
         <hr
@@ -523,9 +560,13 @@ export const reatomFilters = (
           `}
         >
           <ActionButton on:click={list.clear}>clear logs</ActionButton>
-          <ActionButton disabled={atom((ctx) => ctx.spy(lines).size === 0)} on:click={lines.clear}>
+          <ActionButton
+            disabled={atom((ctx) => ctx.spy(lines).size === 0)}
+            on:click={lines.clear}
+          >
             clear lines
           </ActionButton>
+          <ActionLabel model={recording}>recording</ActionLabel>
           <ActionLabel model={filters.preview}>preview</ActionLabel>
           <ActionLabel model={filters.time}>time</ActionLabel>
           <label
@@ -538,7 +579,10 @@ export const reatomFilters = (
             {atom((ctx) => `logged ${ctx.spy(list).size} of `)}
             <input
               model:valueAsNumber={filters.size}
-              style:width={atom((ctx) => `${Math.max(3, ctx.spy(filters.size).toString().length)}em`)}
+              style:width={atom(
+                (ctx) =>
+                  `${Math.max(3, ctx.spy(filters.size).toString().length)}em`,
+              )}
               css={`
                 background: none;
                 border: none;
@@ -556,6 +600,7 @@ export const reatomFilters = (
   )
 
   return assign(filters, {
+    recording,
     element: <FiltersComponent />,
   })
 }

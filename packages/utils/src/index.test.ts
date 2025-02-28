@@ -49,7 +49,7 @@ describe('Utility Functions Tests', () => {
     const err = new Error('test')
     const abortErr = toAbortError(err)
     expect(abortErr.name).toBe('AbortError')
-    expect(abortErr.message).toBe('test')
+    assert.is(abortErr.message, 'test [1]')
     expect(abortErr.cause).toBe(err)
   })
 

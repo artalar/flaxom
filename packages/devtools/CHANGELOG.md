@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.12.0](https://github.com/artalar/reatom/compare/devtools-v0.11.4...devtools-v0.12.0) (2025-02-27)
+
+
+### Features
+
+* **devtools:** add pause checkbox ([968ef72](https://github.com/artalar/reatom/commit/968ef72c1655af59e5bfadaa2bbd1a73f5fd289d))
+
+## [0.11.4](https://github.com/artalar/reatom/compare/devtools-v0.11.3...devtools-v0.11.4) (2025-02-27)
+
+
+### Bug Fixes
+
+* **devtools:** do not restrictMultipleContexts ([f549ef6](https://github.com/artalar/reatom/commit/f549ef64a7b5bd416214da28b17ff6ee6543ad9b))
+* **devtools:** optimize regexp pattern ([#1050](https://github.com/artalar/reatom/issues/1050)) ([270fbac](https://github.com/artalar/reatom/commit/270fbacb1ca5eee5db30acb3b2686429b3a6476a))
+
 ## [0.11.3](https://github.com/artalar/reatom/compare/devtools-v0.11.2...devtools-v0.11.3) (2025-02-18)
 
 ### Bug Fixes

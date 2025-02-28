@@ -68,7 +68,7 @@ export const reatomResource = <T>(
       },
     }) as AsyncCtx
 
-    const abortError = toAbortError('concurrent')
+    const abortError = toAbortError('concurrent ' + name)
     const controller = new AbortController()
     const unabort = onCtxAbort(ctx, (error) => {
       if (
@@ -106,7 +106,7 @@ export const reatomResource = <T>(
 
     const cached = pendingBefore === ctx.get(theAsync.pendingAtom)
     const fulfillCalls = ctx.get(theAsync.onFulfill)
-    if (cached) controller.abort(toAbortError('cached'))
+    if (cached) controller.abort(toAbortError('cached ' + name))
     if (cached && fulfillCallsBefore !== fulfillCalls) {
       promise = Object.assign(
         Promise.resolve(fulfillCalls[fulfillCalls.length - 1]!.payload),
@@ -143,7 +143,7 @@ export const reatomResource = <T>(
   const theReaction = Object.assign(
     (ctx: Ctx) =>
       ctx.get((read, actualize) => {
-        reset(ctx, promiseAtom.__reatom, toAbortError('force'))
+        reset(ctx, promiseAtom.__reatom, toAbortError('force ' + name))
         // force update (needed if the atom is connected)
         actualize!(ctx, promiseAtom.__reatom, noop)
         const state = ctx.get(theAsync)
@@ -161,7 +161,7 @@ export const reatomResource = <T>(
         return ctx.subscribe(promiseAtom, noop)
       },
       reset: action((ctx: Ctx) => {
-        reset(ctx, promiseAtom.__reatom, toAbortError('reset'))
+        reset(ctx, promiseAtom.__reatom, toAbortError('reset ' + name))
       }, `${name}.reset`),
     },
   ) as ResourceAtom<T>

@@ -189,9 +189,10 @@ export const Graph = ({
 
               try {
                 const searchValue = ctx.spy(search)
-                
-                const result = !searchValue || new RegExp(searchValue, 'i').test(name!)
-                                                                                 
+
+                const result =
+                  !searchValue || new RegExp(searchValue, 'i').test(name!)
+
                 if (_type === 'filter' && !result) {
                   state.display = 'none'
                 }
@@ -336,6 +337,17 @@ export const Graph = ({
     `${name}.list`,
   )
 
+  const listEl = (
+    <ul
+      css={`
+        padding: 0;
+        content-visibility: auto;
+      `}
+    >
+      {list}
+    </ul>
+  )
+
   const lines = reatomLines(`${name}.lines`)
   list.clear.onCall(() => {
     followingsMap.clear()
@@ -348,7 +360,7 @@ export const Graph = ({
   )
 
   const filters = reatomFilters(
-    { list: list as unknown as LinkedListAtom, lines, redrawLines, initSize },
+    { list: list as unknown as LinkedListAtom,listEl, lines, redrawLines, initSize },
     `${name}.filters`,
   )
   const valuesSearch = atom((ctx) => {
@@ -389,6 +401,8 @@ export const Graph = ({
     }
 
     await null
+
+    if (!ctx.get(filters.recording)) return
 
     let isTimeStampWritten =
       !ctx.get(filters.time) || lastTimestamp === Date.now()
@@ -462,22 +476,6 @@ export const Graph = ({
       {lines}
     </svg:svg>
   ) as SVGElement
-
-  const listEl = (
-    <ul
-      // ref={subscribe}
-      css={`
-        padding: 0;
-        content-visibility: auto;
-
-        /* & [data-stack] + [data-stack] {
-          display: none;
-        } */
-      `}
-    >
-      {list}
-    </ul>
-  )
 
   const container = (
     <section

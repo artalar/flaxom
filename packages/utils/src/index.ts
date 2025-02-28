@@ -270,6 +270,7 @@ export interface AbortError extends DOMException {
   name: 'AbortError'
 }
 
+let i = 0
 export const toAbortError = (reason: any): AbortError => {
   if (reason instanceof Error === false || reason.name !== 'AbortError') {
     if (reason instanceof Error) {
@@ -278,6 +279,8 @@ export const toAbortError = (reason: any): AbortError => {
     } else {
       reason = isObject(reason) ? toString.call(reason) : String(reason)
     }
+
+    reason += ` [${++i}]`
 
     if (typeof DOMException === 'undefined') {
       reason = new Error(reason, options)

@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.18.1](https://github.com/artalar/reatom/compare/jsx-v3.18.0...jsx-v3.18.1) (2025-02-27)
+
+
+### Bug Fixes
+
+* **jsx:** batch elements creation ([56e3eae](https://github.com/artalar/reatom/commit/56e3eaed08db253471ec50ee567e8398b87892ae))
+* **jsx:** do not restrictMultipleContexts ([c981346](https://github.com/artalar/reatom/commit/c98134642d8853d86bee1d8f313abe2ed4b06bb2))
+
 ## [3.18.0](https://github.com/artalar/reatom/compare/jsx-v3.17.1...jsx-v3.18.0) (2025-02-16)
 
 ### Features

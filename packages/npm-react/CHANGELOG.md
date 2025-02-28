@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.10.6](https://github.com/artalar/reatom/compare/npm-react-v3.10.5...npm-react-v3.10.6) (2025-02-27)
+
+
+### Bug Fixes
+
+* **npm-react:** abort message format ([f671738](https://github.com/artalar/reatom/commit/f671738a4d6848d4ff405f933fa9bb5f1b7d8b14))
+
 ## [3.10.5](https://github.com/artalar/reatom/compare/npm-react-v3.10.4...npm-react-v3.10.5) (2025-01-14)
 
 ### Bug Fixes

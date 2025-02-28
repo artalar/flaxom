@@ -77,11 +77,19 @@ const walkLinkedList = (
         el.append(head)
       }
     } else {
+      let appendBatch: undefined | DocumentFragment
       for (const change of state.changes) {
         if (change.kind === 'create') {
           throwNativeFragment(change.node)
-          el.append(change.node)
+
+          appendBatch ??= DOM.document.createDocumentFragment()
+
+          appendBatch.append(change.node)
+        } else if (appendBatch) {
+          el.append(appendBatch)
+          appendBatch = undefined
         }
+
         if (change.kind === 'remove') {
           if (isLiveFragment(change.node)) {
             const fragment = change.node.__reatomFragment
@@ -93,7 +101,7 @@ const walkLinkedList = (
           }
         }
         // TODO support fragments
-        if (change.kind === 'swap') {
+        else if (change.kind === 'swap') {
           let [aNext, bNext] = [change.a.nextSibling, change.b.nextSibling]
           if (bNext) {
             el.insertBefore(change.a, bNext)
@@ -108,17 +116,18 @@ const walkLinkedList = (
           }
         }
         // TODO support fragments
-        if (change.kind === 'move') {
+        else if (change.kind === 'move') {
           if (change.after) {
             change.after.insertAdjacentElement('afterend', change.node)
           } else {
             el.append(change.node)
           }
-        }
-        if (change.kind === 'clear') {
+        } else if (change.kind === 'clear') {
           el.innerHTML = ''
         }
       }
+
+      if (appendBatch) el.append(appendBatch)
     }
     lastVersion = state.version
   }
@@ -444,7 +453,7 @@ export const reatomJsx = (
   return { h, hf, mount }
 }
 
-export const ctx = createCtx()
+export const ctx = createCtx({ restrictMultipleContexts: false })
 export const { h, hf, mount } = reatomJsx(ctx)
 
 /**

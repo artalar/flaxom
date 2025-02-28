@@ -1,11 +1,18 @@
 import { test, expect } from 'vitest'
 import { createTestCtx, mockFn, createMockStorage } from '@reatom/testing'
 import { noop, sleep } from '@reatom/utils'
-import { Ctx } from '@reatom/core'
-import { reatomPersist } from '@reatom/persist'
+import { Ctx, atom } from '@reatom/core'
+import { createMemStorage, reatomPersist } from '@reatom/persist'
 import { onConnect } from '@reatom/hooks'
 
-import { reatomAsync, withAbort, withDataAtom, withCache, AsyncCtx } from './'
+import {
+  reatomAsync,
+  withAbort,
+  withDataAtom,
+  withCache,
+  AsyncCtx,
+  reatomResource,
+} from './'
 
 test('withCache', async () => {
   const fetchData = reatomAsync(
@@ -306,4 +313,42 @@ test('Infinity cache invalidation', async () => {
 
   await fetchData.cacheAtom.invalidate(ctx)
   expect(effect.calls.length).toBe(3)
+})
+
+test('shared cache', async () => {
+  const ctx = createTestCtx()
+
+  const myModelStorage = createMemStorage({ name: 'myModel' })
+  const withMyModelPersist = reatomPersist(myModelStorage)
+  const reatomMyModel = (init: number) => {
+    const param = atom(init)
+    const someResource = reatomResource(async (ctx) => {
+      const value = ctx.spy(param)
+      await ctx.schedule(() => sleep())
+      return value
+    }).pipe(
+      withDataAtom(0),
+      withCache({ swr: false, withPersist: () => withMyModelPersist('myModel') }),
+    )
+
+    return {
+      param,
+      data: someResource.dataAtom,
+      cacheAtom: someResource.cacheAtom,
+    }
+  }
+
+  const a = reatomMyModel(1)
+  const b = reatomMyModel(2)
+
+  ctx.subscribeTrack(a.data)
+  ctx.subscribeTrack(b.data)
+
+  await sleep()
+
+  expect(ctx.get(a.data)).toBe(1)
+  expect(ctx.get(b.data)).toBe(2)
+
+  a.param(ctx, 2)
+  expect(ctx.get(a.data)).toBe(2)
 })
