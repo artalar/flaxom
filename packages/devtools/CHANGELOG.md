@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.1](https://github.com/artalar/reatom/compare/devtools-v0.12.0...devtools-v0.12.1) (2025-02-28)
+
+
+### Bug Fixes
+
+* **devtools:** autoscroll after elements removing ([90e25ae](https://github.com/artalar/reatom/commit/90e25ae9b5bfc02413f9d85168181836eaf160fb))
+
 ## [0.12.0](https://github.com/artalar/reatom/compare/devtools-v0.11.4...devtools-v0.12.0) (2025-02-27)
 
 
